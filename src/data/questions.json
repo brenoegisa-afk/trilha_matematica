@@ -1,0 +1,2138 @@
+{
+  "grades": {
+    "5": {
+      "Green": [
+        {
+          "question": "Resolva a expressão: 49 + (20 x 4)",
+          "answer": "129",
+          "options": [
+            "126",
+            "130",
+            "128",
+            "129"
+          ]
+        },
+        {
+          "question": "Resolva a expressão: 10 + (11 x 4)",
+          "answer": "54",
+          "options": [
+            "49",
+            "52",
+            "54",
+            "56"
+          ]
+        },
+        {
+          "question": "Resolva a expressão: 28 + (10 x 5)",
+          "answer": "78",
+          "options": [
+            "77",
+            "83",
+            "80",
+            "78"
+          ]
+        },
+        {
+          "question": "Resolva a expressão: 27 + (14 x 7)",
+          "answer": "125",
+          "options": [
+            "127",
+            "130",
+            "128",
+            "125"
+          ]
+        },
+        {
+          "question": "Resolva a expressão: 30 + (22 x 8)",
+          "answer": "206",
+          "options": [
+            "201",
+            "206",
+            "211",
+            "205"
+          ]
+        },
+        {
+          "question": "Resolva a expressão: 49 + (9 x 4)",
+          "answer": "85",
+          "options": [
+            "81",
+            "85",
+            "86",
+            "87"
+          ]
+        },
+        {
+          "question": "Resolva a expressão: 44 + (11 x 3)",
+          "answer": "77",
+          "options": [
+            "77",
+            "78",
+            "81",
+            "80"
+          ]
+        },
+        {
+          "question": "Resolva a expressão: 32 + (18 x 9)",
+          "answer": "194",
+          "options": [
+            "189",
+            "191",
+            "195",
+            "194"
+          ]
+        },
+        {
+          "question": "Resolva a expressão: 11 + (10 x 3)",
+          "answer": "41",
+          "options": [
+            "41",
+            "45",
+            "40",
+            "37"
+          ]
+        },
+        {
+          "question": "Resolva a expressão: 36 + (14 x 4)",
+          "answer": "92",
+          "options": [
+            "96",
+            "92",
+            "90",
+            "88"
+          ]
+        },
+        {
+          "question": "Resolva a expressão: 58 + (15 x 2)",
+          "answer": "88",
+          "options": [
+            "89",
+            "90",
+            "88",
+            "92"
+          ]
+        },
+        {
+          "question": "Resolva a expressão: 57 + (19 x 1)",
+          "answer": "76",
+          "options": [
+            "81",
+            "72",
+            "76",
+            "73"
+          ]
+        },
+        {
+          "question": "Resolva a expressão: 30 + (18 x 7)",
+          "answer": "156",
+          "options": [
+            "153",
+            "156",
+            "160",
+            "154"
+          ]
+        },
+        {
+          "question": "Resolva a expressão: 17 + (19 x 9)",
+          "answer": "188",
+          "options": [
+            "185",
+            "184",
+            "188",
+            "190"
+          ]
+        },
+        {
+          "question": "Resolva a expressão: 27 + (21 x 6)",
+          "answer": "153",
+          "options": [
+            "153",
+            "155",
+            "152",
+            "158"
+          ]
+        },
+        {
+          "question": "Resolva a expressão: 17 + (16 x 10)",
+          "answer": "177",
+          "options": [
+            "181",
+            "177",
+            "182",
+            "175"
+          ]
+        },
+        {
+          "question": "Resolva a expressão: 54 + (18 x 3)",
+          "answer": "108",
+          "options": [
+            "105",
+            "113",
+            "106",
+            "108"
+          ]
+        },
+        {
+          "question": "Resolva a expressão: 14 + (13 x 7)",
+          "answer": "105",
+          "options": [
+            "105",
+            "101",
+            "109",
+            "103"
+          ]
+        },
+        {
+          "question": "Resolva a expressão: 30 + (5 x 4)",
+          "answer": "50",
+          "options": [
+            "49",
+            "55",
+            "46",
+            "50"
+          ]
+        },
+        {
+          "question": "Resolva a expressão: 27 + (12 x 5)",
+          "answer": "87",
+          "options": [
+            "84",
+            "86",
+            "87",
+            "85"
+          ]
+        },
+        {
+          "question": "Resolva a expressão: 18 + (21 x 9)",
+          "answer": "207",
+          "options": [
+            "205",
+            "204",
+            "209",
+            "207"
+          ]
+        },
+        {
+          "question": "Resolva a expressão: 27 + (22 x 7)",
+          "answer": "181",
+          "options": [
+            "181",
+            "178",
+            "177",
+            "183"
+          ]
+        },
+        {
+          "question": "Resolva a expressão: 13 + (17 x 5)",
+          "answer": "98",
+          "options": [
+            "93",
+            "100",
+            "98",
+            "96"
+          ]
+        },
+        {
+          "question": "Resolva a expressão: 43 + (18 x 4)",
+          "answer": "115",
+          "options": [
+            "113",
+            "119",
+            "115",
+            "112"
+          ]
+        },
+        {
+          "question": "Resolva a expressão: 40 + (20 x 4)",
+          "answer": "120",
+          "options": [
+            "116",
+            "125",
+            "124",
+            "120"
+          ]
+        }
+      ],
+      "Red": [
+        {
+          "question": "Qual é 20% de R$ 500?",
+          "answer": "100",
+          "options": [
+            "97",
+            "101",
+            "103",
+            "100"
+          ]
+        },
+        {
+          "question": "Qual é 30% de R$ 100?",
+          "answer": "30",
+          "options": [
+            "33",
+            "27",
+            "34",
+            "30"
+          ]
+        },
+        {
+          "question": "Qual é 10% de R$ 200?",
+          "answer": "20",
+          "options": [
+            "25",
+            "17",
+            "20",
+            "18"
+          ]
+        },
+        {
+          "question": "Qual é 30% de R$ 900?",
+          "answer": "270",
+          "options": [
+            "267",
+            "270",
+            "274",
+            "265"
+          ]
+        },
+        {
+          "question": "Qual é 30% de R$ 300?",
+          "answer": "90",
+          "options": [
+            "86",
+            "93",
+            "88",
+            "90"
+          ]
+        },
+        {
+          "question": "Qual é 30% de R$ 500?",
+          "answer": "150",
+          "options": [
+            "148",
+            "154",
+            "152",
+            "150"
+          ]
+        },
+        {
+          "question": "Qual é 40% de R$ 600?",
+          "answer": "240",
+          "options": [
+            "240",
+            "238",
+            "241",
+            "235"
+          ]
+        },
+        {
+          "question": "Qual é 30% de R$ 700?",
+          "answer": "210",
+          "options": [
+            "215",
+            "211",
+            "210",
+            "212"
+          ]
+        },
+        {
+          "question": "Qual é 10% de R$ 900?",
+          "answer": "90",
+          "options": [
+            "91",
+            "92",
+            "94",
+            "90"
+          ]
+        },
+        {
+          "question": "Qual é 30% de R$ 500?",
+          "answer": "150",
+          "options": [
+            "150",
+            "145",
+            "154",
+            "148"
+          ]
+        },
+        {
+          "question": "Qual é 40% de R$ 300?",
+          "answer": "120",
+          "options": [
+            "117",
+            "120",
+            "119",
+            "124"
+          ]
+        },
+        {
+          "question": "Qual é 10% de R$ 900?",
+          "answer": "90",
+          "options": [
+            "92",
+            "93",
+            "90",
+            "85"
+          ]
+        },
+        {
+          "question": "Qual é 30% de R$ 600?",
+          "answer": "180",
+          "options": [
+            "176",
+            "180",
+            "183",
+            "181"
+          ]
+        },
+        {
+          "question": "Qual é 30% de R$ 100?",
+          "answer": "30",
+          "options": [
+            "29",
+            "28",
+            "30",
+            "25"
+          ]
+        },
+        {
+          "question": "Qual é 10% de R$ 900?",
+          "answer": "90",
+          "options": [
+            "95",
+            "90",
+            "91",
+            "87"
+          ]
+        },
+        {
+          "question": "Qual é 20% de R$ 500?",
+          "answer": "100",
+          "options": [
+            "101",
+            "102",
+            "100",
+            "98"
+          ]
+        },
+        {
+          "question": "Qual é 40% de R$ 100?",
+          "answer": "40",
+          "options": [
+            "44",
+            "41",
+            "40",
+            "37"
+          ]
+        },
+        {
+          "question": "Qual é 20% de R$ 800?",
+          "answer": "160",
+          "options": [
+            "161",
+            "163",
+            "160",
+            "159"
+          ]
+        },
+        {
+          "question": "Qual é 40% de R$ 100?",
+          "answer": "40",
+          "options": [
+            "40",
+            "39",
+            "35",
+            "43"
+          ]
+        },
+        {
+          "question": "Qual é 20% de R$ 800?",
+          "answer": "160",
+          "options": [
+            "160",
+            "159",
+            "155",
+            "165"
+          ]
+        },
+        {
+          "question": "Qual é 20% de R$ 700?",
+          "answer": "140",
+          "options": [
+            "140",
+            "135",
+            "142",
+            "139"
+          ]
+        },
+        {
+          "question": "Qual é 20% de R$ 600?",
+          "answer": "120",
+          "options": [
+            "125",
+            "116",
+            "120",
+            "117"
+          ]
+        },
+        {
+          "question": "Qual é 10% de R$ 700?",
+          "answer": "70",
+          "options": [
+            "70",
+            "65",
+            "71",
+            "69"
+          ]
+        },
+        {
+          "question": "Qual é 20% de R$ 200?",
+          "answer": "40",
+          "options": [
+            "45",
+            "44",
+            "39",
+            "40"
+          ]
+        },
+        {
+          "question": "Qual é 20% de R$ 400?",
+          "answer": "80",
+          "options": [
+            "78",
+            "85",
+            "80",
+            "82"
+          ]
+        }
+      ],
+      "Yellow": [
+        {
+          "question": "Pensei em um número. Dobrei seu valor e subtraí 4, resultando em 54. Que número é esse?",
+          "answer": "29",
+          "options": [
+            "27",
+            "29",
+            "32",
+            "33"
+          ]
+        },
+        {
+          "question": "Pensei em um número. Dobrei seu valor e subtraí 4, resultando em 16. Que número é esse?",
+          "answer": "10",
+          "options": [
+            "6",
+            "14",
+            "10",
+            "7"
+          ]
+        },
+        {
+          "question": "Pensei em um número. Dobrei seu valor e subtraí 4, resultando em 34. Que número é esse?",
+          "answer": "19",
+          "options": [
+            "19",
+            "20",
+            "17",
+            "23"
+          ]
+        },
+        {
+          "question": "Pensei em um número. Dobrei seu valor e subtraí 4, resultando em 16. Que número é esse?",
+          "answer": "10",
+          "options": [
+            "10",
+            "6",
+            "11",
+            "9"
+          ]
+        },
+        {
+          "question": "Pensei em um número. Dobrei seu valor e subtraí 4, resultando em 32. Que número é esse?",
+          "answer": "18",
+          "options": [
+            "18",
+            "14",
+            "15",
+            "21"
+          ]
+        },
+        {
+          "question": "Pensei em um número. Dobrei seu valor e subtraí 4, resultando em 46. Que número é esse?",
+          "answer": "25",
+          "options": [
+            "27",
+            "20",
+            "25",
+            "23"
+          ]
+        },
+        {
+          "question": "Pensei em um número. Dobrei seu valor e subtraí 4, resultando em 36. Que número é esse?",
+          "answer": "20",
+          "options": [
+            "23",
+            "24",
+            "20",
+            "25"
+          ]
+        },
+        {
+          "question": "Pensei em um número. Dobrei seu valor e subtraí 4, resultando em 22. Que número é esse?",
+          "answer": "13",
+          "options": [
+            "18",
+            "13",
+            "10",
+            "9"
+          ]
+        },
+        {
+          "question": "Pensei em um número. Dobrei seu valor e subtraí 4, resultando em 18. Que número é esse?",
+          "answer": "11",
+          "options": [
+            "11",
+            "14",
+            "15",
+            "6"
+          ]
+        },
+        {
+          "question": "Pensei em um número. Dobrei seu valor e subtraí 4, resultando em 46. Que número é esse?",
+          "answer": "25",
+          "options": [
+            "28",
+            "27",
+            "24",
+            "25"
+          ]
+        },
+        {
+          "question": "Pensei em um número. Dobrei seu valor e subtraí 4, resultando em 48. Que número é esse?",
+          "answer": "26",
+          "options": [
+            "28",
+            "26",
+            "30",
+            "31"
+          ]
+        },
+        {
+          "question": "Pensei em um número. Dobrei seu valor e subtraí 4, resultando em 52. Que número é esse?",
+          "answer": "28",
+          "options": [
+            "26",
+            "28",
+            "24",
+            "30"
+          ]
+        },
+        {
+          "question": "Pensei em um número. Dobrei seu valor e subtraí 4, resultando em 44. Que número é esse?",
+          "answer": "24",
+          "options": [
+            "28",
+            "24",
+            "22",
+            "19"
+          ]
+        },
+        {
+          "question": "Pensei em um número. Dobrei seu valor e subtraí 4, resultando em 28. Que número é esse?",
+          "answer": "16",
+          "options": [
+            "20",
+            "15",
+            "16",
+            "14"
+          ]
+        },
+        {
+          "question": "Pensei em um número. Dobrei seu valor e subtraí 4, resultando em 44. Que número é esse?",
+          "answer": "24",
+          "options": [
+            "28",
+            "26",
+            "23",
+            "24"
+          ]
+        },
+        {
+          "question": "O que é que tem raiz, mas não é planta, tem volume, mas não é líquido?",
+          "answer": "Cabelo",
+          "options": [
+            "Cabelo",
+            "Cubo",
+            "Dado",
+            "Terra"
+          ]
+        },
+        {
+          "question": "Continue: 1, 1, 2, 3, 5, 8, ...",
+          "answer": "13",
+          "options": [
+            "10",
+            "11",
+            "12",
+            "13"
+          ]
+        }
+      ]
+    },
+    "1-2": {
+      "Green": [
+        {
+          "question": "Quanto é 6 + 4?",
+          "answer": "10",
+          "options": [
+            "6",
+            "11",
+            "9",
+            "10"
+          ]
+        },
+        {
+          "question": "Quanto é 4 + 5?",
+          "answer": "9",
+          "options": [
+            "9",
+            "14",
+            "12",
+            "6"
+          ]
+        },
+        {
+          "question": "Quanto é 8 + 10?",
+          "answer": "18",
+          "options": [
+            "22",
+            "21",
+            "18",
+            "14"
+          ]
+        },
+        {
+          "question": "Quanto é 6 + 4?",
+          "answer": "10",
+          "options": [
+            "10",
+            "8",
+            "14",
+            "5"
+          ]
+        },
+        {
+          "question": "Quanto é 9 + 2?",
+          "answer": "11",
+          "options": [
+            "14",
+            "11",
+            "12",
+            "15"
+          ]
+        },
+        {
+          "question": "Quanto é 6 + 5?",
+          "answer": "11",
+          "options": [
+            "14",
+            "7",
+            "9",
+            "11"
+          ]
+        },
+        {
+          "question": "Quanto é 8 + 1?",
+          "answer": "9",
+          "options": [
+            "14",
+            "9",
+            "7",
+            "4"
+          ]
+        },
+        {
+          "question": "Quanto é 8 + 4?",
+          "answer": "12",
+          "options": [
+            "10",
+            "17",
+            "7",
+            "12"
+          ]
+        },
+        {
+          "question": "Quanto é 3 + 8?",
+          "answer": "11",
+          "options": [
+            "9",
+            "11",
+            "10",
+            "13"
+          ]
+        },
+        {
+          "question": "Quanto é 3 + 1?",
+          "answer": "4",
+          "options": [
+            "8",
+            "1",
+            "2",
+            "4"
+          ]
+        },
+        {
+          "question": "Quanto é 3 + 7?",
+          "answer": "10",
+          "options": [
+            "10",
+            "14",
+            "11",
+            "15"
+          ]
+        },
+        {
+          "question": "Quanto é 10 + 9?",
+          "answer": "19",
+          "options": [
+            "20",
+            "18",
+            "15",
+            "19"
+          ]
+        },
+        {
+          "question": "Quanto é 4 + 6?",
+          "answer": "10",
+          "options": [
+            "10",
+            "11",
+            "7",
+            "13"
+          ]
+        },
+        {
+          "question": "Quanto é 6 + 6?",
+          "answer": "12",
+          "options": [
+            "7",
+            "10",
+            "12",
+            "13"
+          ]
+        },
+        {
+          "question": "Quanto é 9 + 2?",
+          "answer": "11",
+          "options": [
+            "15",
+            "10",
+            "13",
+            "11"
+          ]
+        },
+        {
+          "question": "Quanto é 2 + 9?",
+          "answer": "11",
+          "options": [
+            "8",
+            "11",
+            "9",
+            "16"
+          ]
+        },
+        {
+          "question": "Quanto é 3 + 1?",
+          "answer": "4",
+          "options": [
+            "4",
+            "8",
+            "6",
+            "7"
+          ]
+        },
+        {
+          "question": "Quanto é 3 + 9?",
+          "answer": "12",
+          "options": [
+            "8",
+            "16",
+            "17",
+            "12"
+          ]
+        },
+        {
+          "question": "Quanto é 3 + 10?",
+          "answer": "13",
+          "options": [
+            "9",
+            "13",
+            "15",
+            "11"
+          ]
+        },
+        {
+          "question": "Quanto é 5 + 5?",
+          "answer": "10",
+          "options": [
+            "6",
+            "10",
+            "7",
+            "11"
+          ]
+        },
+        {
+          "question": "Quanto é 3 + 8?",
+          "answer": "11",
+          "options": [
+            "10",
+            "14",
+            "15",
+            "11"
+          ]
+        },
+        {
+          "question": "Quanto é 9 + 10?",
+          "answer": "19",
+          "options": [
+            "15",
+            "23",
+            "17",
+            "19"
+          ]
+        },
+        {
+          "question": "Quanto é 8 + 2?",
+          "answer": "10",
+          "options": [
+            "10",
+            "8",
+            "15",
+            "12"
+          ]
+        },
+        {
+          "question": "Quanto é 2 + 7?",
+          "answer": "9",
+          "options": [
+            "7",
+            "9",
+            "10",
+            "8"
+          ]
+        },
+        {
+          "question": "Quanto é 5 + 3?",
+          "answer": "8",
+          "options": [
+            "8",
+            "10",
+            "5",
+            "12"
+          ]
+        },
+        {
+          "question": "Quanto é 2 + 6?",
+          "answer": "8",
+          "options": [
+            "13",
+            "9",
+            "8",
+            "12"
+          ]
+        },
+        {
+          "question": "Quanto é 7 + 5?",
+          "answer": "12",
+          "options": [
+            "7",
+            "9",
+            "12",
+            "11"
+          ]
+        },
+        {
+          "question": "Quanto é 6 + 10?",
+          "answer": "16",
+          "options": [
+            "16",
+            "18",
+            "12",
+            "13"
+          ]
+        },
+        {
+          "question": "Quanto é 2 + 5?",
+          "answer": "7",
+          "options": [
+            "8",
+            "7",
+            "10",
+            "2"
+          ]
+        },
+        {
+          "question": "Quanto é 5 + 1?",
+          "answer": "6",
+          "options": [
+            "11",
+            "6",
+            "5",
+            "1"
+          ]
+        }
+      ],
+      "Red": [
+        {
+          "question": "João tinha 19 balas e comeu 18. Quantas sobraram?",
+          "answer": "1",
+          "options": [
+            "1",
+            "5",
+            "4",
+            "0"
+          ]
+        },
+        {
+          "question": "João tinha 8 balas e comeu 0. Quantas sobraram?",
+          "answer": "8",
+          "options": [
+            "8",
+            "13",
+            "9",
+            "7"
+          ]
+        },
+        {
+          "question": "Quanto é 15 - 1?",
+          "answer": "14",
+          "options": [
+            "14",
+            "9",
+            "10",
+            "15"
+          ]
+        },
+        {
+          "question": "João tinha 13 balas e comeu 4. Quantas sobraram?",
+          "answer": "9",
+          "options": [
+            "13",
+            "12",
+            "8",
+            "9"
+          ]
+        },
+        {
+          "question": "Quanto é 13 - 11?",
+          "answer": "2",
+          "options": [
+            "2",
+            "1",
+            "4",
+            "3"
+          ]
+        },
+        {
+          "question": "João tinha 17 balas e comeu 14. Quantas sobraram?",
+          "answer": "3",
+          "options": [
+            "1",
+            "8",
+            "7",
+            "3"
+          ]
+        },
+        {
+          "question": "Quanto é 8 - 4?",
+          "answer": "4",
+          "options": [
+            "0",
+            "4",
+            "7",
+            "8"
+          ]
+        },
+        {
+          "question": "Quanto é 15 - 6?",
+          "answer": "9",
+          "options": [
+            "5",
+            "8",
+            "13",
+            "9"
+          ]
+        },
+        {
+          "question": "Quanto é 11 - 2?",
+          "answer": "9",
+          "options": [
+            "7",
+            "9",
+            "11",
+            "6"
+          ]
+        },
+        {
+          "question": "João tinha 9 balas e comeu 8. Quantas sobraram?",
+          "answer": "1",
+          "options": [
+            "3",
+            "1",
+            "2",
+            "5"
+          ]
+        },
+        {
+          "question": "João tinha 13 balas e comeu 0. Quantas sobraram?",
+          "answer": "13",
+          "options": [
+            "15",
+            "12",
+            "11",
+            "13"
+          ]
+        },
+        {
+          "question": "Quanto é 6 - 2?",
+          "answer": "4",
+          "options": [
+            "2",
+            "7",
+            "4",
+            "9"
+          ]
+        },
+        {
+          "question": "Quanto é 12 - 5?",
+          "answer": "7",
+          "options": [
+            "9",
+            "7",
+            "3",
+            "2"
+          ]
+        },
+        {
+          "question": "João tinha 13 balas e comeu 4. Quantas sobraram?",
+          "answer": "9",
+          "options": [
+            "9",
+            "7",
+            "6",
+            "10"
+          ]
+        },
+        {
+          "question": "Quanto é 13 - 10?",
+          "answer": "3",
+          "options": [
+            "2",
+            "4",
+            "0",
+            "3"
+          ]
+        },
+        {
+          "question": "Quanto é 11 - 2?",
+          "answer": "9",
+          "options": [
+            "12",
+            "9",
+            "6",
+            "4"
+          ]
+        },
+        {
+          "question": "João tinha 6 balas e comeu 5. Quantas sobraram?",
+          "answer": "1",
+          "options": [
+            "2",
+            "3",
+            "1",
+            "5"
+          ]
+        },
+        {
+          "question": "Quanto é 7 - 1?",
+          "answer": "6",
+          "options": [
+            "3",
+            "6",
+            "8",
+            "5"
+          ]
+        },
+        {
+          "question": "João tinha 6 balas e comeu 2. Quantas sobraram?",
+          "answer": "4",
+          "options": [
+            "4",
+            "0",
+            "5",
+            "1"
+          ]
+        },
+        {
+          "question": "João tinha 12 balas e comeu 3. Quantas sobraram?",
+          "answer": "9",
+          "options": [
+            "9",
+            "4",
+            "13",
+            "11"
+          ]
+        },
+        {
+          "question": "João tinha 17 balas e comeu 2. Quantas sobraram?",
+          "answer": "15",
+          "options": [
+            "10",
+            "15",
+            "11",
+            "14"
+          ]
+        },
+        {
+          "question": "Quanto é 16 - 0?",
+          "answer": "16",
+          "options": [
+            "17",
+            "14",
+            "13",
+            "16"
+          ]
+        },
+        {
+          "question": "Quanto é 18 - 12?",
+          "answer": "6",
+          "options": [
+            "6",
+            "4",
+            "5",
+            "7"
+          ]
+        },
+        {
+          "question": "João tinha 5 balas e comeu 1. Quantas sobraram?",
+          "answer": "4",
+          "options": [
+            "4",
+            "5",
+            "8",
+            "9"
+          ]
+        },
+        {
+          "question": "João tinha 8 balas e comeu 5. Quantas sobraram?",
+          "answer": "3",
+          "options": [
+            "6",
+            "4",
+            "3",
+            "8"
+          ]
+        }
+      ],
+      "Yellow": [
+        {
+          "question": "Qual o próximo número: 8, 10, 12, ?",
+          "answer": "14",
+          "options": [
+            "12",
+            "14",
+            "18",
+            "19"
+          ]
+        },
+        {
+          "question": "Qual o próximo número: 4, 6, 8, ?",
+          "answer": "10",
+          "options": [
+            "10",
+            "9",
+            "15",
+            "13"
+          ]
+        },
+        {
+          "question": "Qual o próximo número: 15, 20, 25, ?",
+          "answer": "30",
+          "options": [
+            "26",
+            "25",
+            "29",
+            "30"
+          ]
+        },
+        {
+          "question": "Qual o próximo número: 1, 2, 3, ?",
+          "answer": "4",
+          "options": [
+            "7",
+            "4",
+            "0",
+            "1"
+          ]
+        },
+        {
+          "question": "Qual o próximo número: 2, 4, 6, ?",
+          "answer": "8",
+          "options": [
+            "7",
+            "8",
+            "6",
+            "4"
+          ]
+        },
+        {
+          "question": "Qual o próximo número: 20, 30, 40, ?",
+          "answer": "50",
+          "options": [
+            "55",
+            "50",
+            "47",
+            "48"
+          ]
+        },
+        {
+          "question": "Qual o próximo número: 0, 2, 4, ?",
+          "answer": "6",
+          "options": [
+            "2",
+            "8",
+            "3",
+            "6"
+          ]
+        },
+        {
+          "question": "Qual o próximo número: 5, 10, 15, ?",
+          "answer": "20",
+          "options": [
+            "20",
+            "23",
+            "15",
+            "24"
+          ]
+        },
+        {
+          "question": "Qual o próximo número: 0, 5, 10, ?",
+          "answer": "15",
+          "options": [
+            "15",
+            "20",
+            "10",
+            "12"
+          ]
+        },
+        {
+          "question": "Qual o próximo número: 2, 4, 6, ?",
+          "answer": "8",
+          "options": [
+            "8",
+            "6",
+            "11",
+            "5"
+          ]
+        },
+        {
+          "question": "Qual o próximo número: 1, 2, 3, ?",
+          "answer": "4",
+          "options": [
+            "0",
+            "4",
+            "6",
+            "3"
+          ]
+        },
+        {
+          "question": "Qual o próximo número: 6, 8, 10, ?",
+          "answer": "12",
+          "options": [
+            "9",
+            "12",
+            "11",
+            "10"
+          ]
+        },
+        {
+          "question": "Qual o próximo número: 8, 10, 12, ?",
+          "answer": "14",
+          "options": [
+            "15",
+            "10",
+            "19",
+            "14"
+          ]
+        },
+        {
+          "question": "Qual o próximo número: 4, 5, 6, ?",
+          "answer": "7",
+          "options": [
+            "11",
+            "3",
+            "5",
+            "7"
+          ]
+        },
+        {
+          "question": "Qual o próximo número: 5, 10, 15, ?",
+          "answer": "20",
+          "options": [
+            "18",
+            "20",
+            "25",
+            "15"
+          ]
+        }
+      ]
+    },
+    "3-4": {
+      "Green": [
+        {
+          "question": "Quanto é 2 x 8?",
+          "answer": "16",
+          "options": [
+            "16",
+            "12",
+            "13",
+            "18"
+          ]
+        },
+        {
+          "question": "Quanto é 3 x 7?",
+          "answer": "21",
+          "options": [
+            "26",
+            "17",
+            "18",
+            "21"
+          ]
+        },
+        {
+          "question": "Some: 35 + 47 = ?",
+          "answer": "82",
+          "options": [
+            "78",
+            "79",
+            "77",
+            "82"
+          ]
+        },
+        {
+          "question": "Some: 28 + 44 = ?",
+          "answer": "72",
+          "options": [
+            "74",
+            "72",
+            "67",
+            "73"
+          ]
+        },
+        {
+          "question": "Quanto é 10 x 6?",
+          "answer": "60",
+          "options": [
+            "62",
+            "60",
+            "55",
+            "58"
+          ]
+        },
+        {
+          "question": "Quanto é 9 x 4?",
+          "answer": "36",
+          "options": [
+            "33",
+            "31",
+            "39",
+            "36"
+          ]
+        },
+        {
+          "question": "Quanto é 6 x 3?",
+          "answer": "18",
+          "options": [
+            "18",
+            "14",
+            "21",
+            "20"
+          ]
+        },
+        {
+          "question": "Quanto é 8 x 9?",
+          "answer": "72",
+          "options": [
+            "72",
+            "67",
+            "74",
+            "75"
+          ]
+        },
+        {
+          "question": "Some: 34 + 44 = ?",
+          "answer": "78",
+          "options": [
+            "78",
+            "73",
+            "74",
+            "83"
+          ]
+        },
+        {
+          "question": "Quanto é 5 x 10?",
+          "answer": "50",
+          "options": [
+            "50",
+            "46",
+            "55",
+            "49"
+          ]
+        },
+        {
+          "question": "Quanto é 6 x 4?",
+          "answer": "24",
+          "options": [
+            "22",
+            "28",
+            "24",
+            "19"
+          ]
+        },
+        {
+          "question": "Quanto é 4 x 10?",
+          "answer": "40",
+          "options": [
+            "40",
+            "45",
+            "42",
+            "38"
+          ]
+        },
+        {
+          "question": "Quanto é 4 x 3?",
+          "answer": "12",
+          "options": [
+            "13",
+            "17",
+            "12",
+            "7"
+          ]
+        },
+        {
+          "question": "Quanto é 7 x 10?",
+          "answer": "70",
+          "options": [
+            "69",
+            "66",
+            "70",
+            "65"
+          ]
+        },
+        {
+          "question": "Quanto é 8 x 5?",
+          "answer": "40",
+          "options": [
+            "41",
+            "43",
+            "35",
+            "40"
+          ]
+        },
+        {
+          "question": "Some: 32 + 59 = ?",
+          "answer": "91",
+          "options": [
+            "95",
+            "87",
+            "94",
+            "91"
+          ]
+        },
+        {
+          "question": "Quanto é 5 x 6?",
+          "answer": "30",
+          "options": [
+            "32",
+            "27",
+            "30",
+            "33"
+          ]
+        },
+        {
+          "question": "Quanto é 8 x 4?",
+          "answer": "32",
+          "options": [
+            "32",
+            "30",
+            "35",
+            "34"
+          ]
+        },
+        {
+          "question": "Some: 57 + 35 = ?",
+          "answer": "92",
+          "options": [
+            "92",
+            "95",
+            "94",
+            "87"
+          ]
+        },
+        {
+          "question": "Quanto é 8 x 9?",
+          "answer": "72",
+          "options": [
+            "71",
+            "69",
+            "72",
+            "75"
+          ]
+        },
+        {
+          "question": "Quanto é 6 x 6?",
+          "answer": "36",
+          "options": [
+            "36",
+            "41",
+            "35",
+            "32"
+          ]
+        },
+        {
+          "question": "Some: 39 + 31 = ?",
+          "answer": "70",
+          "options": [
+            "69",
+            "65",
+            "70",
+            "71"
+          ]
+        },
+        {
+          "question": "Quanto é 5 x 8?",
+          "answer": "40",
+          "options": [
+            "40",
+            "43",
+            "37",
+            "36"
+          ]
+        },
+        {
+          "question": "Some: 57 + 43 = ?",
+          "answer": "100",
+          "options": [
+            "96",
+            "97",
+            "100",
+            "105"
+          ]
+        },
+        {
+          "question": "Quanto é 2 x 7?",
+          "answer": "14",
+          "options": [
+            "9",
+            "14",
+            "10",
+            "12"
+          ]
+        },
+        {
+          "question": "Some: 58 + 26 = ?",
+          "answer": "84",
+          "options": [
+            "84",
+            "80",
+            "82",
+            "81"
+          ]
+        },
+        {
+          "question": "Quanto é 2 x 8?",
+          "answer": "16",
+          "options": [
+            "12",
+            "19",
+            "16",
+            "11"
+          ]
+        },
+        {
+          "question": "Quanto é 10 x 5?",
+          "answer": "50",
+          "options": [
+            "52",
+            "45",
+            "46",
+            "50"
+          ]
+        },
+        {
+          "question": "Quanto é 7 x 4?",
+          "answer": "28",
+          "options": [
+            "28",
+            "27",
+            "26",
+            "25"
+          ]
+        },
+        {
+          "question": "Quanto é 6 x 10?",
+          "answer": "60",
+          "options": [
+            "60",
+            "58",
+            "61",
+            "64"
+          ]
+        }
+      ],
+      "Red": [
+        {
+          "question": "Qual é o resultado de 50 ÷ 5?",
+          "answer": "10",
+          "options": [
+            "6",
+            "5",
+            "14",
+            "10"
+          ]
+        },
+        {
+          "question": "Qual é o resultado de 48 ÷ 6?",
+          "answer": "8",
+          "options": [
+            "13",
+            "8",
+            "3",
+            "6"
+          ]
+        },
+        {
+          "question": "Qual é o resultado de 15 ÷ 3?",
+          "answer": "5",
+          "options": [
+            "7",
+            "3",
+            "5",
+            "4"
+          ]
+        },
+        {
+          "question": "Tenho 10 figurinhas para dividir entre 5 amigos. Quantas cada um recebe?",
+          "answer": "2",
+          "options": [
+            "3",
+            "0",
+            "4",
+            "2"
+          ]
+        },
+        {
+          "question": "Tenho 32 figurinhas para dividir entre 4 amigos. Quantas cada um recebe?",
+          "answer": "8",
+          "options": [
+            "9",
+            "11",
+            "8",
+            "12"
+          ]
+        },
+        {
+          "question": "Qual é o resultado de 12 ÷ 6?",
+          "answer": "2",
+          "options": [
+            "0",
+            "2",
+            "6",
+            "1"
+          ]
+        },
+        {
+          "question": "Qual é o resultado de 25 ÷ 5?",
+          "answer": "5",
+          "options": [
+            "4",
+            "6",
+            "0",
+            "5"
+          ]
+        },
+        {
+          "question": "Qual é o resultado de 8 ÷ 4?",
+          "answer": "2",
+          "options": [
+            "7",
+            "3",
+            "2",
+            "1"
+          ]
+        },
+        {
+          "question": "Tenho 56 figurinhas para dividir entre 8 amigos. Quantas cada um recebe?",
+          "answer": "7",
+          "options": [
+            "2",
+            "4",
+            "7",
+            "12"
+          ]
+        },
+        {
+          "question": "Tenho 36 figurinhas para dividir entre 6 amigos. Quantas cada um recebe?",
+          "answer": "6",
+          "options": [
+            "9",
+            "6",
+            "8",
+            "10"
+          ]
+        },
+        {
+          "question": "Qual é o resultado de 30 ÷ 6?",
+          "answer": "5",
+          "options": [
+            "7",
+            "1",
+            "5",
+            "6"
+          ]
+        },
+        {
+          "question": "Tenho 10 figurinhas para dividir entre 2 amigos. Quantas cada um recebe?",
+          "answer": "5",
+          "options": [
+            "8",
+            "6",
+            "9",
+            "5"
+          ]
+        },
+        {
+          "question": "Qual é o resultado de 45 ÷ 9?",
+          "answer": "5",
+          "options": [
+            "3",
+            "9",
+            "5",
+            "4"
+          ]
+        },
+        {
+          "question": "Qual é o resultado de 36 ÷ 4?",
+          "answer": "9",
+          "options": [
+            "11",
+            "10",
+            "9",
+            "6"
+          ]
+        },
+        {
+          "question": "Tenho 20 figurinhas para dividir entre 2 amigos. Quantas cada um recebe?",
+          "answer": "10",
+          "options": [
+            "13",
+            "11",
+            "7",
+            "10"
+          ]
+        },
+        {
+          "question": "Qual é o resultado de 81 ÷ 9?",
+          "answer": "9",
+          "options": [
+            "5",
+            "14",
+            "9",
+            "7"
+          ]
+        },
+        {
+          "question": "Qual é o resultado de 12 ÷ 4?",
+          "answer": "3",
+          "options": [
+            "3",
+            "6",
+            "2",
+            "0"
+          ]
+        },
+        {
+          "question": "Tenho 20 figurinhas para dividir entre 4 amigos. Quantas cada um recebe?",
+          "answer": "5",
+          "options": [
+            "6",
+            "1",
+            "5",
+            "8"
+          ]
+        },
+        {
+          "question": "Tenho 49 figurinhas para dividir entre 7 amigos. Quantas cada um recebe?",
+          "answer": "7",
+          "options": [
+            "9",
+            "3",
+            "11",
+            "7"
+          ]
+        },
+        {
+          "question": "Qual é o resultado de 6 ÷ 2?",
+          "answer": "3",
+          "options": [
+            "8",
+            "1",
+            "3",
+            "0"
+          ]
+        },
+        {
+          "question": "Tenho 40 figurinhas para dividir entre 5 amigos. Quantas cada um recebe?",
+          "answer": "8",
+          "options": [
+            "7",
+            "3",
+            "8",
+            "12"
+          ]
+        },
+        {
+          "question": "Qual é o resultado de 35 ÷ 5?",
+          "answer": "7",
+          "options": [
+            "11",
+            "7",
+            "10",
+            "9"
+          ]
+        },
+        {
+          "question": "Qual é o resultado de 16 ÷ 2?",
+          "answer": "8",
+          "options": [
+            "12",
+            "9",
+            "4",
+            "8"
+          ]
+        },
+        {
+          "question": "Tenho 20 figurinhas para dividir entre 4 amigos. Quantas cada um recebe?",
+          "answer": "5",
+          "options": [
+            "5",
+            "1",
+            "0",
+            "6"
+          ]
+        },
+        {
+          "question": "Qual é o resultado de 90 ÷ 9?",
+          "answer": "10",
+          "options": [
+            "9",
+            "6",
+            "10",
+            "5"
+          ]
+        }
+      ],
+      "Yellow": [
+        {
+          "question": "Um pato tem 2 pés. Quantos pés têm 5 patos?",
+          "answer": "10",
+          "options": [
+            "12",
+            "10",
+            "8",
+            "6"
+          ]
+        },
+        {
+          "question": "O dobro do dobro de 3 é?",
+          "answer": "12",
+          "options": [
+            "8",
+            "15",
+            "16",
+            "12"
+          ]
+        },
+        {
+          "question": "Se eu leio 5 páginas por dia, em quantos dias leio 30 páginas?",
+          "answer": "6",
+          "options": [
+            "5",
+            "6",
+            "11",
+            "7"
+          ]
+        },
+        {
+          "question": "Uma dúzia e meia de ovos são quantos ovos?",
+          "answer": "18",
+          "options": [
+            "21",
+            "20",
+            "18",
+            "14"
+          ]
+        },
+        {
+          "question": "Um carro tem 4 rodas. Quantas rodas têm 3 carros iguais?",
+          "answer": "12",
+          "options": [
+            "7",
+            "12",
+            "13",
+            "8"
+          ]
+        },
+        {
+          "question": "Um carro tem 4 rodas. Quantas rodas têm 2 carros iguais?",
+          "answer": "8",
+          "options": [
+            "11",
+            "5",
+            "8",
+            "3"
+          ]
+        },
+        {
+          "question": "Um carro tem 4 rodas. Quantas rodas têm 3 carros iguais?",
+          "answer": "12",
+          "options": [
+            "17",
+            "14",
+            "16",
+            "12"
+          ]
+        },
+        {
+          "question": "Um carro tem 4 rodas. Quantas rodas têm 2 carros iguais?",
+          "answer": "8",
+          "options": [
+            "12",
+            "8",
+            "6",
+            "5"
+          ]
+        },
+        {
+          "question": "Um carro tem 4 rodas. Quantas rodas têm 1 carros iguais?",
+          "answer": "4",
+          "options": [
+            "4",
+            "7",
+            "3",
+            "1"
+          ]
+        },
+        {
+          "question": "Um carro tem 4 rodas. Quantas rodas têm 4 carros iguais?",
+          "answer": "16",
+          "options": [
+            "16",
+            "20",
+            "15",
+            "14"
+          ]
+        },
+        {
+          "question": "Um carro tem 4 rodas. Quantas rodas têm 1 carros iguais?",
+          "answer": "4",
+          "options": [
+            "4",
+            "8",
+            "7",
+            "3"
+          ]
+        },
+        {
+          "question": "Um carro tem 4 rodas. Quantas rodas têm 2 carros iguais?",
+          "answer": "8",
+          "options": [
+            "10",
+            "8",
+            "13",
+            "4"
+          ]
+        },
+        {
+          "question": "Um carro tem 4 rodas. Quantas rodas têm 1 carros iguais?",
+          "answer": "4",
+          "options": [
+            "4",
+            "7",
+            "1",
+            "2"
+          ]
+        },
+        {
+          "question": "Um carro tem 4 rodas. Quantas rodas têm 3 carros iguais?",
+          "answer": "12",
+          "options": [
+            "17",
+            "13",
+            "12",
+            "8"
+          ]
+        },
+        {
+          "question": "Um carro tem 4 rodas. Quantas rodas têm 1 carros iguais?",
+          "answer": "4",
+          "options": [
+            "4",
+            "9",
+            "6",
+            "1"
+          ]
+        },
+        {
+          "question": "Um carro tem 4 rodas. Quantas rodas têm 1 carros iguais?",
+          "answer": "4",
+          "options": [
+            "7",
+            "4",
+            "8",
+            "2"
+          ]
+        },
+        {
+          "question": "Um carro tem 4 rodas. Quantas rodas têm 2 carros iguais?",
+          "answer": "8",
+          "options": [
+            "11",
+            "12",
+            "8",
+            "10"
+          ]
+        },
+        {
+          "question": "Um carro tem 4 rodas. Quantas rodas têm 2 carros iguais?",
+          "answer": "8",
+          "options": [
+            "8",
+            "3",
+            "7",
+            "11"
+          ]
+        },
+        {
+          "question": "Um carro tem 4 rodas. Quantas rodas têm 1 carros iguais?",
+          "answer": "4",
+          "options": [
+            "1",
+            "4",
+            "7",
+            "6"
+          ]
+        }
+      ]
+    }
+  }
+}

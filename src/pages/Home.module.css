@@ -1,0 +1,312 @@
+.homeContainer {
+    position: relative;
+    width: 100vw;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 80px;
+}
+
+/* Parallax Math Symbols */
+.parallaxBg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.mathSymbol {
+    position: absolute;
+    color: var(--color-ink);
+    font-weight: 900;
+    animation: drift linear infinite;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes drift {
+    0% {
+        transform: translateY(115vh) rotate(0deg);
+    }
+
+    100% {
+        transform: translateY(-20vh) rotate(360deg);
+    }
+}
+
+/* Hero Section */
+.heroSection {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 55vh;
+    width: 100%;
+    margin-top: 40px;
+}
+
+.titleContainer {
+    text-align: center;
+    transform: perspective(800px) rotateX(10deg);
+    animation: floatingTitle 3s ease-in-out infinite alternate;
+}
+
+@keyframes floatingTitle {
+    0% {
+        transform: perspective(800px) rotateX(10deg) translateY(0px);
+    }
+
+    100% {
+        transform: perspective(800px) rotateX(5deg) translateY(-15px);
+    }
+}
+
+.mainTitle {
+    font-size: clamp(3rem, 10vw, 6rem);
+    font-weight: 900;
+    color: var(--color-ink);
+    margin: 0;
+    line-height: 1.1;
+    text-shadow:
+        4px 4px 0px var(--color-red),
+        8px 8px 0px var(--color-blue);
+    text-transform: uppercase;
+}
+
+.subTitle {
+    font-size: clamp(1.2rem, 4vw, 2.5rem);
+    font-weight: 900;
+    color: #fff;
+    margin: 0;
+    margin-top: -5px;
+    background-color: var(--color-ink);
+    padding: 5px 20px;
+    display: inline-block;
+    border-radius: 16px;
+    transform: rotate(-3deg);
+    box-shadow: 4px 4px 0px var(--color-yellow);
+}
+
+.playButton {
+    margin-top: 50px;
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-weight: 900;
+    padding: 20px 60px;
+    background-color: var(--color-green);
+    color: var(--color-ink);
+    border: 6px solid var(--color-ink);
+    border-radius: 32px;
+    cursor: pointer;
+    text-transform: uppercase;
+    box-shadow: 0px 12px 0px var(--color-ink);
+    transition: all 0.1s;
+    animation: pulseButton 2s infinite;
+}
+
+.playButton:hover {
+    transform: translateY(4px) scale(1.02);
+    box-shadow: 0px 8px 0px var(--color-ink);
+    background-color: #3ae45b;
+}
+
+.playButton:active {
+    transform: translateY(12px) scale(0.98);
+    box-shadow: 0px 0px 0px var(--color-ink);
+    animation: none;
+}
+
+@keyframes pulseButton {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.03);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Rules Section */
+.rulesSection {
+    position: relative;
+    z-index: 10;
+    width: 90%;
+    max-width: 1000px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 4px solid var(--color-ink);
+    border-radius: 40px;
+    padding: 50px;
+    margin-top: 50px;
+    box-shadow: 12px 12px 0px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.rulesHeader {
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--color-ink);
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 0px var(--color-yellow);
+}
+
+.rulesSub {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 40px;
+    color: #444;
+}
+
+.cardsContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 30px;
+    perspective: 1200px;
+}
+
+/* 3D Flip Cards */
+.flipCard {
+    background-color: transparent;
+    width: 100%;
+    height: 320px;
+    perspective: 1000px;
+    cursor: pointer;
+}
+
+.flipCardInner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-style: preserve-3d;
+    border-radius: 20px;
+    border: 4px solid var(--color-ink);
+    box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.4);
+}
+
+.flipCard:hover .flipCardInner {
+    transform: rotateY(180deg) scale(1.05);
+    box-shadow: -8px 8px 0px rgba(0, 0, 0, 0.4);
+}
+
+.flipCardFront,
+.flipCardBack {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 25px;
+    box-sizing: border-box;
+    color: var(--color-ink);
+}
+
+/* The front face */
+.flipCardFront {
+    background-color: inherit;
+}
+
+/* The back face */
+.flipCardBack {
+    background-color: white;
+    transform: rotateY(180deg);
+}
+
+.cardIcon {
+    font-size: 5rem;
+    margin-bottom: 15px;
+    filter: drop-shadow(3px 3px 0px rgba(0, 0, 0, 0.2));
+}
+
+.flipCardFront h4 {
+    font-size: 1.8rem;
+    font-weight: 900;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.flipCardBack p {
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 15px;
+    line-height: 1.3;
+}
+
+.flipCardBack span {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #666;
+    font-style: italic;
+    background: #f0f0f0;
+    padding: 5px 10px;
+    border-radius: 8px;
+}
+
+/* Card Colors */
+.greenCard {
+    background-color: var(--color-green);
+}
+
+.redCard {
+    background-color: var(--color-red);
+}
+
+.yellowCard {
+    background-color: var(--color-yellow);
+}
+
+.blueCard {
+    background-color: var(--color-blue);
+}
+
+@media (max-width: 768px) {
+    .mainTitle {
+        font-size: 3.5rem;
+        text-shadow: 3px 3px 0px var(--color-red), 6px 6px 0px var(--color-blue);
+    }
+
+    .subTitle {
+        font-size: 1.5rem;
+    }
+
+    .playButton {
+        padding: 15px 40px;
+        font-size: 1.8rem;
+    }
+
+    .rulesSection {
+        padding: 30px 20px;
+        width: 92%;
+    }
+
+    .rulesHeader {
+        font-size: 2.2rem;
+    }
+
+    .flipCard {
+        height: 280px;
+    }
+
+    .flipCardFront h4 {
+        font-size: 1.4rem;
+    }
+
+    .cardIcon {
+        font-size: 4rem;
+    }
+}

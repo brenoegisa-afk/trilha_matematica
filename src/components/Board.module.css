@@ -1,0 +1,232 @@
+.boardWrapper {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.boardDecorations {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.startBanner {
+    position: absolute;
+    bottom: -20px;
+    left: -10px;
+    background: var(--color-ink);
+    color: white;
+    padding: 8px 16px;
+    font-family: var(--font-title);
+    font-weight: 900;
+    font-size: 1.5rem;
+    border-radius: var(--radius-pill);
+    transform: rotate(-5deg);
+    box-shadow: var(--shadow-handmade);
+}
+
+.finishBanner {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    /* it ends at Row 1 Col 1 */
+    background: gold;
+    color: var(--color-ink);
+    padding: 8px 16px;
+    border: 4px solid var(--color-ink);
+    font-family: var(--font-title);
+    font-weight: 900;
+    font-size: 1.5rem;
+    border-radius: var(--radius-md);
+    transform: rotate(-5deg);
+    box-shadow: var(--shadow-handmade);
+}
+
+.boardContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Control size by height so it fits exactly on tablet screens without scrolling! */
+    height: calc(100vh - 150px);
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 10px;
+    background-color: transparent;
+    position: relative;
+    z-index: 1;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    /* Force a square grid based on height! */
+    height: 100%;
+    aspect-ratio: 1;
+    background-color: transparent;
+    /* Allows negative space to show through */
+    border: none;
+    box-shadow: none;
+}
+
+.tile {
+    aspect-ratio: 1;
+    border: 3px solid var(--color-ink);
+    /* Reduced border since they combine to 6px dividers */
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.2s, filter 0.2s;
+    /* Small inner curve inside the square block for handmade feel */
+    /* Corner radii are overridden via inline style computed in React */
+}
+
+.tile:hover {
+    filter: brightness(1.1);
+    z-index: 5;
+    transform: scale(1.05) rotate(2deg);
+    box-shadow: var(--shadow-lifted);
+}
+
+.tileNumber {
+    position: absolute;
+    top: 4px;
+    left: 6px;
+    font-size: 0.8rem;
+    font-family: var(--font-title);
+    font-weight: 800;
+    color: var(--color-ink);
+    opacity: 0.6;
+}
+
+.tileSymbol {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--color-ink);
+    text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.7);
+}
+
+.arrow {
+    position: absolute;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--color-ink);
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.arrow-right {
+    right: -14px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+}
+
+.arrow-left {
+    left: -14px;
+    top: 50%;
+    transform: translateY(-50%) rotate(180deg);
+    z-index: 2;
+}
+
+.arrow-up {
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-90deg);
+    z-index: 2;
+}
+
+.playersArea {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -40%);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2px;
+    width: 90%;
+    z-index: 10;
+}
+
+.pawn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 3px solid var(--color-ink);
+    box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.4), inset -2px -2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: help;
+}
+
+.pawnAvatar {
+    font-size: 1.2rem;
+    line-height: 1;
+    filter: drop-shadow(1px 1px 0px rgba(0, 0, 0, 0.3));
+}
+
+/* RANK AURAS */
+.goldAura {
+    box-shadow: 0 0 15px #f1c40f, 0 0 30px #f1c40f, inset -2px -2px 4px rgba(0, 0, 0, 0.2) !important;
+    animation: goldPulse 2s infinite ease-in-out;
+    border-color: #f1c40f !important;
+}
+
+.silverAura {
+    box-shadow: 0 0 12px #bdc3c7, 0 0 24px #bdc3c7, inset -2px -2px 4px rgba(0, 0, 0, 0.2) !important;
+    animation: silverPulse 2s infinite ease-in-out;
+    border-color: #bdc3c7 !important;
+}
+
+.bronzeAura {
+    box-shadow: 0 0 10px #cd7f32, 0 0 20px #cd7f32, inset -2px -2px 4px rgba(0, 0, 0, 0.2) !important;
+    animation: bronzePulse 2s infinite ease-in-out;
+    border-color: #cd7f32 !important;
+}
+
+@keyframes goldPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 10px #f1c40f, 0 0 20px #f1c40f;
+    }
+
+    50% {
+        box-shadow: 0 0 20px #f1c40f, 0 0 40px #f1c40f;
+    }
+}
+
+@keyframes silverPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 8px #bdc3c7, 0 0 16px #bdc3c7;
+    }
+
+    50% {
+        box-shadow: 0 0 16px #bdc3c7, 0 0 32px #bdc3c7;
+    }
+}
+
+@keyframes bronzePulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 6px #cd7f32, 0 0 12px #cd7f32;
+    }
+
+    50% {
+        box-shadow: 0 0 12px #cd7f32, 0 0 24px #cd7f32;
+    }
+}
