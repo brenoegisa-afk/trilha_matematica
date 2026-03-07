@@ -1,7 +1,7 @@
 import { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
 import questionsData from '../data/questions.json';
-import { getOrCreateProfile, updateProfile, getSavedProfiles, saveProfiles } from '../utils/saveSystem';
+import { getOrCreateProfile, getSavedProfiles, saveProfiles, getGlobalRanking } from '../utils/saveSystem';
 
 export type TileType = 'Normal' | 'Green' | 'Red' | 'Yellow' | 'Blue' | 'Start' | 'Finish';
 
@@ -10,8 +10,15 @@ export interface Tile {
     type: TileType;
 }
 
-score: number;
-globalRank ?: number; // 1, 2 or 3
+export interface Player {
+    id: string;      // maps to save profile id
+    name: string;
+    color: string; // 'red', 'blue', 'green', 'yellow'
+    avatar: string; // cosmetic emoji/icon
+    currentPosition: number;
+    inventoryProtectionCount: number;
+    score: number;
+    globalRank?: number; // 1, 2 or 3
 }
 
 export interface Question {
@@ -129,7 +136,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         const ranking = await getGlobalRanking();
 
         setPlayers(prev => prev.map(p => {
-            const rankIndex = ranking.findIndex(r => r.name === p.name);
+            const rankIndex = ranking.findIndex((r: any) => r.name === p.name);
             // Global rank is only relevant if you are top 3
             if (rankIndex !== -1 && rankIndex < 3) {
                 return { ...p, globalRank: rankIndex + 1 };

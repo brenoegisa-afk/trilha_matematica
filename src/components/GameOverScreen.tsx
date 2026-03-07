@@ -1,9 +1,7 @@
-import { useNavigate } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
 import styles from './GameOverScreen.module.css';
 
 export default function GameOverScreen() {
-    const navigate = useNavigate();
     const { players, gameStatus } = useGame();
 
     if (gameStatus !== 'finished') return null;
