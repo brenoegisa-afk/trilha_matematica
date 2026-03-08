@@ -59,6 +59,9 @@ export default function Hub() {
             </div>
 
             <footer className={styles.footer}>
+                <button onClick={() => navigate('/')} className={styles.backBtn}>
+                    ⬅ Voltar ao Início
+                </button>
                 <button onClick={() => navigate('/teacher/login')} className={styles.teacherBtn}>
                     🔓 Painel do Professor
                 </button>

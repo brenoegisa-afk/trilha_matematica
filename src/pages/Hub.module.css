@@ -92,17 +92,56 @@
 
 .footer {
     margin-top: auto;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.backBtn {
+    background: white;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: 3px solid var(--color-ink);
+    border-radius: 12px;
+    box-shadow: 4px 4px 0px var(--color-ink);
+    cursor: pointer;
+    font-weight: 800;
+}
+
+.backBtn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px var(--color-ink);
 }
 
 .teacherBtn {
     background: white;
     padding: 10px 20px;
     font-size: 1rem;
-    border-style: dashed;
+    border: 2px dashed var(--color-ink);
+    border-radius: 12px;
+    cursor: pointer;
+    opacity: 0.7;
+    font-weight: 600;
+}
+
+.teacherBtn:hover {
+    opacity: 1;
+    background: #fdfdfd;
 }
 
 @media (max-width: 600px) {
     .header h1 {
         font-size: 2rem;
+    }
+
+    .footer {
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+    }
+
+    .backBtn,
+    .teacherBtn {
+        width: 100%;
     }
 }
