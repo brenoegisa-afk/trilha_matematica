@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
 import '../App.css';
 
@@ -15,13 +15,16 @@ export default function Setup() {
     const { players, addPlayer, startGame, selectedGrade, setGrade, refreshPlayers } = useGame();
     const [name, setName] = useState('');
     const [secretCode, setSecretCode] = useState('');
+    const [classCode, setClassCode] = useState('');
     const [selectedColor, setSelectedColor] = useState('red');
+    const [classLoading, setClassLoading] = useState(false);
+
 
     useEffect(() => {
         refreshPlayers();
     }, []);
 
-    const handleAddPlayer = () => {
+    const handleAddPlayer = async () => {
         if (!name.trim()) return;
         if (players.length >= 4) return;
 
@@ -36,15 +39,52 @@ export default function Setup() {
             return;
         }
 
-        addPlayer(name, colorHex, secretCode);
+        let finalClassId = '';
+        if (classCode.trim()) {
+            setClassLoading(true);
+            const { data, error } = await import('../utils/supabaseClient').then(m =>
+                m.supabase.from('classes').select('id').eq('access_code', classCode.toUpperCase()).single()
+            );
+
+            if (error || !data) {
+                alert('Código de Turma inválido!');
+                setClassLoading(false);
+                return;
+            }
+            finalClassId = data.id;
+            setClassLoading(false);
+        }
+
+        // Add player to game context
+        const profile = addPlayer(name, colorHex, secretCode, finalClassId);
+
+        // Explicitly update the profile if a class code was provided 
+        // (addPlayer handles creation, this ensures an existing profile gets updated)
+        if (finalClassId) {
+            import('../utils/saveSystem').then(m => m.updateProfile(profile.id, { class_id: finalClassId }));
+        }
+
         setName('');
         setSecretCode('');
+        setClassCode('');
+
     };
+
+
+    const location = useLocation();
+    const gameMode = location.state?.gameMode || 'trilha';
 
     const handleStart = () => {
         if (players.length === 0) return;
         startGame();
-        navigate('/game');
+
+        if (gameMode === 'arena') {
+            navigate('/arena', { state: { fromSetup: true } });
+        } else if (gameMode === 'battle') {
+            navigate('/battle');
+        } else {
+            navigate('/game');
+        }
     };
 
     return (
@@ -116,8 +156,21 @@ export default function Setup() {
                     </div>
                 </div>
 
-                <button className="btn-primary" onClick={handleAddPlayer} disabled={!name.trim() || secretCode.length < 4 || players.length >= 4} style={{ width: '100%' }}>
-                    Adicionar Jogador
+                <div style={{ marginBottom: '20px' }}>
+                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Código da Turma (Opcional):</label>
+                    <input
+                        type="text"
+                        maxLength={6}
+                        value={classCode}
+                        onChange={e => setClassCode(e.target.value.toUpperCase())}
+                        placeholder="ABC123"
+                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '2px solid var(--color-blue)', fontFamily: 'var(--font-title)', fontSize: '1rem', textAlign: 'center' }}
+                    />
+                    <small style={{ fontSize: '0.7rem', opacity: 0.7 }}>Peça o código ao seu professor!</small>
+                </div>
+
+                <button className="btn-primary" onClick={handleAddPlayer} disabled={!name.trim() || secretCode.length < 4 || players.length >= 4 || classLoading} style={{ width: '100%' }}>
+                    {classLoading ? 'Verificando...' : 'Adicionar Jogador'}
                 </button>
             </div>
 
@@ -145,7 +198,6 @@ export default function Setup() {
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--color-ink)' }}>
                                     <span style={{ color: '#f1c40f' }}>⭐</span>
-                                    {/* Score display logic could be updated to show profile stars if we wanted, but for now let's just keep it simple */}
                                     Pronto!
                                 </div>
                             </li>
@@ -178,3 +230,4 @@ export default function Setup() {
         </div>
     );
 }
+

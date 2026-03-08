@@ -230,3 +230,72 @@
         box-shadow: 0 0 12px #cd7f32, 0 0 24px #cd7f32;
     }
 }
+
+.mascotFollower {
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    font-size: 1.2rem;
+    animation: mascotFloat 3s infinite ease-in-out;
+    filter: drop-shadow(2px 2px 0px rgba(0, 0, 0, 0.2));
+    z-index: 15;
+}
+
+.streakFire {
+    position: absolute;
+    bottom: -10px;
+    left: -10px;
+    font-size: 1rem;
+    animation: bounce 1s infinite alternate;
+    z-index: 15;
+}
+
+@keyframes mascotFloat {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(5deg);
+    }
+
+    50% {
+        transform: translateY(-5px) rotate(-5deg);
+    }
+}
+
+@keyframes bounce {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(-3px);
+    }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .boardContainer {
+        height: min(100vw, calc(100vh - 150px));
+        /* Ensure grid doesn't overflow horizontally */
+        padding: 5px;
+    }
+
+    .tileSymbol {
+        font-size: 1.2rem;
+    }
+
+    .pawn {
+        width: 20px;
+        height: 20px;
+    }
+
+    .pawnAvatar {
+        font-size: 0.8rem;
+    }
+
+    .mascotFollower {
+        font-size: 0.8rem;
+        top: -10px;
+        right: -10px;
+    }
+}

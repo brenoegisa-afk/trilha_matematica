@@ -38,30 +38,50 @@ export default function Home() {
 
                 <button
                     className={styles.playButton}
-                    onClick={() => navigate('/setup')}
+                    onClick={() => navigate('/hub')}
                 >
                     COMEÇAR JORNADA!
                 </button>
 
-                <button
-                    className={styles.rankingButton}
-                    onClick={() => navigate('/ranking')}
-                    style={{
-                        marginTop: '15px',
-                        padding: '10px 20px',
-                        fontSize: '1.2rem',
-                        backgroundColor: 'white',
-                        color: 'var(--color-ink)',
-                        border: '3px solid var(--color-ink)',
-                        borderRadius: '12px',
-                        fontWeight: '800',
-                        cursor: 'pointer',
-                        boxShadow: '4px 4px 0px rgba(0,0,0,0.1)'
-                    }}
-                >
-                    🏆 MURAL DOS CAMPEÕES
-                </button>
+
+                <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
+                    <button
+                        className={styles.rankingButton}
+                        onClick={() => navigate('/ranking')}
+                        style={{
+                            padding: '10px 20px',
+                            fontSize: '1.2rem',
+                            backgroundColor: 'white',
+                            color: 'var(--color-ink)',
+                            border: '3px solid var(--color-ink)',
+                            borderRadius: '12px',
+                            fontWeight: '800',
+                            cursor: 'pointer',
+                            boxShadow: '4px 4px 0px rgba(0,0,0,0.1)'
+                        }}
+                    >
+                        🏆 RANKING
+                    </button>
+                    <button
+                        className={styles.teacherButton}
+                        onClick={() => navigate('/teacher')}
+                        style={{
+                            padding: '10px 20px',
+                            fontSize: '1.2rem',
+                            backgroundColor: 'var(--color-blue)',
+                            color: 'white',
+                            border: '3px solid var(--color-ink)',
+                            borderRadius: '12px',
+                            fontWeight: '800',
+                            cursor: 'pointer',
+                            boxShadow: '4px 4px 0px rgba(0,0,0,0.1)'
+                        }}
+                    >
+                        👨‍🏫 PROFESSOR
+                    </button>
+                </div>
             </div>
+
 
             {/* Interactive Rules Section */}
             <div className={styles.rulesSection}>

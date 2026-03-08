@@ -211,6 +211,17 @@
 }
 
 @media (max-width: 600px) {
+    .rankingHeader {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .rankingHeader h1 {
+        font-size: 1.8rem;
+    }
+
     .podium {
         height: 200px;
         gap: 8px;

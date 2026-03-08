@@ -1,8 +1,12 @@
+import { useState } from 'react';
 import { useGame } from '../context/GameContext';
+import { updateProfile } from '../utils/saveSystem';
+import MathChest from './MathChest';
 import styles from './GameOverScreen.module.css';
 
 export default function GameOverScreen() {
     const { players, gameStatus } = useGame();
+    const [showChestId, setShowChestId] = useState<string | null>(null);
 
     if (gameStatus !== 'finished') return null;
 
@@ -13,6 +17,23 @@ export default function GameOverScreen() {
         // Simple reload to reset everything cleanly
         window.location.href = '/setup';
     };
+
+    const handleOpenChest = (reward: number) => {
+        if (!showChestId) return;
+
+        // Update the profile with the reward stars
+        const p = players.find(player => player.id === showChestId);
+        if (p) {
+            const currentProfiles = JSON.parse(localStorage.getItem('@TrilhaCampeoes:Profiles') || '[]');
+            const profile = currentProfiles.find((prof: any) => prof.id === p.id);
+            if (profile) {
+                updateProfile(p.id, { stars: profile.stars + reward });
+            }
+        }
+
+        setShowChestId(null);
+    };
+
 
     return (
         <div className={styles.overlay}>
@@ -50,9 +71,18 @@ export default function GameOverScreen() {
                                     ( +{Math.floor(player.score / 10)} ⭐ )
                                 </span>
                             </div>
+                            <button
+                                className={styles.collectBtn}
+                                onClick={() => setShowChestId(player.id)}
+                            >
+                                📦 Coletar Baú
+                            </button>
                         </div>
                     ))}
                 </div>
+
+                {showChestId && <MathChest onOpen={handleOpenChest} />}
+
 
                 <div className={styles.buttons}>
                     <button className={styles.playAgainBtn} onClick={handlePlayAgain}>

@@ -15,11 +15,22 @@ const AVATARS = [
     { id: 'unicorn', icon: '🦄', label: 'Unicórnio', price: 250 },
 ];
 
+const MASCOTS = [
+    { id: 'octopus', icon: '🐙', label: 'Polvinho Multiplicador', price: 150 },
+    { id: 'fox', icon: '🦊', label: 'Raposa Divisora', price: 200 },
+    { id: 'owl', icon: '🦉', label: 'Coruja da Lógica', price: 250 },
+    { id: 'lion', icon: '🦁', label: 'Leão Calculador', price: 300 },
+    { id: 'frog', icon: '🐸', label: 'Sapo dos Padrões', price: 100 },
+];
+
+
 export default function Shop() {
     const navigate = useNavigate();
     const [profiles, setProfiles] = useState<SaveProfile[]>([]);
     const [selectedProfileId, setSelectedProfileId] = useState<string>('');
     const [message, setMessage] = useState('');
+    const [activeTab, setActiveTab] = useState<'avatars' | 'mascots'>('avatars');
+
 
     useEffect(() => {
         const saved = getSavedProfiles();
@@ -31,22 +42,28 @@ export default function Shop() {
 
     const selectedProfile = profiles.find(p => p.id === selectedProfileId);
 
-    const handleBuy = (avatar: typeof AVATARS[0]) => {
+    const handleBuyItem = (item: { icon: string, label: string, price: number }, type: 'avatar' | 'mascot') => {
         if (!selectedProfile) return;
 
-        if (selectedProfile.unlockedAvatars.includes(avatar.icon)) {
+        const unlockedField = type === 'avatar' ? 'unlockedAvatars' : 'unlockedMascots';
+        const equippedField = type === 'avatar' ? 'equippedAvatar' : 'equippedMascot';
+
+        const isUnlocked = selectedProfile[unlockedField]?.includes(item.icon);
+
+        if (isUnlocked) {
             // Already owned, just equip
-            updateProfile(selectedProfile.id, { equippedAvatar: avatar.icon });
-            setMessage(`Avatar ${avatar.label} equipado!`);
+            updateProfile(selectedProfile.id, { [equippedField]: item.icon });
+            setMessage(`${item.label} equipado!`);
         } else {
             // Try to buy
-            if (selectedProfile.stars >= avatar.price) {
+            if (selectedProfile.stars >= item.price) {
+                const currentUnlocked = selectedProfile[unlockedField] || [];
                 updateProfile(selectedProfile.id, {
-                    stars: selectedProfile.stars - avatar.price,
-                    unlockedAvatars: [...selectedProfile.unlockedAvatars, avatar.icon],
-                    equippedAvatar: avatar.icon
+                    stars: selectedProfile.stars - item.price,
+                    [unlockedField]: [...currentUnlocked, item.icon],
+                    [equippedField]: item.icon
                 });
-                setMessage(`Você comprou o ${avatar.label}!`);
+                setMessage(`Você comprou o ${item.label}!`);
             } else {
                 setMessage('Estrelas insuficientes! Jogue mais para ganhar.');
             }
@@ -56,6 +73,7 @@ export default function Shop() {
         setProfiles(getSavedProfiles());
         setTimeout(() => setMessage(''), 3000);
     };
+
 
     return (
         <div className={styles.shopContainer}>
@@ -90,20 +108,41 @@ export default function Shop() {
 
                     {message && <div className={styles.messageBox}>{message}</div>}
 
+                    <div className={styles.tabs}>
+                        <button
+                            className={`${styles.tabBtn} ${activeTab === 'avatars' ? styles.activeTab : ''}`}
+                            onClick={() => setActiveTab('avatars')}
+                        >
+                            🎭 Avatares
+                        </button>
+                        <button
+                            className={`${styles.tabBtn} ${activeTab === 'mascots' ? styles.activeTab : ''}`}
+                            onClick={() => setActiveTab('mascots')}
+                        >
+                            🐾 Mascotes
+                        </button>
+                    </div>
+
                     <div className={styles.itemsGrid}>
-                        {AVATARS.map(avatar => {
-                            const isUnlocked = selectedProfile.unlockedAvatars.includes(avatar.icon);
-                            const isEquipped = selectedProfile.equippedAvatar === avatar.icon;
+                        {(activeTab === 'avatars' ? AVATARS : MASCOTS).map(item => {
+                            const isUnlocked = (activeTab === 'avatars'
+                                ? selectedProfile.unlockedAvatars
+                                : (selectedProfile.unlockedMascots || []))
+                                .includes(item.icon);
+
+                            const isEquipped = (activeTab === 'avatars'
+                                ? selectedProfile.equippedAvatar
+                                : (selectedProfile.equippedMascot || '')) === item.icon;
 
                             return (
-                                <div key={avatar.id} className={styles.shopItem}>
-                                    <div className={styles.itemIcon}>{avatar.icon}</div>
-                                    <h3>{avatar.label}</h3>
+                                <div key={item.id} className={styles.shopItem}>
+                                    <div className={styles.itemIcon}>{item.icon}</div>
+                                    <h3>{item.label}</h3>
 
                                     {isUnlocked ? (
                                         <button
                                             className={isEquipped ? styles.equippedBtn : styles.equipBtn}
-                                            onClick={() => handleBuy(avatar)}
+                                            onClick={() => handleBuyItem(item, activeTab === 'avatars' ? 'avatar' : 'mascot')}
                                             disabled={isEquipped}
                                         >
                                             {isEquipped ? 'Equipado' : 'Equipar'}
@@ -111,16 +150,17 @@ export default function Shop() {
                                     ) : (
                                         <button
                                             className={styles.buyBtn}
-                                            onClick={() => handleBuy(avatar)}
-                                            disabled={selectedProfile.stars < avatar.price}
+                                            onClick={() => handleBuyItem(item, activeTab === 'avatars' ? 'avatar' : 'mascot')}
+                                            disabled={selectedProfile.stars < item.price}
                                         >
-                                            ⭐ {avatar.price}
+                                            ⭐ {item.price}
                                         </button>
                                     )}
                                 </div>
                             );
                         })}
                     </div>
+
                 </div>
             ) : (
                 <div className={styles.emptyState}>

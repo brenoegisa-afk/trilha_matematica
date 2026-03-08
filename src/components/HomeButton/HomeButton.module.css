@@ -1,0 +1,38 @@
+.homeBtn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 2000;
+    width: 60px;
+    height: 60px;
+    border-radius: var(--radius-md);
+    background: white;
+    border: 3px solid var(--color-ink);
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 4px 4px 0px var(--color-ink);
+    transition: var(--transition-bounce);
+    padding: 0;
+}
+
+.homeBtn:hover {
+    transform: scale(1.1) rotate(-5deg);
+    background: var(--color-yellow);
+}
+
+.homeBtn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px var(--color-ink);
+}
+
+@media (max-width: 600px) {
+    .homeBtn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+        top: 10px;
+        left: 10px;
+    }
+}

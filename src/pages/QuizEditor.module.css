@@ -1,0 +1,228 @@
+.editorOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    padding: 20px;
+}
+
+.editorBox {
+    background: white;
+    width: 100%;
+    max-width: 900px;
+    height: 90vh;
+    border: 4px solid var(--color-ink);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.header {
+    background: var(--color-blue);
+    color: white;
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid var(--color-ink);
+}
+
+.header h2 {
+    margin: 0;
+    font-family: var(--font-title);
+}
+
+.closeBtn {
+    background: white;
+    padding: 5px 15px;
+    border: 2px solid var(--color-ink);
+    border-radius: 8px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.aiHelperBar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    background: rgba(0, 0, 0, 0.03);
+    padding: 15px 30px;
+    border-bottom: 2px dashed #ccc;
+    align-items: center;
+}
+
+.aiPromptBtn {
+    background: var(--color-blue);
+    color: white;
+    padding: 10px 18px;
+    border: 3px solid var(--color-ink);
+    border-radius: 10px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 var(--color-ink);
+}
+
+.batchBtn {
+    background: var(--color-yellow);
+    color: var(--color-ink);
+    padding: 10px 18px;
+    border: 3px solid var(--color-ink);
+    border-radius: 10px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 var(--color-ink);
+}
+
+.externalLinks {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.externalLinks span {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #666;
+}
+
+.externalLinks button {
+    background: white;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.editorSections {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+.addSection {
+    width: 450px;
+    padding: 30px;
+    border-right: 2px dashed #ccc;
+    overflow-y: auto;
+}
+
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form textarea {
+    width: 100%;
+    height: 100px;
+    padding: 12px;
+    border: 2px solid var(--color-ink);
+    border-radius: 10px;
+    font-size: 1rem;
+    resize: none;
+}
+
+.optionsGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.optionsGrid input {
+    padding: 8px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+}
+
+.metaRow {
+    display: flex;
+    gap: 15px;
+}
+
+.inputGroup {
+    flex: 1;
+}
+
+.inputGroup label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 800;
+    margin-bottom: 5px;
+}
+
+.inputGroup select {
+    width: 100%;
+    padding: 8px;
+    border: 2px solid var(--color-ink);
+    border-radius: 8px;
+}
+
+.saveBtn {
+    background: var(--color-green);
+    padding: 12px;
+    border: 2px solid var(--color-ink);
+    border-radius: 12px;
+    font-weight: 800;
+    box-shadow: 4px 4px 0px var(--color-ink);
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.listSection {
+    flex: 1;
+    padding: 30px;
+    background: #fdfdfd;
+    overflow-y: auto;
+}
+
+.questionsList {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.qCard {
+    background: white;
+    padding: 15px;
+    border: 2px solid var(--color-ink);
+    border-radius: 12px;
+    position: relative;
+}
+
+.qCard p {
+    margin: 0 0 5px 0;
+    font-weight: 500;
+}
+
+.deleteBtn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+.empty {
+    text-align: center;
+    color: #999;
+    margin-top: 50px;
+}

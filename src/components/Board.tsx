@@ -147,6 +147,16 @@ export default function Board() {
                                             title={`${p.name}${p.globalRank ? ` (${p.globalRank}º Global)` : ''}`}
                                         >
                                             {p.avatar && <span className={styles.pawnAvatar}>{p.avatar}</span>}
+                                            {p.mascot && (
+                                                <div className={styles.mascotFollower} title={`Mascote: ${p.mascot}`}>
+                                                    {p.mascot}
+                                                </div>
+                                            )}
+                                            {p.streak && p.streak >= 3 && (
+                                                <div className={styles.streakFire} title={`Sequência de ${p.streak} dias! 🔥`}>
+                                                    🔥
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>

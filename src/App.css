@@ -25,3 +25,15 @@
   width: 100%;
   max-width: 300px;
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+  .app-container {
+    padding: 10px;
+  }
+
+  .title-handmade {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+  }
+}

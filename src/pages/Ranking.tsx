@@ -50,8 +50,12 @@ export default function Ranking() {
                         <div className={styles.podium}>
                             {ranking.slice(0, 3).map((entry, index) => (
                                 <div key={entry.name + index} className={`${styles.podiumItem} ${styles[`rank${index + 1}`]}`}>
-                                    <div className={styles.podiumAvatar}>
-                                        {entry.avatar || '⭕'}
+                                    <div className={styles.podiumAvatar} style={{
+                                        border: '4px solid var(--color-ink)',
+                                        background: 'white',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem'
+                                    }}>
+                                        {entry.avatar || '👤'}
                                         <div className={styles.rankBadge}>{index + 1}</div>
                                     </div>
                                     <div className={styles.podiumName}>{entry.name}</div>
@@ -64,7 +68,12 @@ export default function Ranking() {
                             {ranking.map((entry, index) => (
                                 <div key={entry.name + index} className={styles.rankingRow}>
                                     <div className={styles.rowRank}>{index + 1}º</div>
-                                    <div className={styles.rowAvatar}>{entry.avatar || '⭕'}</div>
+                                    <div className={styles.rowAvatar} style={{
+                                        width: '40px', height: '40px', borderRadius: '50%', border: '2px solid var(--color-ink)',
+                                        background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem'
+                                    }}>
+                                        {entry.avatar || '👤'}
+                                    </div>
                                     <div className={styles.rowName}>{entry.name}</div>
                                     <div className={styles.rowScore}>{entry.totalScore} pts</div>
                                     <div className={styles.rowStars}>⭐ {entry.stars}</div>

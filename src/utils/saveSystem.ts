@@ -10,6 +10,10 @@ export interface SaveProfile {
     gamesPlayed: number;
     totalScore: number;
     lastSync?: number;
+    equippedMascot?: string;
+    unlockedMascots?: string[];
+    streak?: number;
+    class_id?: string;
 }
 
 const STORAGE_KEY = '@TrilhaCampeoes:Profiles';
@@ -53,7 +57,11 @@ export function getOrCreateProfile(name: string, code: string = '0000'): SavePro
         equippedAvatar: '',
         unlockedAvatars: [],
         gamesPlayed: 0,
-        totalScore: 0
+        totalScore: 0,
+        equippedMascot: '',
+        unlockedMascots: [],
+        streak: 1,
+        class_id: ''
     };
 
     profiles.push(newProfile);
@@ -66,26 +74,46 @@ export function getOrCreateProfile(name: string, code: string = '0000'): SavePro
 }
 
 // REAL CLOUD SYNC IMPLEMENTATION
-export async function syncProfileToCloud(profile: SaveProfile) {
-    try {
-        const { error } = await supabase.from('profiles').upsert({
-            id: profile.id,
-            name: profile.name,
-            secret_code: profile.secretCode,
-            stars: profile.stars,
-            equipped_avatar: profile.equippedAvatar,
-            unlocked_avatars: profile.unlockedAvatars,
-            games_played: profile.gamesPlayed,
-            total_score: profile.totalScore,
-            last_sync: new Date().toISOString()
-        });
 
-        if (error) throw error;
-        console.log("Perfil sincronizado com sucesso:", profile.name);
-    } catch (e) {
-        console.warn("Erro ao sincronizar. O jogo continuará offline.", e);
-    }
+// Throttling to prevent excessive sync calls and Auth Lock issues
+let syncTimeout: any = null;
+
+export async function syncProfileToCloud(profile: SaveProfile) {
+    if (syncTimeout) clearTimeout(syncTimeout);
+
+    syncTimeout = setTimeout(async () => {
+        try {
+            const { error } = await supabase.from('profiles').upsert({
+                id: profile.id,
+                name: profile.name,
+                secret_code: profile.secretCode,
+                stars: profile.stars,
+                equipped_avatar: profile.equippedAvatar,
+                unlocked_avatars: profile.unlockedAvatars,
+                games_played: profile.gamesPlayed,
+                total_score: profile.totalScore,
+                equipped_mascot: profile.equippedMascot || '',
+                unlocked_mascots: profile.unlockedMascots || [],
+                streak: profile.streak || 1,
+                class_id: profile.class_id || null,
+                last_sync: new Date().toISOString()
+            });
+
+            if (error) {
+                // If it's a transient lock error, we don't need to spam the console as if it were fatal
+                if (error.message?.includes('Lock')) {
+                    console.debug("Sincronização adiada por trava de sessão.");
+                    return;
+                }
+                throw error;
+            }
+            console.log("Perfil sincronizado com sucesso:", profile.name);
+        } catch (e) {
+            console.warn("Sincronização em segundo plano falhou. O jogo continuará offline.", e);
+        }
+    }, 500); // Wait 500ms before syncing
 }
+
 
 export async function getGlobalRanking() {
     try {
@@ -123,4 +151,23 @@ export function updateProfile(id: string, updates: Partial<SaveProfile>): SavePr
     syncProfileToCloud(updatedProfile);
 
     return updatedProfile;
+}
+
+export function calculateStreak(lastSyncDate: number): number {
+    const last = new Date(lastSyncDate);
+    const now = new Date();
+
+    // Set to midnight for comparison
+    last.setHours(0, 0, 0, 0);
+    now.setHours(0, 0, 0, 0);
+
+    const diffTime = Math.abs(now.getTime() - last.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) {
+        return 1; // Increment will happen outside
+    } else if (diffDays > 1) {
+        return 0; // Reset streak
+    }
+    return -1; // Same day, keep current streak
 }

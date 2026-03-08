@@ -1,0 +1,108 @@
+.hubContainer {
+    min-height: 100vh;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: transparent;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.header h1 {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    color: var(--color-ink);
+    text-shadow: 2px 2px 0px white;
+}
+
+.header p {
+    font-size: 1.2rem;
+    color: #555;
+    font-weight: 700;
+}
+
+.gameGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    width: 100%;
+    max-width: 1100px;
+    margin-bottom: 50px;
+}
+
+.gameCard {
+    background: white;
+    padding: 30px;
+    border-radius: var(--radius-lg);
+    border: 4px solid var(--color-ink);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: var(--transition-bounce);
+    cursor: pointer;
+    box-shadow: 8px 8px 0px var(--color-ink);
+    position: relative;
+    overflow: hidden;
+}
+
+.gameCard:hover:not(.inactive) {
+    transform: translateY(-10px) rotate(1deg);
+    box-shadow: 12px 12px 0px var(--color-ink);
+    border-color: var(--accent-color);
+}
+
+.cardIcon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, 0.1));
+}
+
+.gameCard h3 {
+    margin: 0 0 15px 0;
+    font-size: 1.6rem;
+}
+
+.gameCard p {
+    font-size: 0.95rem;
+    color: #666;
+    margin-bottom: 25px;
+    flex-grow: 1;
+}
+
+.playBtn {
+    width: 100%;
+    background: var(--accent-color);
+    color: white;
+    border: 3px solid var(--color-ink);
+    padding: 12px;
+    font-size: 1.1rem;
+}
+
+.inactive {
+    filter: grayscale(0.8);
+    opacity: 0.7;
+    cursor: not-allowed;
+    background: #fdfdfd;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+.teacherBtn {
+    background: white;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-style: dashed;
+}
+
+@media (max-width: 600px) {
+    .header h1 {
+        font-size: 2rem;
+    }
+}

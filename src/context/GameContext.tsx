@@ -2,6 +2,10 @@ import { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
 import questionsData from '../data/questions.json';
 import { getOrCreateProfile, getSavedProfiles, saveProfiles, getGlobalRanking } from '../utils/saveSystem';
+import { supabase } from '../utils/supabaseClient';
+import { triggerConfetti } from '../utils/confetti';
+
+
 
 export type TileType = 'Normal' | 'Green' | 'Red' | 'Yellow' | 'Blue' | 'Start' | 'Finish';
 
@@ -15,11 +19,15 @@ export interface Player {
     name: string;
     color: string; // 'red', 'blue', 'green', 'yellow'
     avatar: string; // cosmetic emoji/icon
+    mascot?: string; // equipped companion
     currentPosition: number;
     inventoryProtectionCount: number;
     score: number;
+    streak: number;
+    class_id?: string;
     globalRank?: number; // 1, 2 or 3
 }
+
 
 export interface Question {
     question: string;
@@ -37,7 +45,7 @@ interface GameContextProps {
     selectedGrade: string;
 
     setGrade: (grade: string) => void;
-    addPlayer: (name: string, color: string, code?: string) => void;
+    addPlayer: (name: string, color: string, code?: string, classId?: string) => import('../utils/saveSystem').SaveProfile;
     startGame: () => void;
     rollDice: () => number;
     submitAnswer: (answer: string) => void;
@@ -99,8 +107,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
     const [rolledValue, setRolledValue] = useState<number | null>(null);
     const [tiles] = useState<Tile[]>(generateTiles());
     const [selectedGrade, setSelectedGrade] = useState<string>('1-2');
+    const [usedQuestionIds] = useState<Set<string>>(new Set());
 
     const setGrade = (grade: string) => {
+
         setSelectedGrade(grade);
     };
 
@@ -109,13 +119,27 @@ export function GameProvider({ children }: { children: ReactNode }) {
             const profile = getOrCreateProfile(p.name);
             return {
                 ...p,
-                avatar: profile.equippedAvatar
+                avatar: profile.equippedAvatar,
+                mascot: profile.equippedMascot,
+                streak: profile.streak || 0
             };
         }));
     };
 
-    const addPlayer = (name: string, color: string, code: string = '0000') => {
+    const addPlayer = (name: string, color: string, code: string = '0000', classId: string = '') => {
         const profile = getOrCreateProfile(name, code);
+
+        // Prevent adding the same profile twice to the same game session
+        if (players.some(p => p.id === profile.id)) {
+            alert(`${name} já está na fila!`);
+            return profile;
+        }
+
+        // Update profile in save system if a classId was provided
+        if (classId) {
+            import('../utils/saveSystem').then(m => m.updateProfile(profile.id, { class_id: classId }));
+            profile.class_id = classId;
+        }
 
         setPlayers(prev => [
             ...prev,
@@ -124,15 +148,26 @@ export function GameProvider({ children }: { children: ReactNode }) {
                 name: profile.name,
                 color,
                 avatar: profile.equippedAvatar,
+                mascot: profile.equippedMascot,
+                streak: profile.streak || 1,
+                class_id: profile.class_id || classId,
                 currentPosition: 0,
                 inventoryProtectionCount: 0,
                 score: 0
             }
         ]);
+
+        return profile;
     };
 
+
+
+
+
     const startGame = async () => {
+        usedQuestionIds.clear();
         // Fetch ranking to see if anyone is a "Champion"
+
         const ranking = await getGlobalRanking();
 
         setPlayers(prev => prev.map(p => {
@@ -183,9 +218,65 @@ export function GameProvider({ children }: { children: ReactNode }) {
         return value;
     };
 
-    const triggerCardEvent = (type: TileType) => {
+    const triggerCardEvent = async (type: TileType) => {
         setActiveCardType(type);
         setGameStatus('card_event');
+
+        const currentPlayer = players[currentPlayerIndex];
+        let teacherQuestion: Question | null = null;
+
+        // Try to fetch custom teacher questions if player is in a class
+        if (currentPlayer?.id && currentPlayer.class_id) {
+            try {
+                const { data, count, error } = await supabase
+                    .from('teacher_questions')
+                    .select('*', { count: 'exact' })
+                    .eq('class_id', currentPlayer.class_id)
+                    .eq('grade_level', selectedGrade);
+
+                if (!error && data && data.length > 0) {
+                    // Filter out already used questions
+                    let availableQuestions = data.filter(q => !usedQuestionIds.has(q.id));
+
+                    // If all questions used, reset for this class/grade to allow replay
+                    if (availableQuestions.length === 0) {
+                        data.forEach(q => usedQuestionIds.delete(q.id));
+                        availableQuestions = data;
+                    }
+
+                    // Check for Total Focus threshold (10 questions)
+                    const isTotalFocus = count && count >= 10;
+
+                    if (isTotalFocus || Math.random() < 0.8) { // 80% chance or forced if Total Focus
+                        const randomQ = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+
+                        // Mark as used
+                        usedQuestionIds.add(randomQ.id);
+
+                        teacherQuestion = {
+                            question: randomQ.question,
+                            answer: randomQ.answer,
+                            options: typeof randomQ.options === 'string' ? JSON.parse(randomQ.options) : randomQ.options
+                        };
+
+                        if (isTotalFocus) {
+                            console.log("Modo TOTAL FOCO Ativado!");
+                            triggerConfetti(); // Special celebration for teacher questions
+                        }
+
+                    }
+                }
+
+            } catch (e) {
+                console.warn("Falha ao buscar perguntas do professor, usando padrão.");
+            }
+        }
+
+        if (teacherQuestion) {
+            setActiveQuestion(teacherQuestion);
+            return;
+        }
+
 
         let questionsArray: Question[] = [];
         const allGrades = questionsData.grades as Record<string, Record<string, Question[]>>;
@@ -234,6 +325,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         }
     };
 
+
     // Web Audio API helper for 8-bit sounds
     const playSound = (type: 'correct' | 'wrong') => {
         const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
@@ -277,35 +369,54 @@ export function GameProvider({ children }: { children: ReactNode }) {
             let newPosition = players[currentPlayerIndex].currentPosition;
             let newItemCount = players[currentPlayerIndex].inventoryProtectionCount;
             let newScore = players[currentPlayerIndex].score;
+            let newStreak = players[currentPlayerIndex].streak || 0;
+
             let nextIndex = (currentPlayerIndex + 1) % players.length;
 
-            // Apply rewards / penalties purely functionally
+            // Update streak
+            if (isCorrect) {
+                triggerConfetti();
+                newStreak += 1;
+
+            } else {
+                newStreak = 0;
+            }
+
+            // Base points for different types
+            let basePoints = 0;
+            if (isCorrect) {
+                if (activeCardType === 'Green') basePoints = 50;
+                else if (activeCardType === 'Red') basePoints = 100;
+                else if (activeCardType === 'Yellow') basePoints = 30;
+                else if (activeCardType === 'Blue') basePoints = 20;
+            }
+
+            // Apply streak bonus
+            const streakBonus = (newStreak >= 3) ? 1.2 : 1.0;
+            const finalPoints = Math.floor(basePoints * streakBonus);
+            newScore += finalPoints;
+
+            // Apply movement rewards / penalties 
             if (activeCardType === 'Green') {
                 if (isCorrect) {
                     newPosition = Math.min(35, newPosition + 1);
-                    newScore += 50; // Points for basic addition
                 }
             } else if (activeCardType === 'Red') {
                 if (isCorrect) {
                     newPosition = Math.min(35, newPosition + 2);
-                    newScore += 100; // Big points for hard challenge
                 } else {
                     newPosition = Math.max(0, newPosition - 1);
-                    // If the player has a protection item, ask to use it? 
-                    // For now, auto-use protection if they have it
                     if (newItemCount > 0) {
                         newItemCount -= 1;
-                        newPosition = players[currentPlayerIndex].currentPosition; // undo penalty
+                        newPosition = players[currentPlayerIndex].currentPosition;
                     }
                 }
             } else if (activeCardType === 'Yellow') {
                 if (isCorrect) {
-                    nextIndex = currentPlayerIndex; // play again
-                    newScore += 30; // Points for logic
+                    nextIndex = currentPlayerIndex;
                 }
             } else if (activeCardType === 'Blue') {
                 newItemCount += 1;
-                newScore += 20; // Points for collecting item
             }
 
             // Finish line bonus
@@ -319,7 +430,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
                 player.currentPosition = newPosition;
                 player.inventoryProtectionCount = newItemCount;
                 player.score = newScore;
+                player.streak = newStreak;
                 newPlayers[currentPlayerIndex] = player;
+
                 return newPlayers;
             });
 

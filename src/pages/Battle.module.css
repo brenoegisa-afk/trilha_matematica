@@ -1,0 +1,360 @@
+/* Battle.module.css */
+.battleContainer {
+    min-height: 100vh;
+    width: 100vw;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
+    font-family: var(--font-main);
+    overflow: hidden;
+    position: relative;
+}
+
+.header {
+    width: 100%;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    z-index: 10;
+}
+
+.title {
+    font-family: var(--font-title);
+    font-size: 2rem;
+    color: var(--color-yellow);
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
+    margin: 0;
+}
+
+.arena {
+    flex: 1;
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    padding: 20px;
+    position: relative;
+}
+
+/* Combatants */
+.combatantRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.playerSide,
+.monsterSide {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    width: 45%;
+}
+
+.monsterSide {
+    align-items: flex-end;
+}
+
+.playerSide {
+    align-items: flex-start;
+}
+
+.spriteContainer {
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 4rem;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.monsterSprite {
+    font-size: 5rem;
+    border-color: var(--color-red);
+    box-shadow: 0 0 30px rgba(255, 0, 0, 0.2);
+    animation: float 3s ease-in-out infinite;
+}
+
+.playerSprite {
+    border-color: var(--color-blue);
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-15px);
+    }
+}
+
+/* Animations */
+.attackAnim {
+    animation: attackBump 0.3s ease;
+}
+
+@keyframes attackBump {
+    0% {
+        transform: translateX(0);
+    }
+
+    50% {
+        transform: translateX(20px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+.monsterAttackAnim {
+    animation: attackBumpMonster 0.3s ease;
+}
+
+@keyframes attackBumpMonster {
+    0% {
+        transform: translateX(0);
+    }
+
+    50% {
+        transform: translateX(-20px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+.damageAnim {
+    animation: flashRed 0.4s ease;
+}
+
+@keyframes flashRed {
+    0% {
+        filter: brightness(1) sepia(0) hue-rotate(0deg) saturate(1);
+    }
+
+    50% {
+        filter: brightness(0.8) sepia(1) hue-rotate(-50deg) saturate(5);
+    }
+
+    100% {
+        filter: brightness(1) sepia(0) hue-rotate(0deg) saturate(1);
+    }
+}
+
+/* Health Bars */
+.healthBarContainer {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    height: 25px;
+    border-radius: 15px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    position: relative;
+}
+
+.healthFill {
+    height: 100%;
+    background: linear-gradient(90deg, #2ecc71, #27ae60);
+    transition: width 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.healthFillMonster {
+    background: linear-gradient(90deg, #e74c3c, #c0392b);
+}
+
+.healthText {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    line-height: 20px;
+    font-weight: bold;
+    font-size: 0.85rem;
+    text-shadow: 1px 1px 2px black;
+    top: 0;
+    left: 0;
+}
+
+.name {
+    font-family: var(--font-title);
+    font-size: 1.2rem;
+    margin: 0;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
+}
+
+/* Question Area */
+.questionPanel {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    padding: 20px;
+    color: var(--color-ink);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border: 4px solid var(--color-blue);
+    margin-top: 20px;
+    text-align: center;
+}
+
+.questionText {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.optionsGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.optionBtn {
+    background: white;
+    border: 3px solid var(--color-ink);
+    border-radius: 12px;
+    padding: 15px;
+    font-size: 1.2rem;
+    font-family: var(--font-title);
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 0 var(--color-ink);
+}
+
+.optionBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 var(--color-ink);
+    background: #f0f7ff;
+}
+
+.optionBtn:active {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 var(--color-ink);
+}
+
+.optionBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 4px 0 var(--color-ink);
+}
+
+/* Feedback Overlays */
+.feedbackOverlay {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 4rem;
+    font-family: var(--font-title);
+    font-weight: bold;
+    text-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    pointer-events: none;
+    animation: popCenter 1s ease-out forwards;
+}
+
+.feedbackCorrect {
+    color: var(--color-green);
+}
+
+.feedbackWrong {
+    color: var(--color-red);
+}
+
+@keyframes popCenter {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+    }
+
+    20% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+    }
+
+    80% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* Post Match UI */
+.postMatchOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.postMatchCard {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    color: var(--color-ink);
+    border: 5px solid var(--color-yellow);
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.4);
+    animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.homeBtn {
+    background: var(--color-blue);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    font-family: var(--font-title);
+    border-radius: 12px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: transform 0.2s;
+}
+
+.homeBtn:hover {
+    transform: translateY(-2px);
+}
+
+@media (max-width: 600px) {
+    .optionsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .spriteContainer {
+        width: 80px;
+        height: 80px;
+        font-size: 3rem;
+    }
+
+    .monsterSprite {
+        font-size: 3.5rem;
+    }
+}
