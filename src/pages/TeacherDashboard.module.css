@@ -58,6 +58,46 @@
     color: var(--color-ink);
 }
 
+/* V2: Summary Stats Row */
+.statsRow {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 50px;
+}
+
+.statCard {
+    background: white;
+    padding: 20px;
+    border: 3px solid var(--color-ink);
+    border-radius: 15px;
+    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: var(--transition-bounce);
+}
+
+.statCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.1);
+}
+
+.statCard label {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #888;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+}
+
+.statValue {
+    font-family: var(--font-title);
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--color-ink);
+}
+
 .actionsBar {
     display: flex;
     justify-content: space-between;
@@ -130,6 +170,40 @@
 .classHeader h3 {
     margin: 0;
     font-family: var(--font-title);
+}
+
+.cardActions {
+    display: flex;
+    gap: 8px;
+}
+
+.actionIconBtn {
+    background: white;
+    border: 2px solid var(--color-ink);
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: var(--transition-bounce);
+}
+
+.actionIconBtn:hover {
+    background: #f0f0f0;
+    transform: scale(1.1);
+}
+
+.actionIconBtn[title="Excluir"]:hover {
+    background: #fee;
+    border-color: var(--color-red);
+}
+
+.actionIconBtn[title="Renomear"]:hover {
+    background: #eefbff;
+    border-color: var(--color-blue);
 }
 
 .date {

@@ -24,6 +24,11 @@ export default function TeacherDashboard() {
     const [activeStudentClass, setActiveStudentClass] = useState<ClassData | null>(null);
     const [classStats, setClassStats] = useState<Record<string, { studentCount: number, questionCount: number }>>({});
 
+    // V2 Modal States
+    const [classToDelete, setClassToDelete] = useState<ClassData | null>(null);
+    const [classToRename, setClassToRename] = useState<ClassData | null>(null);
+    const [renameValue, setRenameValue] = useState('');
+
 
 
     useEffect(() => {
@@ -79,6 +84,10 @@ export default function TeacherDashboard() {
         setClassStats(stats);
     };
 
+    // V2: Summary Stats
+    const totalStudents = Object.values(classStats).reduce((acc, curr) => acc + curr.studentCount, 0);
+    const totalQuestions = Object.values(classStats).reduce((acc, curr) => acc + curr.questionCount, 0);
+
 
     const handleCreateClass = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -100,6 +109,42 @@ export default function TeacherDashboard() {
             setShowCreateModal(false);
         } else {
             alert('Erro ao criar turma: ' + error?.message);
+        }
+    };
+
+    // V2: Delete Class
+    const handleDeleteClass = async () => {
+        if (!classToDelete) return;
+
+        const { error } = await supabase
+            .from('classes')
+            .delete()
+            .eq('id', classToDelete.id);
+
+        if (!error) {
+            setClasses(classes.filter(c => c.id !== classToDelete.id));
+            setClassToDelete(null);
+        } else {
+            alert('Erro ao deletar turma: ' + error.message);
+        }
+    };
+
+    // V2: Rename Class
+    const handleRenameClass = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!classToRename || !renameValue.trim()) return;
+
+        const { error } = await supabase
+            .from('classes')
+            .update({ name: renameValue })
+            .eq('id', classToRename.id);
+
+        if (!error) {
+            setClasses(classes.map(c => c.id === classToRename.id ? { ...c, name: renameValue } : c));
+            setClassToRename(null);
+            setRenameValue('');
+        } else {
+            alert('Erro ao renomear turma: ' + error.message);
         }
     };
 
@@ -128,6 +173,22 @@ export default function TeacherDashboard() {
                     <p>Gerencie suas turmas e acompanhe o aprendizado dos seus pequenos campeões.</p>
                 </div>
 
+                {/* V2: Summary Stats Row */}
+                <div className={styles.statsRow}>
+                    <div className={styles.statCard}>
+                        <label>Turmas Ativas</label>
+                        <div className={styles.statValue}>{classes.length}</div>
+                    </div>
+                    <div className={styles.statCard}>
+                        <label>Total de Alunos</label>
+                        <div className={styles.statValue}>👥 {totalStudents}</div>
+                    </div>
+                    <div className={styles.statCard}>
+                        <label>Questões no Banco</label>
+                        <div className={styles.statValue}>📝 {totalQuestions}</div>
+                    </div>
+                </div>
+
                 <div className={styles.actionsBar}>
                     <h2>Suas Turmas</h2>
                     <button onClick={() => setShowCreateModal(true)} className={styles.createBtn}>
@@ -145,8 +206,26 @@ export default function TeacherDashboard() {
                         {classes.map(c => (
                             <div key={c.id} className={styles.classCard}>
                                 <div className={styles.classHeader}>
-                                    <h3>{c.name}</h3>
-                                    <span className={styles.date}>{new Date(c.created_at).toLocaleDateString()}</span>
+                                    <div>
+                                        <h3>{c.name}</h3>
+                                        <span className={styles.date}>{new Date(c.created_at).toLocaleDateString()}</span>
+                                    </div>
+                                    <div className={styles.cardActions}>
+                                        <button
+                                            className={styles.actionIconBtn}
+                                            title="Renomear"
+                                            onClick={() => { setClassToRename(c); setRenameValue(c.name); }}
+                                        >
+                                            ✏️
+                                        </button>
+                                        <button
+                                            className={styles.actionIconBtn}
+                                            title="Excluir"
+                                            onClick={() => setClassToDelete(c)}
+                                        >
+                                            🗑️
+                                        </button>
+                                    </div>
                                 </div>
                                 <div className={styles.classBody}>
                                     <div className={styles.accessCode}>
@@ -180,6 +259,50 @@ export default function TeacherDashboard() {
                     </div>
                 )}
             </main>
+
+            {/* V2: Delete Confirmation Modal */}
+            {classToDelete && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modal} style={{ borderColor: 'var(--color-red)' }}>
+                        <h3 style={{ color: 'var(--color-red)' }}>Excluir Turma?</h3>
+                        <p>Você tem certeza que deseja excluir a turma <strong>{classToDelete.name}</strong>? Esta ação não pode ser desfeita.</p>
+                        <div className={styles.modalBtns}>
+                            <button type="button" onClick={() => setClassToDelete(null)}>Cancelar</button>
+                            <button
+                                type="button"
+                                className={styles.confirmBtn}
+                                style={{ backgroundColor: 'var(--color-red)', color: 'white' }}
+                                onClick={handleDeleteClass}
+                            >
+                                Sim, Excluir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* V2: Rename Modal */}
+            {classToRename && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modal}>
+                        <h3>Renomear Turma</h3>
+                        <form onSubmit={handleRenameClass}>
+                            <input
+                                type="text"
+                                placeholder="Novo nome da turma"
+                                value={renameValue}
+                                onChange={(e) => setRenameValue(e.target.value)}
+                                required
+                                autoFocus
+                            />
+                            <div className={styles.modalBtns}>
+                                <button type="button" onClick={() => setClassToRename(null)}>Cancelar</button>
+                                <button type="submit" className={styles.confirmBtn}>Salvar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
 
             {activeQuizClass && (
                 <QuizEditor
