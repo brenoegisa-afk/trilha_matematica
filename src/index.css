@@ -1,38 +1,42 @@
 :root {
-  --color-green: #22c55e;
-  --color-red: #ef4444;
-  --color-yellow: #facc15;
-  --color-blue: #3b82f6;
-  --color-kraft: #d8c0a0;
+  /* Duolingo Inspired Palette */
+  --color-green: #58cc02;
+  --color-green-dark: #58a700;
+  --color-red: #ff4b4b;
+  --color-red-dark: #d63333;
+  --color-yellow: #ffc800;
+  --color-yellow-dark: #cc9f00;
+  --color-blue: #1cb0f6;
+  --color-blue-dark: #1899d6;
+  
+  --color-kraft: #d8c0a0; /* Keeping for some backgrounds, can be removed later */
   --color-kraft-dark: #b89c75;
-  --color-ink: #333333;
-  --color-paper: #fefefe;
+  --color-ink: #333333; /* For text */
+  --color-paper: #ffffff;
+  --color-gray: #e5e5e5;
+  --color-gray-dark: #b3b3b3;
 
-  --font-main: 'Comic Neue', cursive;
-  --font-title: 'Nunito', sans-serif;
+  /* Fonts */
+  --font-title: 'Fredoka', sans-serif; /* Big chunky titles */
+  --font-main: 'Nunito', sans-serif;   /* Round child-friendly body text */
 
-  --shadow-handmade: 3px 3px 0px rgba(0, 0, 0, 0.1);
-  --shadow-lifted: 4px 6px 0px rgba(0, 0, 0, 0.25);
-  --shadow-paper: 2px 2px 8px rgba(0, 0, 0, 0.1);
+  /* Chunky Shadows */
+  --shadow-chunky: 0 6px 0 rgba(0,0,0,0.15); /* The standard pushable depth */
+  --shadow-chunky-green: 0 6px 0 var(--color-green-dark);
+  --shadow-chunky-red: 0 6px 0 var(--color-red-dark);
+  --shadow-chunky-blue: 0 6px 0 var(--color-blue-dark);
+  --shadow-chunky-yellow: 0 6px 0 var(--color-yellow-dark);
+  --shadow-chunky-ink: 0 6px 0 rgba(0,0,0,0.8);
 
-  --radius-sm: 4px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
   --radius-pill: 999px;
 
-  /* Glassmorphism Tokens */
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.3);
-  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-  --glass-blur: blur(8px);
-
-  /* Advanced Shadows */
-  --shadow-premium: 0 10px 40px -10px rgba(0, 0, 0, 0.2);
-  --shadow-floating: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-
   /* Transitions */
-  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-bounce: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 
@@ -81,36 +85,73 @@ h4 {
   color: var(--color-ink);
 }
 
+/* THE CHUNKY BUTTON SYSTEM */
 button {
   font-family: var(--font-title);
   cursor: pointer;
-  border: 3px solid var(--color-ink);
   background: white;
   border-radius: var(--radius-md);
   padding: 12px 24px;
   font-size: 1.2rem;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--color-ink);
-  box-shadow: var(--shadow-handmade);
-  transition: transform 0.1s, box-shadow 0.1s;
+  
+  /* Neumorphism Solid Setup */
+  border: 2px solid transparent; /* Border acts as anti-alias ring */
+  box-shadow: var(--shadow-chunky), 0 10px 10px rgba(0,0,0,0.05);
+  
+  transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 6px; /* Space for the shadow */
 }
 
+/* Physics: Pushing down */
 button:active {
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+  transform: translateY(6px);
+  box-shadow: 0 0px 0 rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.1);
 }
 
 button:focus-visible {
-  outline: 2px dashed var(--color-ink);
-  outline-offset: 4px;
+  outline: 4px solid var(--color-blue);
+  outline-offset: 2px;
 }
 
+/* Chunky Variants */
 button.btn-primary {
   background-color: var(--color-green);
   color: white;
+  box-shadow: var(--shadow-chunky-green), 0 10px 10px rgba(0,0,0,0.1);
+}
+
+button.btn-primary:active {
+  box-shadow: 0 0px 0 var(--color-green-dark), 0 2px 4px rgba(0,0,0,0.1);
 }
 
 button.btn-danger {
   background-color: var(--color-red);
   color: white;
+  box-shadow: var(--shadow-chunky-red), 0 10px 10px rgba(0,0,0,0.1);
+}
+
+button.btn-danger:active {
+  box-shadow: 0 0px 0 var(--color-red-dark), 0 2px 4px rgba(0,0,0,0.1);
+}
+
+button.btn-blue {
+  background-color: var(--color-blue);
+  color: white;
+  box-shadow: var(--shadow-chunky-blue), 0 10px 10px rgba(0,0,0,0.1);
+}
+
+button.btn-blue:active {
+  box-shadow: 0 0px 0 var(--color-blue-dark), 0 2px 4px rgba(0,0,0,0.1);
+}
+
+button.btn-yellow {
+  background-color: var(--color-yellow);
+  color: var(--color-ink); /* Yellow buttons need dark ink for contrast */
+  box-shadow: var(--shadow-chunky-yellow), 0 10px 10px rgba(0,0,0,0.05);
+}
+
+button.btn-yellow:active {
+  box-shadow: 0 0px 0 var(--color-yellow-dark), 0 2px 4px rgba(0,0,0,0.05);
 }

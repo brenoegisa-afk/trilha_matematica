@@ -1,0 +1,219 @@
+/* ===================== */
+/* LEVEL UP MODAL        */
+/* Epic cinematic celebration */
+/* ===================== */
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5000;
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Spinning sunburst behind the modal */
+.sunburst {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        rgba(255, 200, 0, 0.3) 10deg,
+        transparent 20deg,
+        rgba(255, 200, 0, 0.3) 30deg,
+        transparent 40deg,
+        rgba(255, 200, 0, 0.3) 50deg,
+        transparent 60deg,
+        rgba(255, 200, 0, 0.3) 70deg,
+        transparent 80deg,
+        rgba(255, 200, 0, 0.3) 90deg,
+        transparent 100deg,
+        rgba(255, 200, 0, 0.3) 110deg,
+        transparent 120deg,
+        rgba(255, 200, 0, 0.3) 130deg,
+        transparent 140deg,
+        rgba(255, 200, 0, 0.3) 150deg,
+        transparent 160deg,
+        rgba(255, 200, 0, 0.3) 170deg,
+        transparent 180deg,
+        rgba(255, 200, 0, 0.3) 190deg,
+        transparent 200deg,
+        rgba(255, 200, 0, 0.3) 210deg,
+        transparent 220deg,
+        rgba(255, 200, 0, 0.3) 230deg,
+        transparent 240deg,
+        rgba(255, 200, 0, 0.3) 250deg,
+        transparent 260deg,
+        rgba(255, 200, 0, 0.3) 270deg,
+        transparent 280deg,
+        rgba(255, 200, 0, 0.3) 290deg,
+        transparent 300deg,
+        rgba(255, 200, 0, 0.3) 310deg,
+        transparent 320deg,
+        rgba(255, 200, 0, 0.3) 330deg,
+        transparent 340deg,
+        rgba(255, 200, 0, 0.3) 350deg,
+        transparent 360deg
+    );
+    border-radius: 50%;
+    animation: spinSlow 8s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes spinSlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* The main card */
+.card {
+    background: white;
+    border-radius: 40px;
+    border: 6px solid var(--color-yellow);
+    box-shadow: 0 16px 0 var(--color-yellow-dark), 0 0 80px rgba(255,200,0,0.5);
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    z-index: 2;
+    animation: slamIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    max-width: 400px;
+    width: 90%;
+}
+
+@keyframes slamIn {
+    0% {
+        transform: scale(3) rotate(20deg);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(0.9) rotate(-3deg);
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+/* The big medal icon */
+.medalIcon {
+    font-size: 6rem;
+    margin-bottom: 10px;
+    animation: bounceIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s both;
+    filter: drop-shadow(0 6px 10px rgba(0,0,0,0.3));
+}
+
+@keyframes bounceIn {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.3); }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); }
+}
+
+.title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--color-yellow-dark);
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    color: var(--color-ink);
+    opacity: 0.8;
+    margin-bottom: 20px;
+}
+
+/* The level number display */
+.levelDisplay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.oldLevel {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--color-gray-dark);
+    opacity: 0.5;
+}
+
+.arrow {
+    font-size: 2rem;
+    color: var(--color-green);
+    animation: pulseArrow 1s infinite alternate;
+}
+
+@keyframes pulseArrow {
+    from { transform: scale(1); }
+    to { transform: scale(1.3); }
+}
+
+.newLevel {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--color-green);
+    text-shadow: 2px 3px 0 var(--color-green-dark);
+    animation: glowPulse 2s infinite alternate;
+}
+
+@keyframes glowPulse {
+    from { text-shadow: 2px 3px 0 var(--color-green-dark); }
+    to { text-shadow: 2px 3px 20px rgba(88,204,2,0.6), 2px 3px 0 var(--color-green-dark); }
+}
+
+/* Continue button */
+.continueBtn {
+    width: 100%;
+    padding: 18px;
+    background: var(--color-green);
+    color: white;
+    font-size: 1.3rem;
+    font-weight: 800;
+    border: none;
+    border-radius: var(--radius-md);
+    box-shadow: 0 6px 0 var(--color-green-dark);
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.continueBtn:active {
+    transform: translateY(6px);
+    box-shadow: 0 0px 0 var(--color-green-dark);
+}
+
+/* Stars decoration */
+.stars {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.star {
+    position: absolute;
+    font-size: 1.5rem;
+    animation: twinkle 2s infinite alternate;
+}
+
+@keyframes twinkle {
+    0% { opacity: 0.3; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1.2); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}

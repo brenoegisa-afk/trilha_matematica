@@ -1,99 +1,97 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import styles from './BatchImporter.module.css';
 
 interface BatchImporterProps {
-    classId: string;
-    gradeLevel: string;
-    onClose: () => void;
+    classId?: string;
+    gradeLevel?: string;
+    onClose?: () => void;
 }
 
-export const BatchImporter: React.FC<BatchImporterProps> = ({ classId, gradeLevel, onClose }) => {
-    const [rawText, setRawText] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+export function BatchImporter(props: BatchImporterProps) {
+    const { classId, gradeLevel, onClose } = props;
+    const [jsonInput, setJsonInput] = useState('');
+    const [status, setStatus] = useState('');
 
     const handleImport = async () => {
-        if (!rawText.trim()) return;
-        setLoading(true);
-        setError(null);
-
         try {
-            // Try to parse as JSON first (best for AI output)
-            let parsedQuestions: any[] = [];
+            const data = JSON.parse(jsonInput);
+            let questionsList: any[] = [];
 
-            try {
-                // Find potential JSON block in text if AI included conversational filler
-                const jsonMatch = rawText.match(/\[[\s\S]*\]/);
-                const jsonStr = jsonMatch ? jsonMatch[0] : rawText;
-                parsedQuestions = JSON.parse(jsonStr);
-            } catch (e) {
-                throw new Error("Não foi possível identificar o formato JSON. Certifique-se de que o ChatGPT respondeu apenas com o código [ ... ].");
+            // Intelligent extraction
+            if (data.questions && Array.isArray(data.questions)) {
+                questionsList = data.questions;
+            } else if (Array.isArray(data)) {
+                questionsList = data;
+            } else if (data.subjects || data.grades) {
+                // Nested structure (multi-subject or multi-grade)
+                const target = data.subjects ? Object.values(data.subjects) : [data];
+                target.forEach((subject: any) => {
+                    if (subject.grades) {
+                        Object.entries(subject.grades).forEach(([grade, pools]: [string, any]) => {
+                            Object.values(pools).forEach((pool: any) => {
+                                if (Array.isArray(pool)) {
+                                    pool.forEach(q => questionsList.push({ ...q, grade_level: grade }));
+                                }
+                            });
+                        });
+                    }
+                });
             }
 
-            if (!Array.isArray(parsedQuestions)) {
-                throw new Error("O conteúdo deve ser uma lista [ ].");
-            }
+            if (questionsList.length === 0) throw new Error('Nenhuma questão encontrada no formato fornecido.');
 
-            // Map and validate
-            const toInsert = parsedQuestions.map(q => ({
-                class_id: classId,
-                grade_level: q.grade_level || gradeLevel,
+            const questionsToInsert = questionsList.map((q: any) => ({
+                class_id: classId || data.classId,
+                grade_level: gradeLevel || q.grade_level || data.grade || '1-2',
                 question: q.question,
                 answer: q.answer,
                 options: q.options
             }));
 
-            const { error: insertError } = await supabase
-                .from('teacher_questions')
-                .insert(toInsert);
+            if (classId) {
+                const { error } = await supabase.from('teacher_questions').insert(questionsToInsert);
+                if (error) throw error;
+            }
 
-            if (insertError) throw insertError;
-
-            alert('Sucesso! ' + toInsert.length + ' questões importadas.');
-            onClose();
-        } catch (err: any) {
-            setError(err.message || "Erro ao processar as questões.");
-        } finally {
-            setLoading(false);
+            setStatus('✅ Sucesso! ' + questionsToInsert.length + ' questões processadas.');
+            if (onClose) setTimeout(onClose, 1500);
+        } catch (e: any) {
+            setStatus('❌ Erro: ' + (e.message || 'Formato JSON inválido.'));
         }
     };
 
     return (
-        <div className={styles.overlay}>
-            <div className={styles.modal}>
-                <div className={styles.header}>
-                    <h3>📦 Importador em Lote</h3>
-                    <button onClick={onClose} className={styles.closeBtn}>&times;</button>
-                </div>
-                <div className={styles.content}>
-                    <div className={styles.instructions}>
-                        <p><strong>Como usar a IA:</strong></p>
-                        <ol>
-                            <li>Vá ao <a href="https://chatgpt.com" target="_blank" rel="noreferrer">ChatGPT</a>.</li>
-                            <li>Cole o <strong>Prompt</strong> que você copiou no botão anterior.</li>
-                            <li>O ChatGPT vai gerar um código. Copie esse código e cole abaixo:</li>
-                        </ol>
-                    </div>
-                    <textarea
-                        value={rawText}
-                        onChange={e => setRawText(e.target.value)}
-                        placeholder='Ex: [{"question": "...", "answer": "...", ...}]'
-                        className={styles.textarea}
-                    />
-                    {error && <div className={styles.error}>{error}</div>}
-                </div>
-                <div className={styles.footer}>
-                    <button onClick={onClose} className={styles.cancelBtn}>Cancelar</button>
-                    <button
-                        onClick={handleImport}
-                        disabled={loading || !rawText.trim()}
-                        className={styles.confirmBtn}
-                    >
-                        {loading ? 'Importando...' : 'Confirmar Importação'}
-                    </button>
-                </div>
+        <div className={styles.container}>
+            <h2>Ferramenta de Alimentação (Admin) 📥</h2>
+            <p>Cole o JSON gerado pela IA abaixo para alimentar novas matérias e níveis.</p>
+            
+            <textarea 
+                className={styles.textarea}
+                value={jsonInput}
+                onChange={(e) => setJsonInput(e.target.value)}
+                placeholder='{ "subject": "portuguese", "grade": "1", "questions": [...] }'
+            />
+            
+            <div className={styles.actions}>
+                <button onClick={handleImport} className={styles.importBtn}>Processar Lote</button>
+                <button onClick={() => setJsonInput('')} className={styles.clearBtn}>Limpar</button>
+            </div>
+            
+            {status && <p className={styles.status}>{status}</p>}
+
+            <div className={styles.tips}>
+                <h3>Guia de Dificuldade (BNCC):</h3>
+                <ul>
+                    <li><strong>1º Ano:</strong> Identificação visual, rimas, somas básicas.</li>
+                    <li><strong>2º Ano:</strong> Comparação de grandezas, interpretação de frases.</li>
+                    <li><strong>3º Ano:</strong> Tabuadas, concordância verbal elementar.</li>
+                    <li><strong>4º Ano:</strong> Divisão exata, frações simples, gramática básica.</li>
+                    <li><strong>5º Ano:</strong> Problemas de lógica multietapa, ortografia complexa.</li>
+                </ul>
             </div>
         </div>
     );
-};
+}
+
+export default BatchImporter;

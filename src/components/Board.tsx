@@ -1,169 +1,164 @@
+import { useState, useEffect, useRef } from 'react';
 import { useGame } from '../context/GameContext';
+import Dice from './Dice';
 import styles from './Board.module.css';
 
+/* =========================================================
+   CONNECTED GRID PATH GENERATION
+   Creates a snaking path where tiles touch each other.
+   ========================================================= */
+function generateConnectedPath(
+    totalTiles: number,
+    width: number,
+    tileSize: number,
+    rowGap: number
+): { x: number; y: number; isEdge: boolean; side: 'left' | 'right' | 'none' }[] {
+    const positions: { x: number; y: number; isEdge: boolean; side: 'left' | 'right' | 'none' }[] = [];
+    const padding = 40;
+    const usableWidth = width - padding * 2;
+    const tilesPerRow = Math.floor(usableWidth / tileSize);
+    const startY = 60;
+
+    for (let i = 0; i < totalTiles; i++) {
+        const row = Math.floor(i / tilesPerRow);
+        const col = i % tilesPerRow;
+        const isReversed = row % 2 === 1;
+
+        // Current column index in the visual direction
+        const visualCol = isReversed ? (tilesPerRow - 1 - col) : col;
+        
+        const x = padding + (visualCol * tileSize) + (tileSize / 2);
+        const y = startY + (row * (tileSize + rowGap)) + (tileSize / 2);
+
+        // Meta info for connecting curves/visuals
+        const isEdge = col === 0 || col === tilesPerRow - 1;
+        let side: 'left' | 'right' | 'none' = 'none';
+        if (col === 0) side = isReversed ? 'right' : 'left';
+        if (col === tilesPerRow - 1) side = isReversed ? 'left' : 'right';
+
+        positions.push({ x, y, isEdge, side });
+    }
+
+    return positions;
+}
+
+/* =========================================================
+   BOARD COMPONENT
+   ========================================================= */
 export default function Board() {
     const { tiles, players } = useGame();
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [dimensions, setDimensions] = useState({ width: 850, height: 600 });
+    const tileSize = 70; // Larger tiles that touch
+    const rowGap = 25;   // Space between rows for the "turn"
 
-    const getTileColor = (tile: any) => {
-        switch (tile.type) {
-            case 'Green': return 'var(--color-green)';
-            case 'Red': return 'var(--color-red)';
-            case 'Yellow': return 'var(--color-yellow)';
-            case 'Blue': return 'var(--color-blue)';
-            case 'Start': return '#fff';
-            case 'Finish': return '#FFD700'; // Gold
-            default: return '#fff';
-        }
-    };
-
-    const getTileSymbol = (type: string) => {
-        switch (type) {
-            case 'Green': return '+';
-            case 'Red': return 'x';
-            case 'Yellow': return '?';
-            case 'Blue': return '★';
-            case 'Start': return '🏁';
-            case 'Finish': return '🏆';
-            default: return '';
-        }
-    };
-
-    // 8x8 Grid mapping with empty rows to create visual 'S' track space
-    const getTileGridCoords = (index: number) => {
-        if (index <= 7) return { row: 8, col: index + 1 };
-        if (index === 8) return { row: 7, col: 8 };
-        if (index >= 9 && index <= 16) return { row: 6, col: 8 - (index - 9) };
-        if (index === 17) return { row: 5, col: 1 };
-        if (index >= 18 && index <= 25) return { row: 4, col: (index - 18) + 1 };
-        if (index === 26) return { row: 3, col: 8 };
-        if (index >= 27 && index <= 34) return { row: 2, col: 8 - (index - 27) };
-        if (index === 35) return { row: 1, col: 1 };
-        return { row: 1, col: 1 };
-    };
-
-    const getTileStyles = (index: number) => {
-        const coords = getTileGridCoords(index);
-        const prevCoords = index > 0 ? getTileGridCoords(index - 1) : null;
-        const nextCoords = index < 35 ? getTileGridCoords(index + 1) : null;
-
-        const connectsLeft = (prevCoords?.row === coords.row && prevCoords?.col === coords.col - 1) || (nextCoords?.row === coords.row && nextCoords?.col === coords.col - 1);
-        const connectsRight = (prevCoords?.row === coords.row && prevCoords?.col === coords.col + 1) || (nextCoords?.row === coords.row && nextCoords?.col === coords.col + 1);
-        const connectsTop = (prevCoords?.col === coords.col && prevCoords?.row === coords.row - 1) || (nextCoords?.col === coords.col && nextCoords?.row === coords.row - 1);
-        const connectsBottom = (prevCoords?.col === coords.col && prevCoords?.row === coords.row + 1) || (nextCoords?.col === coords.col && nextCoords?.row === coords.row + 1);
-
-        const radius = '35px';
-        const innerRadius = '15px';
-        let borderTopLeftRadius = '0px';
-        let borderTopRightRadius = '0px';
-        let borderBottomRightRadius = '0px';
-        let borderBottomLeftRadius = '0px';
-
-        // Outer corners
-        if (!connectsTop && !connectsLeft) borderTopLeftRadius = radius;
-        if (!connectsTop && !connectsRight) borderTopRightRadius = radius;
-        if (!connectsBottom && !connectsRight) borderBottomRightRadius = radius;
-        if (!connectsBottom && !connectsLeft) borderBottomLeftRadius = radius;
-
-        // Inner corners (elbows)
-        if (connectsTop && connectsLeft) borderTopLeftRadius = innerRadius;
-        if (connectsTop && connectsRight) borderTopRightRadius = innerRadius;
-        if (connectsBottom && connectsRight) borderBottomRightRadius = innerRadius;
-        if (connectsBottom && connectsLeft) borderBottomLeftRadius = innerRadius;
-
-        // Start/End explicit caps
-        if (index === 0) {
-            borderTopLeftRadius = radius;
-            borderBottomLeftRadius = radius;
-        }
-
-        if (index === 35) {
-            borderTopLeftRadius = radius;
-            borderTopRightRadius = radius;
-            borderBottomRightRadius = radius;
-        }
-
-        return {
-            gridRow: coords.row,
-            gridColumn: coords.col,
-            borderTopLeftRadius,
-            borderTopRightRadius,
-            borderBottomRightRadius,
-            borderBottomLeftRadius
+    useEffect(() => {
+        if (!containerRef.current) return;
+        const update = () => {
+            if (containerRef.current) {
+                const rect = containerRef.current.getBoundingClientRect();
+                setDimensions({ width: rect.width, height: 800 });
+            }
         };
-    };
+        const observer = new ResizeObserver(update);
+        observer.observe(containerRef.current);
+        update();
+        return () => observer.disconnect();
+    }, []);
 
-    const getDirectionArrow = (index: number) => {
-        if (index === 35) return null;
-        const coords = getTileGridCoords(index);
-        const nextCoords = getTileGridCoords(index + 1);
-
-        if (nextCoords.row < coords.row) return 'up';
-        if (nextCoords.col > coords.col) return 'right';
-        if (nextCoords.col < coords.col) return 'left';
-        return null;
-    };
+    const positions = generateConnectedPath(tiles.length, dimensions.width, tileSize, rowGap);
+    const maxY = positions.length > 0 ? Math.max(...positions.map(p => p.y)) + 100 : 600;
 
     return (
         <div className={styles.boardWrapper}>
-            <div className={styles.boardDecorations}>
-                <div className={styles.startBanner}>INÍCIO ➔</div>
-                <div className={styles.finishBanner}>CHEGADA</div>
-            </div>
+            <div 
+                className={styles.boardContainer} 
+                ref={containerRef} 
+                style={{ height: `${maxY}px` }}
+            >
+                {/* 🌳 Garden Background */}
+                <div className={styles.gardenBg} />
+                
+                {/* ☁️ Animated Clouds */}
+                <div className={styles.clouds}>
+                    <div className={`${styles.cloud} ${styles.cloud1}`} />
+                    <div className={`${styles.cloud} ${styles.cloud2}`} />
+                </div>
 
-            <div className={styles.boardContainer}>
-                <div className={styles.grid}>
-                    {tiles.map((tile) => {
-                        const playersOnTile = players.filter(p => p.currentPosition === tile.position);
-                        const dynamicStyles = getTileStyles(tile.position);
-                        const arrowDir = getDirectionArrow(tile.position);
+                {/* 🔳 Connected Tiles Grid */}
+                <div className={styles.tilesLayer}>
+                    {tiles.map((tile, i) => {
+                        const pos = positions[i];
+                        if (!pos) return null;
+
+                        const playersHere = players.filter(p => p.currentPosition === i);
+                        const isStart = tile.type === 'Start';
+                        const isFinish = tile.type === 'Finish';
+
+                        // Check if we need a vertical connector to the next row
+                        const isLastInRow = (i + 1) % Math.floor((dimensions.width - 80) / tileSize) === 0;
+                        const hasNextInRow = (i + 1) < tiles.length && (i + 1) % Math.floor((dimensions.width - 80) / tileSize) !== 0;
 
                         return (
                             <div
                                 key={tile.position}
-                                className={styles.tile}
+                                className={`
+                                    ${styles.gardenTile} 
+                                    ${styles['type-' + tile.type]}
+                                    ${isStart ? styles.tileStart : ''}
+                                    ${isFinish ? styles.tileFinish : ''}
+                                    ${hasNextInRow ? styles.hasRightNeighbor : ''}
+                                `}
                                 style={{
-                                    ...dynamicStyles,
-                                    backgroundColor: getTileColor(tile)
+                                    left: `${pos.x}px`,
+                                    top: `${pos.y}px`,
+                                    width: `${tileSize}px`,
+                                    height: `${tileSize}px`,
                                 }}
                             >
-                                <span className={styles.tileNumber}>{tile.position === 0 || tile.position === 35 ? '' : tile.position + 1}</span>
-                                <span className={styles.tileSymbol}>{getTileSymbol(tile.type)}</span>
+                                <span className={styles.tileNumber}>{i + 1}</span>
+                                
+                                <div className={styles.tileInner}>
+                                    {tile.type === 'Red' && <span className={styles.tileIcon}>⚡</span>}
+                                    {tile.type === 'Green' && <span className={styles.tileIcon}>🐝</span>}
+                                    {tile.type === 'Blue' && <span className={styles.tileIcon}>💎</span>}
+                                    {tile.type === 'Yellow' && <span className={styles.tileIcon}>❓</span>}
+                                    {isStart && <span className={styles.tileIcon}>🏁</span>}
+                                    {isFinish && <span className={styles.tileIcon}>🏆</span>}
+                                </div>
 
-                                {arrowDir && (
-                                    <div className={`${styles.arrow} ${styles['arrow-' + arrowDir]}`}>
-                                        ➔
-                                    </div>
+                                {/* 🔗 Vertical Turn Connector */}
+                                {isLastInRow && (i + 1) < tiles.length && (
+                                    <div className={styles.rowConnector} style={{ height: `${rowGap + 10}px` }} />
                                 )}
 
-                                <div className={styles.playersArea}>
-                                    {playersOnTile.map((p, pIdx) => (
-                                        <div
-                                            key={p.id}
-                                            className={`${styles.pawn} ${p.globalRank === 1 ? styles.goldAura : p.globalRank === 2 ? styles.silverAura : p.globalRank === 3 ? styles.bronzeAura : ''}`}
-                                            style={{
-                                                backgroundColor: p.color,
-                                                transform: `translate(${pIdx * 6}px, ${-pIdx * 6}px)`
-                                            }}
-                                            title={`${p.name}${p.globalRank ? ` (${p.globalRank}º Global)` : ''}`}
-                                        >
-                                            {p.avatar && <span className={styles.pawnAvatar}>{p.avatar}</span>}
-                                            {p.mascot && (
-                                                <div className={styles.mascotFollower} title={`Mascote: ${p.mascot}`}>
-                                                    {p.mascot}
+                                {/* ♟️ Players */}
+                                {playersHere.length > 0 && (
+                                    <div className={styles.pawnContainer}>
+                                        {playersHere.map(p => (
+                                            <div
+                                                key={p.id}
+                                                className={styles.pawn}
+                                                style={{ '--pawn-color': p.color } as React.CSSProperties}
+                                                title={p.name}
+                                            >
+                                                <div className={styles.pawnBody} />
+                                                <div className={styles.pawnHead}>
+                                                    {p.avatar && <span className={styles.pawnFace}>{p.avatar}</span>}
                                                 </div>
-                                            )}
-                                            {p.streak && p.streak >= 3 && (
-                                                <div className={styles.streakFire} title={`Sequência de ${p.streak} dias! 🔥`}>
-                                                    🔥
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         );
                     })}
                 </div>
+            </div>
+
+            {/* 🎲 Dice Area */}
+            <div className={styles.diceArea}>
+                <Dice />
             </div>
         </div>
     );

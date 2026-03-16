@@ -16,33 +16,35 @@ interface BattleState {
 }
 
 // Dynamic Monster Generation
-const generateMonster = (gamesPlayed: number) => {
-    const monsterTypes = [
-        { prefixes: ['Zorblax', 'Gork', 'Vex', 'Kraal'], suffixes: ['o Confuso', 'da Tabuada', 'Calculista', 'Sombrio'], emojis: ['👾', '👺', '👹', '👻'] },
-        { prefixes: ['Pestilência', 'Vírus', 'Anomalia', 'Glitch'], suffixes: ['Matemática', 'dos Números', 'Lógica', 'do Caos'], emojis: ['🦠', '🕷️', '🦂', '🐉'] }
-    ];
+const generateMonster = (gamesPlayed: number, subjectId: string = 'math') => {
+    const mathThemes = { prefixes: ['Zorblax', 'Gork', 'Vex', 'Kraal'], suffixes: ['o Confuso', 'da Tabuada', 'Calculista', 'Sombrio'], emojis: ['👾', '👺', '👹', '👻'] };
+    const portThemes = { prefixes: ['Gramati-Cão', 'Rato', 'Troll', 'Polvo'], suffixes: ['das Rimas', 'do Erro', 'Gritante', 'da Tinta'], emojis: ['🐭', '👹', '👾', '🦑'] };
+    const sciThemes = { prefixes: ['Vírus', 'Titã', 'Aranha', 'Fera'], suffixes: ['Vortex', 'Tectônico', 'Estelar', 'Fóssil'], emojis: ['🦠', '🌋', '🕷️', '🦖'] };
 
-    const type = monsterTypes[Math.floor(Math.random() * monsterTypes.length)];
+    let type = mathThemes;
+    if (subjectId === 'portuguese') type = portThemes;
+    if (subjectId === 'science') type = sciThemes;
+
     const prefix = type.prefixes[Math.floor(Math.random() * type.prefixes.length)];
     const suffix = type.suffixes[Math.floor(Math.random() * type.suffixes.length)];
     const emoji = type.emojis[Math.floor(Math.random() * type.emojis.length)];
 
     // Difficulty scaling: Base HP 100 + 20 HP per game played (max 500)
     const baseHp = 100;
-    const hpMultiplier = Math.min(20, gamesPlayed); // Cap difficulty scaling after 20 wins to keep it playable
+    const hpMultiplier = Math.min(20, gamesPlayed);
     const maxHp = baseHp + (hpMultiplier * 20);
 
-    return { id: `m_${Date.now()}`, name: `${prefix}, ${suffix}`, emoji, hp: maxHp, element: 'math' };
+    return { id: `m_${Date.now()}`, name: `${prefix} ${suffix}`, emoji, hp: maxHp, element: subjectId };
 };
 
 export default function Battle() {
     const navigate = useNavigate();
-    const { players, selectedGrade } = useGame();
+    const { players, selectedGrade, currentSubjectId } = useGame();
 
     // Fallback if accessed without setup
     const player = players[0] || { id: 'p1', name: 'Jogador', avatar: '🐱', mascot: '🐶', class_id: '', gamesPlayed: 0 };
 
-    const [monster, setMonster] = useState(generateMonster(0));
+    const [monster, setMonster] = useState(() => generateMonster(0, currentSubjectId));
     const [battle, setBattle] = useState<BattleState>({
         playerHp: 100,
         playerMaxHp: 100,
@@ -94,7 +96,7 @@ export default function Battle() {
             const prof = allProfiles.find((p: any) => p.id === player.id);
             if (prof) gamesPlayed = prof.gamesPlayed || 0;
 
-            const dynamicMonster = generateMonster(gamesPlayed);
+            const dynamicMonster = generateMonster(gamesPlayed, currentSubjectId);
             setMonster(dynamicMonster);
 
             setBattle(prev => ({
@@ -133,16 +135,17 @@ export default function Battle() {
         }
 
         // Fallback to local questions
-        const allGrades = questionsData.grades as any;
-        let gradePool = allGrades[selectedGrade] || allGrades['1-2'];
+        const subjectPool = (questionsData.subjects as any)[currentSubjectId || 'math'];
+        let gradePool = subjectPool?.grades[selectedGrade] || subjectPool?.grades['1-2'];
 
-        // Flatten all categories for battle mode
+        if (!gradePool) return;
+
+        // Flatten all categories (Normal, Green, Red, Yellow) for battle mode
         let allQuestions: any[] = [];
         Object.values(gradePool).forEach((arr: any) => allQuestions.push(...arr));
 
         if (allQuestions.length > 0) {
             const randomQ = allQuestions[Math.floor(Math.random() * allQuestions.length)];
-            // Shuffle options
             const shuffledOptions = [...randomQ.options].sort(() => Math.random() - 0.5);
             setCurrentQuestion({
                 ...randomQ,

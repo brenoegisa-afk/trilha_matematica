@@ -1,15 +1,25 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Board from '../components/Board';
-import Dice from '../components/Dice';
+import HUD from '../components/HUD';
+import BattleArena from '../components/BattleArena';
 import CardModal from '../components/CardModal';
 import GameOverScreen from '../components/GameOverScreen';
 import { useGame } from '../context/GameContext';
+import LevelUpModal from '../components/LevelUpModal';
+import FloatingXP from '../components/FloatingXP';
 import '../App.css';
 
 export default function Game() {
     const navigate = useNavigate();
-    const { players, gameStatus } = useGame();
+    const { 
+        players, 
+        gameStatus, 
+        levelUpData, 
+        xpNotification, 
+        clearLevelUp, 
+        clearXpNotification 
+    } = useGame();
 
     // Redirect to setup if NO players exist
     useEffect(() => {
@@ -19,19 +29,40 @@ export default function Game() {
     }, [players.length, gameStatus, navigate]);
 
     return (
-        <div className="app-container" style={{ justifyContent: 'flex-start', paddingTop: '20px', position: 'relative' }}>
-            <header style={{ width: '100%', maxWidth: '800px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                <h2 style={{ fontSize: '1.5rem' }}>A Grande Trilha</h2>
-                <button className="btn-danger" onClick={() => navigate('/')} style={{ padding: '6px 12px', fontSize: '1rem' }}>Sair</button>
+        <div className="app-container" style={{ justifyContent: 'flex-start', paddingTop: '10px', position: 'relative' }}>
+            <header style={{ width: '100%', maxWidth: '850px', display: 'flex', justifyContent: 'flex-end', padding: '0 15px', marginBottom: '5px' }}>
+                <button className="btn-danger" onClick={() => navigate('/')} style={{ padding: '4px 10px', fontSize: '0.85rem' }}>Sair</button>
             </header>
 
+
             <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                <HUD />
                 <Board />
-                <Dice />
             </main>
 
+            <BattleArena />
             <CardModal />
             <GameOverScreen />
+
+            {/* Cinematic Level Up */}
+            {levelUpData && (
+                <LevelUpModal 
+                    playerName={levelUpData.playerName}
+                    oldLevel={levelUpData.oldLevel}
+                    newLevel={levelUpData.newLevel}
+                    onClose={clearLevelUp}
+                />
+            )}
+
+            {/* Numerical Feedback */}
+            {xpNotification && (
+                <FloatingXP 
+                    amount={xpNotification.amount}
+                    x={window.innerWidth / 2 - 50}
+                    y={window.innerHeight / 2 - 100}
+                    onComplete={clearXpNotification}
+                />
+            )}
         </div>
     );
 }

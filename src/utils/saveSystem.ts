@@ -14,6 +14,7 @@ export interface SaveProfile {
     unlockedMascots?: string[];
     streak?: number;
     class_id?: string;
+    user_id?: string; // Link to Supabase Auth User ID
 }
 
 const STORAGE_KEY = '@TrilhaCampeoes:Profiles';
@@ -61,7 +62,8 @@ export function getOrCreateProfile(name: string, code: string = '0000'): SavePro
         equippedMascot: '',
         unlockedMascots: [],
         streak: 1,
-        class_id: ''
+        class_id: '',
+        user_id: ''
     };
 
     profiles.push(newProfile);
@@ -75,7 +77,6 @@ export function getOrCreateProfile(name: string, code: string = '0000'): SavePro
 
 // REAL CLOUD SYNC IMPLEMENTATION
 
-// Throttling to prevent excessive sync calls and Auth Lock issues
 let syncTimeout: any = null;
 
 export async function syncProfileToCloud(profile: SaveProfile) {
@@ -83,6 +84,9 @@ export async function syncProfileToCloud(profile: SaveProfile) {
 
     syncTimeout = setTimeout(async () => {
         try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const currentUserId = session?.user?.id;
+
             const { error } = await supabase.from('profiles').upsert({
                 id: profile.id,
                 name: profile.name,
@@ -96,11 +100,11 @@ export async function syncProfileToCloud(profile: SaveProfile) {
                 unlocked_mascots: profile.unlockedMascots || [],
                 streak: profile.streak || 1,
                 class_id: profile.class_id || null,
+                user_id: profile.user_id || currentUserId || null,
                 last_sync: new Date().toISOString()
             });
 
             if (error) {
-                // If it's a transient lock error, we don't need to spam the console as if it were fatal
                 if (error.message?.includes('Lock')) {
                     console.debug("Sincronização adiada por trava de sessão.");
                     return;
@@ -111,9 +115,8 @@ export async function syncProfileToCloud(profile: SaveProfile) {
         } catch (e) {
             console.warn("Sincronização em segundo plano falhou. O jogo continuará offline.", e);
         }
-    }, 500); // Wait 500ms before syncing
+    }, 1000); // 1s debounce to avoid spam
 }
-
 
 export async function getGlobalRanking() {
     try {
@@ -157,7 +160,6 @@ export function calculateStreak(lastSyncDate: number): number {
     const last = new Date(lastSyncDate);
     const now = new Date();
 
-    // Set to midnight for comparison
     last.setHours(0, 0, 0, 0);
     now.setHours(0, 0, 0, 0);
 
@@ -165,9 +167,9 @@ export function calculateStreak(lastSyncDate: number): number {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays === 1) {
-        return 1; // Increment will happen outside
+        return 1;
     } else if (diffDays > 1) {
-        return 0; // Reset streak
+        return 0;
     }
-    return -1; // Same day, keep current streak
+    return -1;
 }

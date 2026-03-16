@@ -1,0 +1,202 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    backdrop-filter: blur(8px);
+}
+
+.arenaContainer {
+    width: 90%;
+    max-width: 800px;
+    background: #1a1a2e;
+    border: 4px solid #4834d4;
+    border-radius: 20px;
+    padding: 30px;
+    color: white;
+    box-shadow: 0 0 50px rgba(72, 52, 212, 0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100px) scale(0.9); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.battleHeader {
+    text-align: center;
+}
+
+.battleHeader h2 {
+    font-size: 2rem;
+    color: #f0932b;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.entities {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 20px;
+}
+
+.entity {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.enemyIcon, .playerIcon {
+    font-size: 5rem;
+    filter: drop-shadow(0 0 10px rgba(255,255,255,0.3));
+    animation: idleFloat 3s infinite ease-in-out;
+}
+
+@keyframes idleFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.vs {
+    font-size: 3rem;
+    font-weight: 900;
+    color: #eb4d4b;
+    font-style: italic;
+    text-shadow: 0 0 20px rgba(235, 77, 75, 0.8);
+}
+
+.hpBarContainer {
+    width: 100%;
+}
+
+.hpBarLabel {
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.hpBar {
+    height: 15px;
+    background: #0f0f1b;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #333;
+}
+
+.hpFill {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.hpText {
+    font-size: 0.8rem;
+    text-align: right;
+    margin-top: 4px;
+    color: #aaa;
+}
+
+.inputArea {
+    text-align: center;
+    background: rgba(255,255,255,0.05);
+    padding: 20px;
+    border-radius: 15px;
+    border: 2px dashed rgba(255,255,255,0.1);
+}
+
+.questionContainer {
+    transition: all 0.3s ease;
+}
+
+.questionText {
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+.optionsGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.optionButton {
+    background: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #1a1a2e;
+    cursor: pointer;
+    transition: transform 0.1s;
+    box-shadow: 0 4px 0 #ccc;
+}
+
+.optionButton:hover {
+    transform: scale(1.03);
+    background: #f0f0f0;
+}
+
+.optionButton:active {
+    transform: translateY(4px);
+    box-shadow: none;
+}
+
+.correct {
+    animation: correctFlash 0.5s ease-in-out;
+}
+
+.wrong {
+    animation: shake 0.4s ease-in-out;
+}
+
+@keyframes correctFlash {
+    0%, 100% { background: transparent; }
+    50% { background: rgba(46, 213, 115, 0.2); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.loadingText {
+    font-style: italic;
+    color: #888;
+}
+
+.streakBonus {
+    display: inline-block;
+    color: #f0932b;
+    font-weight: bold;
+    padding: 5px 15px;
+    background: rgba(240, 147, 43, 0.1);
+    border-radius: 20px;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .entities {
+        flex-direction: column;
+    }
+    .vs {
+        margin: 10px 0;
+    }
+}

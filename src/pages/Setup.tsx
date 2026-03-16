@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
-import '../App.css';
+import styles from './Setup.module.css';
 
 const AVAILABLE_COLORS = [
     { id: 'red', label: 'Vermelha', hex: 'var(--color-red)' },
@@ -12,13 +12,12 @@ const AVAILABLE_COLORS = [
 
 export default function Setup() {
     const navigate = useNavigate();
-    const { players, addPlayer, startGame, selectedGrade, setGrade, refreshPlayers } = useGame();
+    const { players, addPlayer, startGame, selectedGrade, setGrade, refreshPlayers, availableSubjects, currentSubjectId, setSubject } = useGame();
     const [name, setName] = useState('');
     const [secretCode, setSecretCode] = useState('');
     const [classCode, setClassCode] = useState('');
     const [selectedColor, setSelectedColor] = useState('red');
     const [classLoading, setClassLoading] = useState(false);
-
 
     useEffect(() => {
         refreshPlayers();
@@ -55,11 +54,8 @@ export default function Setup() {
             setClassLoading(false);
         }
 
-        // Add player to game context
         const profile = addPlayer(name, colorHex, secretCode, finalClassId);
 
-        // Explicitly update the profile if a class code was provided 
-        // (addPlayer handles creation, this ensures an existing profile gets updated)
         if (finalClassId) {
             import('../utils/saveSystem').then(m => m.updateProfile(profile.id, { class_id: finalClassId }));
         }
@@ -67,9 +63,7 @@ export default function Setup() {
         setName('');
         setSecretCode('');
         setClassCode('');
-
     };
-
 
     const location = useLocation();
     const gameMode = location.state?.gameMode || 'trilha';
@@ -87,147 +81,171 @@ export default function Setup() {
         }
     };
 
-    return (
-        <div className="app-container" style={{ justifyContent: 'flex-start', paddingTop: '40px' }}>
-            <h2 style={{ marginBottom: '10px' }}>Configuração do Jogo</h2>
+    // Sub-renderers to keep JSX clean
+    const renderGradeSelector = () => {
+        let grades = [];
+        if (currentSubjectId === 'math') {
+            grades = [
+                { id: '1-2', label: '1º e 2º Ano', sub: 'Adição/Subtração', icon: '🍎' },
+                { id: '3-4', label: '3º e 4º Ano', sub: 'Multiplicação', icon: '🧠' },
+                { id: '5', label: '5º Ano', sub: 'Lógica/Expressões', icon: '🚀' }
+            ];
+        } else if (currentSubjectId === 'portuguese') {
+            grades = [
+                { id: '1-2', label: '1º e 2º Ano', sub: 'Alfabetização', icon: '🖍️' },
+                { id: '3-4', label: '3º e 4º Ano', sub: 'Gramática', icon: '📖' },
+                { id: '5', label: '5º Ano', sub: 'Interpretação', icon: '🎭' }
+            ];
+        } else {
+            grades = [
+                { id: '1-2', label: '1º e 2º Ano', sub: 'Seres Vivos', icon: '🌱' },
+                { id: '3-4', label: '3º e 4º Ano', sub: 'Ciclo da Água', icon: '💧' },
+                { id: '5', label: '5º Ano', sub: 'Corpo e Espaço', icon: '🪐' }
+            ];
+        }
 
-            <div style={{ background: 'white', padding: '15px', borderRadius: '12px', border: '3px solid var(--color-ink)', marginBottom: '20px', width: '100%', maxWidth: '400px', boxShadow: 'var(--shadow-handmade)' }}>
-                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Série (Nível das Perguntas):</label>
-                <select
-                    value={selectedGrade}
-                    onChange={(e) => setGrade(e.target.value)}
-                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '2px solid var(--color-ink)', fontFamily: 'var(--font-title)', fontSize: '1rem', backgroundColor: '#f9f9f9' }}
-                >
-                    <option value="1-2">1º e 2º Ano (Adição/Subtração)</option>
-                    <option value="3-4">3º e 4º Ano (Multiplicação)</option>
-                    <option value="5">5º Ano (Lógica/Expressões)</option>
-                </select>
+        return (
+            <div className={styles.gradeGrid}>
+                {grades.map(g => (
+                    <div 
+                        key={g.id}
+                        className={`${styles.islandCard} ${selectedGrade === g.id ? styles.activeGrade : ''}`}
+                        onClick={() => setGrade(g.id)}
+                    >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+                            <span style={{ fontSize: '2rem' }}>{g.icon}</span>
+                            <div style={{ textAlign: 'left' }}>
+                                <div style={{ fontWeight: '900', fontSize: '1.2rem' }}>{g.label}</div>
+                                <div style={{ fontSize: '0.85rem', opacity: 0.9 }}>{g.sub}</div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
+    return (
+        <div className={styles.setupContainer}>
+            <h1 className={styles.title}>Preparar Aventura!</h1>
+
+            {/* Panel 1: Subject Selection */}
+            <div className={styles.panel}>
+                <label className={styles.label}>O que vamos aprender hoje?</label>
+                <div className={styles.cardGrid}>
+                    {availableSubjects.map(sub => (
+                        <div 
+                            key={sub.id}
+                            className={`${styles.islandCard} ${currentSubjectId === sub.id ? styles.activeSubject : ''}`}
+                            onClick={() => setSubject(sub.id)}
+                        >
+                            <span className={styles.islandIcon}>{sub.icon}</span>
+                            <span className={styles.islandText}>{sub.name}</span>
+                        </div>
+                    ))}
+                </div>
             </div>
 
-            <div style={{ background: 'white', padding: '20px', borderRadius: '12px', border: '3px solid var(--color-ink)', marginBottom: '20px', width: '100%', maxWidth: '400px', boxShadow: 'var(--shadow-handmade)' }}>
-                <h3 style={{ marginBottom: '15px', textAlign: 'center' }}>Adicionar Jogador ({players.length}/4)</h3>
-                <div style={{ marginBottom: '15px' }}>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Nome do Jogador:</label>
-                    <input
-                        type="text"
-                        value={name}
-                        onChange={e => setName(e.target.value)}
-                        placeholder="Ex: Joãozinho"
-                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '2px solid var(--color-ink)', fontFamily: 'var(--font-title)', fontSize: '1rem' }}
-                    />
+            {/* Panel 2: Grade Selection */}
+            <div className={styles.panel}>
+                <label className={styles.label}>Nível do Desafio:</label>
+                {renderGradeSelector()}
+            </div>
+
+            {/* Panel 3: Player Creation */}
+            <div className={styles.panel}>
+                <label className={styles.label}>Criar Jogador ({players.length}/4)</label>
+                
+                <input
+                    type="text"
+                    className={styles.inputField}
+                    style={{ marginBottom: '10px' }}
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    placeholder="Seu Nome de Herói"
+                />
+
+                <input
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={4}
+                    className={styles.inputField}
+                    style={{ marginBottom: '10px', letterSpacing: '8px', textAlign: 'center' }}
+                    value={secretCode}
+                    onChange={e => setSecretCode(e.target.value.replace(/\D/g, ''))}
+                    placeholder="Senha (4 números)"
+                />
+
+                <input
+                    type="text"
+                    maxLength={6}
+                    className={styles.inputField}
+                    style={{ marginBottom: '15px', textAlign: 'center' }}
+                    value={classCode}
+                    onChange={e => setClassCode(e.target.value.toUpperCase())}
+                    placeholder="Código da Turma (Ex: A99B)"
+                />
+
+                <label className={styles.label} style={{ fontSize: '0.9rem', textAlign: 'center' }}>Cor da Tampinha:</label>
+                <div className={styles.colorPicker} style={{ marginBottom: '20px' }}>
+                    {AVAILABLE_COLORS.map(c => {
+                        const isTaken = players.some(p => p.color === c.hex);
+                        return (
+                            <div
+                                key={c.id}
+                                className={styles.colorDot}
+                                onClick={() => !isTaken && setSelectedColor(c.id)}
+                                style={{
+                                    backgroundColor: c.hex,
+                                    opacity: isTaken ? 0.2 : 1,
+                                    boxShadow: selectedColor === c.id ? `0 0 0 4px var(--color-ink)` : 'none',
+                                    cursor: isTaken ? 'not-allowed' : 'pointer'
+                                }}
+                            />
+                        );
+                    })}
                 </div>
 
-                <div style={{ marginBottom: '15px' }}>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Código Secreto (4 dígitos):</label>
-                    <input
-                        type="password"
-                        inputMode="numeric"
-                        maxLength={4}
-                        value={secretCode}
-                        onChange={e => setSecretCode(e.target.value.replace(/\D/g, ''))}
-                        placeholder="1234"
-                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '2px solid var(--color-ink)', fontFamily: 'var(--font-title)', fontSize: '1rem', letterSpacing: '8px', textAlign: 'center' }}
-                    />
-                    <small style={{ fontSize: '0.7rem', opacity: 0.7 }}>Acesse seu ranking em qualquer lugar!</small>
-                </div>
-
-                <div style={{ marginBottom: '20px' }}>
-                    <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}>Escolha sua Tampinha:</label>
-                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                        {AVAILABLE_COLORS.map(c => {
-                            const isTaken = players.some(p => p.color === c.hex);
-                            return (
-                                <button
-                                    key={c.id}
-                                    disabled={isTaken}
-                                    onClick={() => setSelectedColor(c.id)}
-                                    style={{
-                                        width: '40px', height: '40px', borderRadius: '50%',
-                                        backgroundColor: c.hex,
-                                        border: selectedColor === c.id ? '4px solid var(--color-ink)' : '2px solid rgba(0,0,0,0.2)',
-                                        opacity: isTaken ? 0.3 : 1,
-                                        padding: 0,
-                                        boxShadow: selectedColor === c.id ? 'none' : '2px 2px 4px rgba(0,0,0,0.2)'
-                                    }}
-                                    title={c.label}
-                                />
-                            )
-                        })}
-                    </div>
-                </div>
-
-                <div style={{ marginBottom: '20px' }}>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Código da Turma (Opcional):</label>
-                    <input
-                        type="text"
-                        maxLength={6}
-                        value={classCode}
-                        onChange={e => setClassCode(e.target.value.toUpperCase())}
-                        placeholder="ABC123"
-                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '2px solid var(--color-blue)', fontFamily: 'var(--font-title)', fontSize: '1rem', textAlign: 'center' }}
-                    />
-                    <small style={{ fontSize: '0.7rem', opacity: 0.7 }}>Peça o código ao seu professor!</small>
-                </div>
-
-                <button className="btn-primary" onClick={handleAddPlayer} disabled={!name.trim() || secretCode.length < 4 || players.length >= 4 || classLoading} style={{ width: '100%' }}>
-                    {classLoading ? 'Verificando...' : 'Adicionar Jogador'}
+                <button 
+                    className="btn-primary" 
+                    style={{ width: '100%', padding: '15px' }}
+                    onClick={handleAddPlayer} 
+                    disabled={!name.trim() || secretCode.length < 4 || players.length >= 4 || classLoading}
+                >
+                    {classLoading ? '⏳ Criando...' : '➕ Adicionar Herói!'}
                 </button>
             </div>
 
+            {/* Panel 4: Queue & Start (Only visible if players exist) */}
             {players.length > 0 && (
-                <div style={{ width: '100%', maxWidth: '400px', marginBottom: '20px' }}>
-                    <h3 style={{ marginBottom: '10px' }}>Na Fila:</h3>
-                    <ul style={{ listStyle: 'none', padding: 0 }}>
+                <div style={{ width: '100%', maxWidth: '500px', marginBottom: '20px' }}>
+                    <h3 style={{ color: 'white', marginBottom: '10px', textAlign: 'center', textShadow: '2px 2px 0 var(--color-ink)' }}>
+                        Equipe Pronta:
+                    </h3>
+                    <ul className={styles.queueList}>
                         {players.map(p => (
-                            <li key={p.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', background: 'white', padding: '10px', borderRadius: '8px', border: '2px solid var(--color-ink)' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <div style={{
-                                        width: '30px',
-                                        height: '30px',
-                                        borderRadius: '50%',
-                                        backgroundColor: p.color,
-                                        border: '2px solid var(--color-ink)',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontSize: '1.2rem'
-                                    }}>
+                            <li key={p.id} className={styles.queueItem}>
+                                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                    <div className={styles.avatarBadge} style={{ backgroundColor: p.color }}>
                                         {p.avatar}
                                     </div>
-                                    <span style={{ fontWeight: 'bold' }}>{p.name}</span>
+                                    <strong style={{ fontSize: '1.2rem' }}>{p.name}</strong>
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--color-ink)' }}>
-                                    <span style={{ color: '#f1c40f' }}>⭐</span>
-                                    Pronto!
-                                </div>
+                                <span style={{ fontSize: '1.5rem', animation: 'bounce var(--transition-bounce) infinite alternate' }}>⭐</span>
                             </li>
                         ))}
                     </ul>
+
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                        <button className="btn-danger" style={{ flex: 1 }} onClick={() => navigate('/')}>
+                            🔙 Voltar
+                        </button>
+                        <button className="btn-primary" style={{ flex: 2, padding: '20px', fontSize: '1.5rem' }} onClick={handleStart}>
+                            🎮 JOGAR AGORA!
+                        </button>
+                    </div>
                 </div>
             )}
-
-            <div className="menu-buttons" style={{ flexDirection: 'column', gap: '10px', width: '100%', maxWidth: '400px' }}>
-                <button
-                    onClick={() => navigate('/shop')}
-                    style={{
-                        width: '100%',
-                        padding: '12px',
-                        backgroundColor: 'var(--color-yellow)',
-                        fontWeight: 'bold',
-                        borderRadius: '12px'
-                    }}
-                >
-                    🛒 Ir para a Lojinha
-                </button>
-
-                <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
-                    <button onClick={() => navigate('/')} style={{ flex: 1, padding: '12px' }}>Voltar</button>
-                    <button className="btn-primary" onClick={handleStart} disabled={players.length === 0} style={{ flex: 1, padding: '12px' }}>
-                        Começar!
-                    </button>
-                </div>
-            </div>
         </div>
     );
 }
-
