@@ -1,22 +1,21 @@
 .sideNav {
     width: 240px;
     height: 100vh;
-    background-color: white;
-    border-right: 2px solid #e5e5e5;
+    background: #ffffff;
+    border-right: 1px solid #eeeeee;
     display: flex;
     flex-direction: column;
-    padding: 24px 16px;
     position: fixed;
     left: 0;
     top: 0;
-    z-index: 100;
+    z-index: 1000;
 }
 
 .logo {
+    padding: 30px 24px;
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 0 12px 32px;
 }
 
 .logoIcon {
@@ -24,88 +23,91 @@
 }
 
 .logoText {
-    font-family: 'var(--font-title)', sans-serif;
     font-size: 1.5rem;
     font-weight: 900;
-    color: var(--color-ink);
-    text-transform: uppercase;
+    color: #333;
     letter-spacing: -1px;
 }
 
 .menuList {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
     flex: 1;
+    padding: 0 12px;
 }
 
 .navItem {
+    width: 100%;
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
     padding: 12px 16px;
-    border: 2px solid transparent;
+    margin-bottom: 4px;
+    border: none;
+    background: transparent;
     border-radius: 12px;
-    background: none;
     cursor: pointer;
     transition: all 0.2s;
-    text-align: left;
-    width: 100%;
+    color: #666;
+    font-weight: 700;
 }
 
 .navItem:hover {
-    background-color: #f7f7f7;
+    background: #f5f5f5;
+    color: #333;
 }
 
 .navItem.active {
-    background-color: #ddf4ff;
-    border-color: #84d8ff;
-    color: #1899d6;
+    background: #e8f5e9;
+    color: #2e7d32;
 }
 
 .icon {
-    font-size: 1.5rem;
-}
-
-.label {
-    font-family: 'var(--font-title)', sans-serif;
-    font-size: 1rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
+    font-size: 1.25rem;
 }
 
 .footer {
-    padding-top: 16px;
-    border-top: 2px solid #e5e5e5;
+    padding: 24px;
+    border-top: 1px solid #eeeeee;
+}
+
+.loginBtn {
+    width: 100%;
+    padding: 12px;
+    background: #56ab2f;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    margin-bottom: 15px;
+}
+
+.userSection {
+    margin-bottom: 15px;
+}
+
+.userEmail {
+    font-size: 0.8rem;
+    color: #666;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 5px;
+}
+
+.logoutBtn {
+    background: none;
+    border: none;
+    color: #d63031;
+    font-size: 0.85rem;
+    font-weight: 800;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
 }
 
 .streakIndicator {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 12px;
-    background-color: #ffead0;
-    color: #ff9600;
-    border-radius: 12px;
-    font-weight: 900;
-}
-
-@media (max-width: 1024px) {
-    .sideNav {
-        width: 80px;
-        padding: 24px 8px;
-    }
-    .logoText, .label {
-        display: none;
-    }
-    .logo {
-        justify-content: center;
-        padding: 0 0 24px;
-    }
-    .navItem {
-        justify-content: center;
-        padding: 12px 0;
-    }
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #ff9800;
 }
