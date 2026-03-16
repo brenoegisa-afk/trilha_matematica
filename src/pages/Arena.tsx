@@ -32,9 +32,9 @@ export default function Arena() {
 
 
     const generateQuestion = useCallback(() => {
-        const pool = questionsData.grades['1-2'].Green.concat(
-            questionsData.grades['3-4'].Green,
-            questionsData.grades['5'].Green
+        const pool = (questionsData as any).subjects.math.grades['1-2'].Green.concat(
+            (questionsData as any).subjects.math.grades['3-4'].Green,
+            (questionsData as any).subjects.math.grades['5'].Green
         );
         const randomQ = pool[Math.floor(Math.random() * pool.length)];
         setCurrentQ(randomQ);

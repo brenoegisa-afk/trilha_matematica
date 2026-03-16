@@ -28,12 +28,10 @@ export default function CardModal() {
     };
 
     const cardStyle = getCardStyle(activeCardType);
-
     const feedbackClass = answerFeedback === 'correct' ? styles.correctFeedback : answerFeedback === 'wrong' ? styles.wrongFeedback : '';
-    const isBattle = gameStatus === 'battle';
 
     return (
-        <div className={isBattle ? styles.battleOverlay : styles.overlay}>
+        <div className={styles.overlay}>
             <div 
                 className={`${styles.card} ${feedbackClass}`} 
                 style={{ 

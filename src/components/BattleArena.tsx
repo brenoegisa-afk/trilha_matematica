@@ -2,7 +2,7 @@ import { useGame } from '../context/GameContext';
 import styles from './BattleArena.module.css';
 
 export default function BattleArena() {
-    const { currentEnemy, players, currentPlayerIndex, gameState, submitAnswer, startBattle } = useGame();
+    const { currentEnemy, players, currentPlayerIndex, gameState, submitAnswer } = useGame();
     
     if (gameState.status !== 'battle' || !currentEnemy) return null;
 
