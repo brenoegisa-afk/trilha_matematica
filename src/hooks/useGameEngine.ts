@@ -68,74 +68,93 @@ export function useGameEngine(initialPlayers: Player[], selectedGrade: string) {
 
         const isCorrect = answer === state.activeQuestion.answer;
         engineRef.current.resolveAnswer(isCorrect);
-        if (isCorrect) triggerConfetti();
+        
+        if (isCorrect) {
+            triggerConfetti();
+        } else {
+            // New: Pause turn to show educational feedback
+            engineRef.current.setWaitingFeedback(true);
+        }
+        
         updateState();
 
-        // Delayed Turn Resolution
+        // Delayed Turn Resolution ONLY if correct. If wrong, wait for user to acknowledge.
         setTimeout(() => {
-            const currentState = engineRef.current.getState();
-            const player = currentState.players[currentState.currentPlayerIndex];
-            const activeTileType = currentState.activeCardType || 'Normal';
-            
-            // 1. Calculate Streak
-            player.streak = streakEngineRef.current.calculateNewStreak(isCorrect, player.streak);
-
-            // 2. Delegate to Progression Hook (XP & Level)
-            progression.applyXP(player, activeTileType, isCorrect, player.streak);
-
-            // 3. Update Skill Mastery
-            if (currentState.activeQuestion?.skillId) {
-                skillEngineRef.current.updateMastery(player, currentState.activeQuestion.skillId, isCorrect);
+            if (isCorrect) {
+                advanceTurn(true);
             }
+        }, 1500);
+    }, [updateState]);
 
-            // 4. Battle Resolution
-            if (currentState.status === 'battle') {
-                const { battleEnded, playerDefeated } = battleSystem.resolveBattleTurn(player, isCorrect);
-                
-                if (battleEnded) {
-                    if (playerDefeated) {
-                        // Fled/Defeated: No confetti, just end turn
-                        engineRef.current.endTurn();
-                    } else {
-                        // Victory
-                        engineRef.current.endTurn();
-                        triggerConfetti();
-                    }
+    const advanceTurn = useCallback((isCorrect: boolean) => {
+        const currentState = engineRef.current.getState();
+        const player = currentState.players[currentState.currentPlayerIndex];
+        const activeTileType = currentState.activeCardType || 'Normal';
+        
+        // 1. Calculate Streak
+        player.streak = streakEngineRef.current.calculateNewStreak(isCorrect, player.streak);
+
+        // 2. Delegate to Progression Hook (XP & Level)
+        progression.applyXP(player, activeTileType, isCorrect, player.streak);
+
+        // 3. Update Skill Mastery
+        if (currentState.activeQuestion?.skillId) {
+            skillEngineRef.current.updateMastery(player, currentState.activeQuestion.skillId, isCorrect);
+        }
+
+        // 4. Battle Resolution
+        if (currentState.status === 'battle') {
+            const { battleEnded, playerDefeated } = battleSystem.resolveBattleTurn(player, isCorrect);
+            
+            if (battleEnded) {
+                if (playerDefeated) {
+                    // Fled/Defeated: No confetti, just end turn
+                    engineRef.current.endTurn();
                 } else {
-                    engineRef.current.clearQuestion();
+                    // Victory
+                    engineRef.current.endTurn();
+                    triggerConfetti();
                 }
             } else {
-                // 5. Resolve Special Tile Movement
-                if (activeTileType === 'Green' && isCorrect) {
-                    player.currentPosition = Math.min(35, player.currentPosition + 1);
-                } else if (activeTileType === 'Red') {
-                    if (isCorrect) {
-                        player.currentPosition = Math.min(35, player.currentPosition + 2);
+                engineRef.current.clearQuestion();
+            }
+        } else {
+            // 5. Resolve Special Tile Movement
+            if (activeTileType === 'Green' && isCorrect) {
+                player.currentPosition = Math.min(35, player.currentPosition + 1);
+            } else if (activeTileType === 'Red') {
+                if (isCorrect) {
+                    player.currentPosition = Math.min(35, player.currentPosition + 2);
+                } else {
+                    const protection = mascotEngineRef.current.getProtectionBonus(player);
+                    if (player.inventoryProtectionCount > 0 || protection > 0) {
+                        if (player.inventoryProtectionCount > 0) player.inventoryProtectionCount -= 1;
                     } else {
-                        const protection = mascotEngineRef.current.getProtectionBonus(player);
-                        if (player.inventoryProtectionCount > 0 || protection > 0) {
-                            if (player.inventoryProtectionCount > 0) player.inventoryProtectionCount -= 1;
-                        } else {
-                            player.currentPosition = Math.max(0, player.currentPosition - 1);
-                        }
+                        player.currentPosition = Math.max(0, player.currentPosition - 1);
                     }
-                } else if (activeTileType === 'Blue' && isCorrect) {
-                    player.inventoryProtectionCount += 1;
                 }
-
-                // 6. Check for New Achievements
-                const newMedals = achievementEngineRef.current.checkNewAchievements(player);
-                if (newMedals.length > 0) {
-                    player.achievements.push(...newMedals);
-                }
-
-                // 7. Finalize Turn
-                engineRef.current.endTurn();
+            } else if (activeTileType === 'Blue' && isCorrect) {
+                player.inventoryProtectionCount += 1;
             }
 
-            updateState();
-        }, 1500);
+            // 6. Check for New Achievements
+            const newMedals = achievementEngineRef.current.checkNewAchievements(player);
+            if (newMedals.length > 0) {
+                player.achievements.push(...newMedals);
+            }
+
+            // 7. Finalize Turn
+            engineRef.current.endTurn();
+        }
+
+        updateState();
     }, [updateState, progression, battleSystem]);
+
+    const acknowledgeFeedback = useCallback(() => {
+        // Called when the user clicks 'Entendi' on the error feedback
+        engineRef.current.setWaitingFeedback(false);
+        advanceTurn(false);
+    }, [advanceTurn]);
 
     const startBattle = useCallback(() => {
         const state = engineRef.current.getState();
@@ -176,6 +195,7 @@ export function useGameEngine(initialPlayers: Player[], selectedGrade: string) {
         actions: {
             rollDice,
             submitAnswer,
+            acknowledgeFeedback,
             generateQuestion,
             startBattle,
             start: (players?: Player[]) => {

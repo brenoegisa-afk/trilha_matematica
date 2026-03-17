@@ -110,4 +110,5 @@ export interface GameState {
     activeQuestion: Question | null;
     rolledValue: number | null;
     answerFeedback: 'correct' | 'wrong' | null;
+    waitingFeedback: boolean;
 }

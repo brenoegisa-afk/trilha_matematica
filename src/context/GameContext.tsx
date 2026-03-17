@@ -34,6 +34,7 @@ interface GameContextProps {
     clearLevelUp: () => void;
     clearXpNotification: () => void;
     logout: () => void;
+    actions: any;
 }
 
 const GameContext = createContext<GameContextProps | undefined>(undefined);
@@ -200,7 +201,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
             xpNotification: engine.xpNotification,
             clearLevelUp: engine.clearLevelUp,
             clearXpNotification: engine.clearXpNotification,
-            logout
+            logout,
+            actions
         }}>
             {children}
         </GameContext.Provider>

@@ -4,14 +4,19 @@ import styles from './CardModal.module.css';
 
 export default function CardModal() {
     const {
-        gameStatus,
+        gameState,
+        players,
+        actions
+    } = useGame();
+
+    const {
+        status: gameStatus,
         activeCardType,
         activeQuestion,
         currentPlayerIndex,
-        players,
-        submitAnswer,
-        answerFeedback
-    } = useGame();
+        answerFeedback,
+        waitingFeedback
+    } = gameState;
 
     if (gameStatus !== 'card_event' || !activeCardType || !activeQuestion) return null;
 
@@ -54,37 +59,50 @@ export default function CardModal() {
                 <div className={styles.content}>
                     <p className={styles.questionText}>"{activeQuestion.question}"</p>
 
-                    <div className={styles.optionsGrid}>
-                        {activeQuestion.options.map((opt: string, idx: number) => {
-                            // Let's add A, B, C, D indicators to make it more game-like
-                            const letter = String.fromCharCode(65 + idx); 
-                            return (
-                                <button
-                                    key={idx}
-                                    className={`${styles.optionButton} ${answerFeedback && (answerFeedback !== 'correct') ? styles.selected : ''}`}
-                                    onClick={() => submitAnswer(opt)}
-                                    disabled={!!answerFeedback} // Disable clicking again while feedback plays
-                                >
-                                    <span style={{ 
-                                        display: 'inline-flex', 
-                                        alignItems: 'center', 
-                                        justifyContent: 'center', 
-                                        background: '#f0f0f0', 
-                                        width: '40px', 
-                                        height: '40px', 
-                                        borderRadius: '10px', 
-                                        marginRight: '15px',
-                                        fontSize: '1.2rem',
-                                        color: '#aaa',
-                                        border: '2px solid #ddd'
-                                    }}>
-                                        {letter}
-                                    </span>
-                                    {opt}
-                                </button>
-                            );
-                        })}
-                    </div>
+                    {waitingFeedback ? (
+                        <div className={styles.educationalFeedback}>
+                            <h3 style={{ color: '#ff4757', marginBottom: '10px' }}>Puxa, não foi dessa vez!</h3>
+                            <p style={{ fontSize: '1.2rem', marginBottom: '20px' }}>A resposta certa era:<br/><strong>{activeQuestion.answer}</strong></p>
+                            <button 
+                                className={styles.optionButton} 
+                                style={{ background: '#2ed573', color: 'white', width: '100%' }}
+                                onClick={() => actions.acknowledgeFeedback()}
+                            >
+                                Entendi!
+                            </button>
+                        </div>
+                    ) : (
+                        <div className={styles.optionsGrid}>
+                            {activeQuestion.options.map((opt: string, idx: number) => {
+                                const letter = String.fromCharCode(65 + idx); 
+                                return (
+                                    <button
+                                        key={idx}
+                                        className={`${styles.optionButton} ${answerFeedback && (answerFeedback !== 'correct') ? styles.selected : ''}`}
+                                        onClick={() => actions.submitAnswer(opt)}
+                                        disabled={!!answerFeedback}
+                                    >
+                                        <span style={{ 
+                                            display: 'inline-flex', 
+                                            alignItems: 'center', 
+                                            justifyContent: 'center', 
+                                            background: '#f0f0f0', 
+                                            width: '40px', 
+                                            height: '40px', 
+                                            borderRadius: '10px', 
+                                            marginRight: '15px',
+                                            fontSize: '1.2rem',
+                                            color: '#aaa',
+                                            border: '2px solid #ddd'
+                                        }}>
+                                            {letter}
+                                        </span>
+                                        {opt}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

@@ -18,7 +18,8 @@ export class GameEngine {
             activeCardType: null,
             activeQuestion: null,
             rolledValue: null,
-            answerFeedback: null
+            answerFeedback: null,
+            waitingFeedback: false
         };
     }
 
@@ -85,9 +86,14 @@ export class GameEngine {
         // Post-answer logic will be handled by the caller/orchestrator to allow for animations
     }
 
+    public setWaitingFeedback(value: boolean): void {
+        this.state.waitingFeedback = value;
+    }
+
     public clearQuestion(): void {
         this.state.activeQuestion = null;
         this.state.answerFeedback = null;
+        this.state.waitingFeedback = false;
     }
 
     public updateStatus(status: GameStatus): void {
@@ -99,6 +105,7 @@ export class GameEngine {
         this.state.activeCardType = null;
         this.state.activeQuestion = null;
         this.state.answerFeedback = null;
+        this.state.waitingFeedback = false;
         this.state.rolledValue = null;
         this.state.currentPlayerIndex = this.turns.next();
     }

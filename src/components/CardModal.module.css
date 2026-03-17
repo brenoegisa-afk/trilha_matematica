@@ -154,6 +154,17 @@
     box-shadow: 0 0px 0 var(--color-blue-dark);
 }
 
+.educationalFeedback {
+    background: rgba(255, 71, 87, 0.1);
+    border: 2px dashed #ff4757;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 20px;
+    text-align: center;
+    width: 100%;
+    animation: fadeIn 0.3s ease-out;
+}
+
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }

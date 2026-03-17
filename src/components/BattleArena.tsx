@@ -3,7 +3,7 @@ import { useGame } from '../context/GameContext';
 import styles from './BattleArena.module.css';
 
 export default function BattleArena() {
-    const { currentEnemy, players, currentPlayerIndex, gameState, submitAnswer } = useGame();
+    const { currentEnemy, players, currentPlayerIndex, gameState, actions } = useGame();
     const [hitAnimation, setHitAnimation] = useState<'player' | 'enemy' | null>(null);
 
     useEffect(() => {
@@ -76,17 +76,47 @@ export default function BattleArena() {
                     ) : (
                         <div className={`${styles.questionContainer} ${gameState.answerFeedback === 'correct' ? styles.correct : gameState.answerFeedback === 'wrong' ? styles.wrong : ''}`}>
                             <p className={styles.questionText}>"{gameState.activeQuestion.question}"</p>
-                            <div className={styles.optionsGrid}>
-                                {gameState.activeQuestion.options.map((opt: string, idx: number) => (
+                            {gameState.waitingFeedback ? (
+                                <div className={styles.educationalFeedback} style={{ background: 'rgba(255, 71, 87, 0.1)', border: '2px dashed #ff4757', borderRadius: '12px', padding: '20px', textAlign: 'center', width: '100%', animation: 'fadeIn 0.3s ease-out' }}>
+                                    <h3 style={{ color: '#ff4757', marginBottom: '10px' }}>Puxa, não foi dessa vez!</h3>
+                                    <p style={{ fontSize: '1.2rem', marginBottom: '20px', fontWeight: 'bold' }}>A resposta certa era:<br/><span style={{fontSize: '2rem', color: '#ff4757'}}>{gameState.activeQuestion.answer}</span></p>
                                     <button 
-                                        key={idx} 
-                                        className={styles.optionButton}
-                                        onClick={() => submitAnswer(opt)}
+                                        className={styles.optionButton} 
+                                        style={{ background: '#2ed573', color: 'white', width: '100%', padding: '15px', borderRadius: '15px', border: 'none', fontSize: '1.2rem', fontWeight: 'bold', cursor: 'pointer' }}
+                                        onClick={() => actions.acknowledgeFeedback()}
                                     >
-                                        {opt}
+                                        Continuar Batalha!
                                     </button>
-                                ))}
-                            </div>
+                                </div>
+                            ) : (
+                                <div className={styles.optionsGrid}>
+                                    {gameState.activeQuestion.options.map((opt: string, idx: number) => (
+                                        <button 
+                                            key={idx} 
+                                            className={`${styles.optionButton} ${gameState.answerFeedback && (gameState.answerFeedback !== 'correct') ? styles.selected : ''}`}
+                                            onClick={() => actions.submitAnswer(opt)}
+                                            disabled={!!gameState.answerFeedback}
+                                        >
+                                            <span style={{ 
+                                                display: 'inline-flex', 
+                                                alignItems: 'center', 
+                                                justifyContent: 'center', 
+                                                background: '#f0f0f0', 
+                                                width: '40px', 
+                                                height: '40px', 
+                                                borderRadius: '10px', 
+                                                marginRight: '15px',
+                                                fontSize: '1.2rem',
+                                                color: '#aaa',
+                                                border: '2px solid #ddd'
+                                            }}>
+                                                {String.fromCharCode(65 + idx)}
+                                            </span>
+                                            {opt}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
                     
