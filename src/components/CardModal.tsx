@@ -62,7 +62,22 @@ export default function CardModal() {
                     {waitingFeedback ? (
                         <div className={styles.educationalFeedback}>
                             <h3 style={{ color: '#ff4757', marginBottom: '10px' }}>Puxa, não foi dessa vez!</h3>
-                            <p style={{ fontSize: '1.2rem', marginBottom: '20px' }}>A resposta certa era:<br/><strong>{activeQuestion.answer}</strong></p>
+                            <p style={{ fontSize: '1.2rem', marginBottom: '10px' }}>A resposta certa era:<br/><strong>{activeQuestion.answer}</strong></p>
+                            {activeQuestion.explanation && (
+                                <p style={{ 
+                                    background: '#f9f9f9', 
+                                    padding: '15px', 
+                                    borderRadius: '12px', 
+                                    fontSize: '0.95rem', 
+                                    color: '#555',
+                                    borderLeft: '4px solid #ff4757',
+                                    marginBottom: '20px',
+                                    fontStyle: 'italic',
+                                    lineHeight: '1.4'
+                                }}>
+                                    💡 {activeQuestion.explanation}
+                                </p>
+                            )}
                             <button 
                                 className={styles.optionButton} 
                                 style={{ background: '#2ed573', color: 'white', width: '100%' }}

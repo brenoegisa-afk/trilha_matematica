@@ -77,9 +77,24 @@ export default function BattleArena() {
                         <div className={`${styles.questionContainer} ${gameState.answerFeedback === 'correct' ? styles.correct : gameState.answerFeedback === 'wrong' ? styles.wrong : ''}`}>
                             <p className={styles.questionText}>"{gameState.activeQuestion.question}"</p>
                             {gameState.waitingFeedback ? (
-                                <div className={styles.educationalFeedback} style={{ background: 'rgba(255, 71, 87, 0.1)', border: '2px dashed #ff4757', borderRadius: '12px', padding: '20px', textAlign: 'center', width: '100%', animation: 'fadeIn 0.3s ease-out' }}>
+                                <div className={styles.educationalFeedback}>
                                     <h3 style={{ color: '#ff4757', marginBottom: '10px' }}>Puxa, não foi dessa vez!</h3>
-                                    <p style={{ fontSize: '1.2rem', marginBottom: '20px', fontWeight: 'bold' }}>A resposta certa era:<br/><span style={{fontSize: '2rem', color: '#ff4757'}}>{gameState.activeQuestion.answer}</span></p>
+                                    <p style={{ fontSize: '1.2rem', marginBottom: '10px', fontWeight: 'bold' }}>A resposta certa era:<br/><span style={{fontSize: '2rem', color: '#ff4757'}}>{gameState.activeQuestion.answer}</span></p>
+                                    {gameState.activeQuestion.explanation && (
+                                        <div style={{ 
+                                            background: 'rgba(255, 255, 255, 0.9)', 
+                                            padding: '15px', 
+                                            borderRadius: '12px', 
+                                            fontSize: '1rem', 
+                                            color: '#333',
+                                            borderLeft: '4px solid #ff4757',
+                                            marginBottom: '20px',
+                                            textAlign: 'left',
+                                            lineHeight: '1.4'
+                                        }}>
+                                            💡 {gameState.activeQuestion.explanation}
+                                        </div>
+                                    )}
                                     <button 
                                         className={styles.optionButton} 
                                         style={{ background: '#2ed573', color: 'white', width: '100%', padding: '15px', borderRadius: '15px', border: 'none', fontSize: '1.2rem', fontWeight: 'bold', cursor: 'pointer' }}

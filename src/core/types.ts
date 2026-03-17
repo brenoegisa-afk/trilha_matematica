@@ -74,6 +74,7 @@ export interface Question {
     options: string[];
     skillId?: string;
     difficulty?: 'easy' | 'medium' | 'hard';
+    explanation?: string;
 }
 
 export interface Enemy {
@@ -111,4 +112,5 @@ export interface GameState {
     rolledValue: number | null;
     answerFeedback: 'correct' | 'wrong' | null;
     waitingFeedback: boolean;
+    waitingVictory: { player: Player, mascot: Mascot } | null;
 }

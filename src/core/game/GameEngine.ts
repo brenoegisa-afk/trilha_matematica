@@ -19,7 +19,8 @@ export class GameEngine {
             activeQuestion: null,
             rolledValue: null,
             answerFeedback: null,
-            waitingFeedback: false
+            waitingFeedback: false,
+            waitingVictory: null
         };
     }
 
@@ -90,10 +91,15 @@ export class GameEngine {
         this.state.waitingFeedback = value;
     }
 
+    public setWaitingVictory(player: Player, mascot: any): void {
+        this.state.waitingVictory = { player, mascot };
+    }
+
     public clearQuestion(): void {
         this.state.activeQuestion = null;
         this.state.answerFeedback = null;
         this.state.waitingFeedback = false;
+        this.state.waitingVictory = null;
     }
 
     public updateStatus(status: GameStatus): void {
@@ -107,6 +113,7 @@ export class GameEngine {
         this.state.answerFeedback = null;
         this.state.waitingFeedback = false;
         this.state.rolledValue = null;
+        this.state.waitingVictory = null;
         this.state.currentPlayerIndex = this.turns.next();
     }
 }

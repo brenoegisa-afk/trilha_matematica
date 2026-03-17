@@ -12,7 +12,7 @@ export function useBattleSystem(battleEngine: BattleEngine, mascotEngine: Mascot
         return enemy;
     }, [battleEngine]);
 
-    const resolveBattleTurn = useCallback((player: Player, isCorrect: boolean): { battleEnded: boolean, enemyDefeated: boolean, playerDefeated: boolean, playerHurt?: boolean } => {
+    const resolveBattleTurn = useCallback((player: Player, isCorrect: boolean): { battleEnded: boolean, enemyDefeated: boolean, playerDefeated: boolean, playerHurt?: boolean, rewardedMascot?: any } => {
         if (!currentEnemy) return { battleEnded: false, enemyDefeated: false, playerDefeated: false };
 
         if (isCorrect) {
@@ -35,7 +35,7 @@ export function useBattleSystem(battleEngine: BattleEngine, mascotEngine: Mascot
                 
                 battleEngine.endBattle();
                 setCurrentEnemy(null);
-                return { battleEnded: true, enemyDefeated: true, playerDefeated: false };
+                return { battleEnded: true, enemyDefeated: true, playerDefeated: false, rewardedMascot: reward };
             }
         } else {
             // Player takes damage on wrong answer

@@ -177,6 +177,22 @@
     75% { transform: translateX(5px); }
 }
 
+.educationalFeedback {
+    background: rgba(255, 71, 87, 0.1);
+    border: 2px dashed #ff4757;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 10px;
+    text-align: center;
+    width: 100%;
+    animation: fadeIn 0.4s ease-out 0.4s both; /* Delayed to wait for shake */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 .loadingText {
     font-style: italic;
     color: #888;

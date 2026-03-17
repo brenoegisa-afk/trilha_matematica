@@ -12,7 +12,8 @@
                 "130",
                 "128",
                 "129"
-              ]
+              ],
+              "explanation": "Lembre-se da ordem das operações: primeiro resolvemos a multiplicação (20 x 4 = 80) e depois somamos (49 + 80 = 129)."
             },
             {
               "question": "Resolva a expressão: 10 + (11 x 4)",
@@ -22,7 +23,8 @@
                 "52",
                 "54",
                 "56"
-              ]
+              ],
+              "explanation": "Seguimos a hierarquia matemática: calculamos 11 x 4 primeiro, que é 44. Depois somamos os 10, resultando em 54."
             },
             {
               "question": "Resolva a expressão: 28 + (10 x 5)",
@@ -32,7 +34,8 @@
                 "83",
                 "80",
                 "78"
-              ]
+              ],
+              "explanation": "A multiplicação vem antes da soma! 10 x 5 = 50. Agora é só somar: 28 + 50 = 78."
             },
             {
               "question": "Resolva a expressão: 27 + (14 x 7)",
@@ -324,7 +327,8 @@
                 "238",
                 "241",
                 "235"
-              ]
+              ],
+              "explanation": "Dica rápida: 10% de 600 é 60. Para achar 40%, é só fazer 60 x 4 = 240!"
             },
             {
               "question": "Qual é 30% de R$ 700?",
@@ -334,7 +338,8 @@
                 "211",
                 "210",
                 "212"
-              ]
+              ],
+              "explanation": "Para calcular 30% de 700, multiplique 700 por 0,3 ou use a regra de três: 10% de 700 é 70, então 30% é 70 x 3 = 210."
             },
             {
               "question": "Qual é 10% de R$ 900?",
@@ -516,7 +521,8 @@
                 "29",
                 "32",
                 "33"
-              ]
+              ],
+              "explanation": "Pense no processo inverso! Se o resultado foi 54 subtraindo 4, o número antes de subtrair era 58 (54 + 4). Como ele foi dobrado, o número original é 58 dividido por 2, que dá 29."
             },
             {
               "question": "Pensei em um número. Dobrei seu valor e subtraí 4, resultando em 16. Que número é esse?",
@@ -1398,7 +1404,8 @@
                 "12",
                 "13",
                 "18"
-              ]
+              ],
+              "explanation": "A tabuada do 2 é o dobro! O dobro de 8 é 16."
             },
             {
               "question": "Quanto é 3 x 7?",
@@ -1418,7 +1425,8 @@
                 "79",
                 "77",
                 "82"
-              ]
+              ],
+              "explanation": "Dica: Tente somar as unidades primeiro (5 + 7 = 12). Depois some as dezenas (30 + 40 = 70). Somando tudo: 70 + 12 = 82!"
             },
             {
               "question": "Some: 28 + 44 = ?",
@@ -1428,7 +1436,8 @@
                 "72",
                 "67",
                 "73"
-              ]
+              ],
+              "explanation": "Pense assim: 20 + 40 = 60. Depois 8 + 4 = 12. Somando 60 + 12 chegamos em 72!"
             },
             {
               "question": "Quanto é 10 x 6?",
@@ -1478,7 +1487,8 @@
                 "73",
                 "74",
                 "83"
-              ]
+              ],
+              "explanation": "Dica: Some as dezenas (30 + 40 = 70) e as unidades (4 + 4 = 8). Depois junte tudo: 70 + 8 = 78!"
             },
             {
               "question": "Quanto é 5 x 10?",

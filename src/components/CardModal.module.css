@@ -162,7 +162,7 @@
     margin-top: 20px;
     text-align: center;
     width: 100%;
-    animation: fadeIn 0.3s ease-out;
+    animation: fadeIn 0.4s ease-out 0.4s both; /* Delayed to wait for shake */
 }
 
 @keyframes fadeIn {
@@ -189,7 +189,7 @@
 }
 
 .wrongFeedback {
-    animation: wrongShake 0.4s cubic-bezier(.36, .07, .19, .97) both infinite !important;
+    animation: wrongShake 0.4s cubic-bezier(.36, .07, .19, .97) both; /* Removed infinite */
     box-shadow: 0 16px 0 var(--color-red-dark), 0 0 50px rgba(255, 75, 75, 0.8) !important;
     border-color: var(--color-red) !important;
 }

@@ -1,5 +1,6 @@
 import type { Question, Subject, Skill } from '../types';
 import questionsData from '../../data/questions.json';
+import { ExplanationEngine } from './ExplanationEngine';
 
 // Extension of the current data structure to support subjects and skills
 // In a real scenario, this would come from an API
@@ -49,16 +50,16 @@ export class SubjectService {
                     if (tileType === 'Yellow') skillId = 'math_logic';
                 }
                 
-                return { ...q, skillId };
+                return ExplanationEngine.enhance({ ...q, skillId });
             }
         }
 
         // Fallback robusto
-        return {
+        return ExplanationEngine.enhance({
             question: subjectId === 'math' ? "Quanto é 1 + 1?" : "Qual a primeira letra de ABA?",
             answer: subjectId === 'math' ? "2" : "A",
             options: subjectId === 'math' ? ["1", "2", "3", "4"] : ["A", "B", "C", "D"],
             skillId: subjectId === 'math' ? 'math_basic' : 'port_grammar'
-        };
+        });
     }
 }

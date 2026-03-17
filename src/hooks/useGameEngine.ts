@@ -64,30 +64,6 @@ export function useGameEngine(initialPlayers: Player[], selectedGrade: string) {
         return value;
     }, [updateState]);
 
-    const submitAnswer = useCallback((answer: string) => {
-        const state = engineRef.current.getState();
-        if (!state.activeQuestion) return;
-
-        const isCorrect = answer === state.activeQuestion.answer;
-        engineRef.current.resolveAnswer(isCorrect);
-        
-        if (isCorrect) {
-            triggerConfetti();
-        } else {
-            // New: Pause turn to show educational feedback
-            engineRef.current.setWaitingFeedback(true);
-        }
-        
-        updateState();
-
-        // Delayed Turn Resolution ONLY if correct. If wrong, wait for user to acknowledge.
-        setTimeout(() => {
-            if (isCorrect) {
-                advanceTurn(true);
-            }
-        }, 1500);
-    }, [updateState]);
-
     const advanceTurn = useCallback((isCorrect: boolean) => {
         const currentState = engineRef.current.getState();
         const player = currentState.players[currentState.currentPlayerIndex];
@@ -106,16 +82,19 @@ export function useGameEngine(initialPlayers: Player[], selectedGrade: string) {
 
         // 4. Battle Resolution
         if (currentState.status === 'battle') {
-            const { battleEnded, playerDefeated, playerHurt } = battleSystem.resolveBattleTurn(player, isCorrect);
+            const { battleEnded, playerDefeated, playerHurt, rewardedMascot } = battleSystem.resolveBattleTurn(player, isCorrect);
             
             if (battleEnded) {
                 if (playerDefeated) {
-                    // Fled/Defeated: No confetti, just end turn
                     engineRef.current.endTurn();
                 } else {
-                    // Victory
-                    engineRef.current.endTurn();
-                    triggerConfetti();
+                    if (rewardedMascot) {
+                        engineRef.current.setWaitingVictory(player, rewardedMascot);
+                        updateState();
+                    } else {
+                        engineRef.current.endTurn();
+                        triggerConfetti();
+                    }
                 }
             } else {
                 if (playerHurt) {
@@ -158,13 +137,43 @@ export function useGameEngine(initialPlayers: Player[], selectedGrade: string) {
         }
 
         updateState();
-    }, [updateState, progression, battleSystem]);
+    }, [updateState, progression, battleSystem, currentSubjectId]);
+
+    const submitAnswer = useCallback((answer: string) => {
+        const state = engineRef.current.getState();
+        if (!state.activeQuestion) return;
+
+        const isCorrect = answer === state.activeQuestion.answer;
+        engineRef.current.resolveAnswer(isCorrect);
+        
+        if (isCorrect) {
+            triggerConfetti();
+        } else {
+            // New: Pause turn to show educational feedback
+            engineRef.current.setWaitingFeedback(true);
+        }
+        
+        updateState();
+
+        // Delayed Turn Resolution ONLY if correct. If wrong, wait for user to acknowledge.
+        setTimeout(() => {
+            if (isCorrect) {
+                advanceTurn(true);
+            }
+        }, 1500);
+    }, [updateState, advanceTurn]);
 
     const acknowledgeFeedback = useCallback(() => {
         // Called when the user clicks 'Entendi' on the error feedback
         engineRef.current.setWaitingFeedback(false);
         advanceTurn(false);
     }, [advanceTurn]);
+
+    const acknowledgeVictory = useCallback(() => {
+        // Called when the user clicks 'Continuar' on the victory ceremony
+        engineRef.current.endTurn();
+        updateState();
+    }, [updateState]);
 
     const startBattle = useCallback(() => {
         const state = engineRef.current.getState();
@@ -176,7 +185,7 @@ export function useGameEngine(initialPlayers: Player[], selectedGrade: string) {
         // Update core engine state to battle mode
         engineRef.current.updateStatus('battle');
         updateState();
-    }, [updateState, battleSystem, currentSubjectId]);
+    }, [updateState, battleSystem, currentSubjectId, advanceTurn]); // Added advanceTurn for completeness though not directly used here, it's safer if actions change
 
     const generateQuestion = useCallback((type: TileType) => {
         const nextQ = subjectServiceRef.current.getQuestion(
@@ -206,6 +215,7 @@ export function useGameEngine(initialPlayers: Player[], selectedGrade: string) {
             rollDice,
             submitAnswer,
             acknowledgeFeedback,
+            acknowledgeVictory,
             generateQuestion,
             startBattle,
             start: (players?: Player[]) => {

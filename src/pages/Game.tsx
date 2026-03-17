@@ -8,6 +8,7 @@ import GameOverScreen from '../components/GameOverScreen';
 import { useGame } from '../context/GameContext';
 import LevelUpModal from '../components/LevelUpModal';
 import FloatingXP from '../components/FloatingXP';
+import VictoryModal from '../components/VictoryModal';
 import '../App.css';
 
 export default function Game() {
@@ -43,6 +44,7 @@ export default function Game() {
             <BattleArena />
             <CardModal />
             <GameOverScreen />
+            <VictoryModal />
 
             {/* Cinematic Level Up */}
             {levelUpData && (

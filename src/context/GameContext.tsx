@@ -22,6 +22,7 @@ interface GameContextProps {
     availableSubjects: Subject[];
     levelUpData: { playerName: string, oldLevel: number, newLevel: number } | null;
     xpNotification: { amount: number } | null;
+    waitingVictory: { player: Player, mascot: any } | null;
 
     setGrade: (grade: string) => void;
     addPlayer: (name: string, color: string, code?: string, classId?: string) => import('../utils/saveSystem').SaveProfile;
@@ -199,6 +200,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
             availableSubjects,
             levelUpData: engine.levelUpData,
             xpNotification: engine.xpNotification,
+            waitingVictory: gameState.waitingVictory,
             clearLevelUp: engine.clearLevelUp,
             clearXpNotification: engine.clearXpNotification,
             logout,
