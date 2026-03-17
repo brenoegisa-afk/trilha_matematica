@@ -36,7 +36,9 @@ export function useGameEngine(initialPlayers: Player[], selectedGrade: string) {
     const battleSystem = useBattleSystem(battleEngineRef.current, mascotEngineRef.current);
 
     const updateState = useCallback(() => {
-        setGameState(engineRef.current.getState());
+        // Spread the state to create a new object reference, forcing React to re-render.
+        // Without this, React bails out of rendering if only internal properties mutate.
+        setGameState({ ...engineRef.current.getState() });
     }, []);
 
     const rollDice = useCallback(() => {
