@@ -182,6 +182,29 @@
     color: #888;
 }
 
+/* Animations for Damage Mechanics */
+.playerHit {
+    animation: screenShake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    border-color: #ff4757;
+    box-shadow: 0 0 50px rgba(255, 71, 87, 0.8) inset;
+}
+
+.enemyHit {
+    animation: enemyFlash 0.5s ease-out;
+}
+
+@keyframes screenShake {
+    10%, 90% { transform: translate3d(-10px, 0, 0); }
+    20%, 80% { transform: translate3d(15px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-20px, 0, 0); }
+    40%, 60% { transform: translate3d(20px, 0, 0); }
+}
+
+@keyframes enemyFlash {
+    0%, 100% { filter: brightness(1) drop-shadow(0 0 10px rgba(255,255,255,0.3)) sepia(0) hue-rotate(0deg) saturate(1); }
+    50% { filter: brightness(2) drop-shadow(0 0 40px red) sepia(100%) hue-rotate(-50deg) saturate(5); transform: scale(1.1) rotate(-5deg); }
+}
+
 .streakBonus {
     display: inline-block;
     color: #f0932b;

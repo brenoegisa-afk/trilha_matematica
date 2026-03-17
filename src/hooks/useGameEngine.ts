@@ -90,11 +90,17 @@ export function useGameEngine(initialPlayers: Player[], selectedGrade: string) {
 
             // 4. Battle Resolution
             if (currentState.status === 'battle') {
-                const { battleEnded } = battleSystem.resolveBattleTurn(player, isCorrect);
+                const { battleEnded, playerDefeated } = battleSystem.resolveBattleTurn(player, isCorrect);
                 
                 if (battleEnded) {
-                    engineRef.current.endTurn();
-                    triggerConfetti();
+                    if (playerDefeated) {
+                        // Fled/Defeated: No confetti, just end turn
+                        engineRef.current.endTurn();
+                    } else {
+                        // Victory
+                        engineRef.current.endTurn();
+                        triggerConfetti();
+                    }
                 } else {
                     engineRef.current.clearQuestion();
                 }

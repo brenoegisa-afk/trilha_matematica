@@ -63,8 +63,23 @@ export class BattleEngine {
         }
     }
 
+    // New: Player Damage Logic
+    public applyDamageToPlayer(player: any): number {
+        const damage = 25; // Base damage the player takes for answering wrong
+        player.hp = Math.max(0, player.hp - damage);
+        return damage;
+    }
+
+    public isPlayerDefeated(player: any): boolean {
+        return player.hp <= 0;
+    }
+
     public getCurrentEnemy(): Enemy | null {
         return this.currentEnemy;
+    }
+
+    public resetPlayerHp(player: any): void {
+        player.hp = player.maxHp || 100;
     }
 
     public endBattle(): void {

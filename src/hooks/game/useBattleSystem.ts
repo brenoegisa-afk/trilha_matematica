@@ -12,8 +12,8 @@ export function useBattleSystem(battleEngine: BattleEngine, mascotEngine: Mascot
         return enemy;
     }, [battleEngine]);
 
-    const resolveBattleTurn = useCallback((player: Player, isCorrect: boolean): { battleEnded: boolean, enemyDefeated: boolean } => {
-        if (!currentEnemy) return { battleEnded: false, enemyDefeated: false };
+    const resolveBattleTurn = useCallback((player: Player, isCorrect: boolean): { battleEnded: boolean, enemyDefeated: boolean, playerDefeated: boolean } => {
+        if (!currentEnemy) return { battleEnded: false, enemyDefeated: false, playerDefeated: false };
 
         if (isCorrect) {
             const damageBonus = mascotEngine.getDamageBonus(player);
@@ -23,13 +23,29 @@ export function useBattleSystem(battleEngine: BattleEngine, mascotEngine: Mascot
             if (battleEngine.isEnemyDefeated()) {
                 const reward = mascotEngine.getRandomMascot();
                 mascotEngine.addMascotToPlayer(player, reward);
+                
+                // Heal player on victory
+                battleEngine.resetPlayerHp(player);
+                
                 battleEngine.endBattle();
                 setCurrentEnemy(null);
-                return { battleEnded: true, enemyDefeated: true };
+                return { battleEnded: true, enemyDefeated: true, playerDefeated: false };
+            }
+        } else {
+            // Player takes damage on wrong answer
+            battleEngine.applyDamageToPlayer(player);
+            
+            if (battleEngine.isPlayerDefeated(player)) {
+                // Heal player upon fleeing/defeat
+                battleEngine.resetPlayerHp(player);
+                
+                battleEngine.endBattle();
+                setCurrentEnemy(null);
+                return { battleEnded: true, enemyDefeated: false, playerDefeated: true };
             }
         }
         
-        return { battleEnded: false, enemyDefeated: false };
+        return { battleEnded: false, enemyDefeated: false, playerDefeated: false };
     }, [currentEnemy, battleEngine, mascotEngine]);
 
     return {
