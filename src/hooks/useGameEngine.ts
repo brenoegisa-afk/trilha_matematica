@@ -104,7 +104,7 @@ export function useGameEngine(initialPlayers: Player[], selectedGrade: string) {
 
         // 4. Battle Resolution
         if (currentState.status === 'battle') {
-            const { battleEnded, playerDefeated } = battleSystem.resolveBattleTurn(player, isCorrect);
+            const { battleEnded, playerDefeated, playerHurt } = battleSystem.resolveBattleTurn(player, isCorrect);
             
             if (battleEnded) {
                 if (playerDefeated) {
@@ -116,6 +116,14 @@ export function useGameEngine(initialPlayers: Player[], selectedGrade: string) {
                     triggerConfetti();
                 }
             } else {
+                if (playerHurt) {
+                    // Force state update to reflect Player HP loss
+                    updateState();
+                } else {
+                    // Even if the player wasn't hurt (meaning they hit the enemy), 
+                    // we must trigger a top-level update so GameContext passes new HP down
+                    updateState();
+                }
                 engineRef.current.clearQuestion();
             }
         } else {

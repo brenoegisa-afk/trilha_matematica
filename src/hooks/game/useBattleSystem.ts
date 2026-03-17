@@ -12,13 +12,19 @@ export function useBattleSystem(battleEngine: BattleEngine, mascotEngine: Mascot
         return enemy;
     }, [battleEngine]);
 
-    const resolveBattleTurn = useCallback((player: Player, isCorrect: boolean): { battleEnded: boolean, enemyDefeated: boolean, playerDefeated: boolean } => {
+    const resolveBattleTurn = useCallback((player: Player, isCorrect: boolean): { battleEnded: boolean, enemyDefeated: boolean, playerDefeated: boolean, playerHurt?: boolean } => {
         if (!currentEnemy) return { battleEnded: false, enemyDefeated: false, playerDefeated: false };
 
         if (isCorrect) {
             const damageBonus = mascotEngine.getDamageBonus(player);
             const damage = battleEngine.calculateDamage(true, player.streak) + damageBonus;
             battleEngine.applyDamageToEnemy(damage);
+            
+            // Sync React state to show HP bar depleting
+            const updatedEnemy = battleEngine.getCurrentEnemy();
+            if (updatedEnemy) {
+                setCurrentEnemy({ ...updatedEnemy });
+            }
             
             if (battleEngine.isEnemyDefeated()) {
                 const reward = mascotEngine.getRandomMascot();
@@ -35,17 +41,22 @@ export function useBattleSystem(battleEngine: BattleEngine, mascotEngine: Mascot
             // Player takes damage on wrong answer
             battleEngine.applyDamageToPlayer(player);
             
+            // Sync React state to show HP bar depleting (Player state is managed by GameEngine, so we return a hit flag to force update)
+            const playerHurt = true;
+            
             if (battleEngine.isPlayerDefeated(player)) {
                 // Heal player upon fleeing/defeat
                 battleEngine.resetPlayerHp(player);
                 
                 battleEngine.endBattle();
                 setCurrentEnemy(null);
-                return { battleEnded: true, enemyDefeated: false, playerDefeated: true };
+                return { battleEnded: true, enemyDefeated: false, playerDefeated: true, playerHurt };
             }
+            
+            return { battleEnded: false, enemyDefeated: false, playerDefeated: false, playerHurt };
         }
         
-        return { battleEnded: false, enemyDefeated: false, playerDefeated: false };
+        return { battleEnded: false, enemyDefeated: false, playerDefeated: false, playerHurt: false };
     }, [currentEnemy, battleEngine, mascotEngine]);
 
     return {
