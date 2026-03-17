@@ -7,24 +7,33 @@ import { StreakEngine } from '../core/gamification/StreakEngine';
 import { AchievementEngine } from '../core/gamification/AchievementEngine';
 import { BattleEngine } from '../core/game/BattleEngine';
 import { MascotEngine } from '../core/game/MascotEngine';
-import type { Player, GameState, TileType, Enemy } from '../core/types';
+import type { Player, GameState, TileType } from '../core/types';
 import { triggerConfetti } from '../utils/confetti';
+
+// Import sub-hooks
+import { useProgression } from './game/useProgression';
+import { useBattleSystem } from './game/useBattleSystem';
 
 export function useGameEngine(initialPlayers: Player[], selectedGrade: string) {
     const engineRef = useRef<GameEngine>(new GameEngine(initialPlayers));
     const skillEngineRef = useRef<SkillEngine>(new SkillEngine());
     const subjectServiceRef = useRef<SubjectService>(new SubjectService());
+    
+    // Core Gamification Engines
     const xpEngineRef = useRef<XPEngine>(new XPEngine());
     const streakEngineRef = useRef<StreakEngine>(new StreakEngine());
     const achievementEngineRef = useRef<AchievementEngine>(new AchievementEngine());
+    
+    // Battle & Mascot Engines
     const battleEngineRef = useRef<BattleEngine>(new BattleEngine());
     const mascotEngineRef = useRef<MascotEngine>(new MascotEngine());
     
     const [gameState, setGameState] = useState<GameState>(engineRef.current.getState());
-    const [currentEnemy, setCurrentEnemy] = useState<Enemy | null>(null);
     const [currentSubjectId, setCurrentSubjectId] = useState<string>('math');
-    const [levelUpData, setLevelUpData] = useState<{ playerName: string, oldLevel: number, newLevel: number } | null>(null);
-    const [xpNotification, setXpNotification] = useState<{ amount: number } | null>(null);
+
+    // --- Sub-Systems Integration ---
+    const progression = useProgression(xpEngineRef.current, mascotEngineRef.current);
+    const battleSystem = useBattleSystem(battleEngineRef.current, mascotEngineRef.current);
 
     const updateState = useCallback(() => {
         setGameState(engineRef.current.getState());
@@ -71,55 +80,26 @@ export function useGameEngine(initialPlayers: Player[], selectedGrade: string) {
             // 1. Calculate Streak
             player.streak = streakEngineRef.current.calculateNewStreak(isCorrect, player.streak);
 
-            // 2. Calculate XP & Level
-            if (isCorrect) {
-                const oldLevel = player.level;
-                const baseXP = xpEngineRef.current.calculateXP(activeTileType, true, player.streak);
-                const mascotBonus = mascotEngineRef.current.calculateXPBonus(player, baseXP);
-                const xpGained = baseXP + mascotBonus;
-                
-                player.score += xpGained;
-                player.xp += xpGained;
-                const newLevel = xpEngineRef.current.calculateLevel(player.xp);
-                player.level = newLevel;
+            // 2. Delegate to Progression Hook (XP & Level)
+            progression.applyXP(player, activeTileType, isCorrect, player.streak);
 
-                setXpNotification({ amount: xpGained });
-
-                if (newLevel > oldLevel) {
-                    setLevelUpData({
-                        playerName: player.name,
-                        oldLevel: oldLevel,
-                        newLevel: newLevel
-                    });
-                }
-            }
-
-            // 2.1 Update Skill Mastery
+            // 3. Update Skill Mastery
             if (currentState.activeQuestion?.skillId) {
                 skillEngineRef.current.updateMastery(player, currentState.activeQuestion.skillId, isCorrect);
             }
 
-            // 2.5 Battle Resolution
-            if (currentState.status === 'battle' && isCorrect) {
-                const damageBonus = mascotEngineRef.current.getDamageBonus(player);
-                const damage = battleEngineRef.current.calculateDamage(true, player.streak) + damageBonus;
-                battleEngineRef.current.applyDamageToEnemy(damage);
+            // 4. Battle Resolution
+            if (currentState.status === 'battle') {
+                const { battleEnded } = battleSystem.resolveBattleTurn(player, isCorrect);
                 
-                if (battleEngineRef.current.isEnemyDefeated()) {
-                    const reward = mascotEngineRef.current.getRandomMascot();
-                    mascotEngineRef.current.addMascotToPlayer(player, reward);
-                    battleEngineRef.current.endBattle();
-                    setCurrentEnemy(null);
+                if (battleEnded) {
                     engineRef.current.endTurn();
                     triggerConfetti();
                 } else {
                     engineRef.current.clearQuestion();
                 }
-            } else if (currentState.status === 'battle' && !isCorrect) {
-                // If wrong answer during battle, also clear to continue
-                engineRef.current.clearQuestion();
             } else {
-                // 3. Resolve Special Tile Movement
+                // 5. Resolve Special Tile Movement
                 if (activeTileType === 'Green' && isCorrect) {
                     player.currentPosition = Math.min(35, player.currentPosition + 1);
                 } else if (activeTileType === 'Red') {
@@ -137,30 +117,31 @@ export function useGameEngine(initialPlayers: Player[], selectedGrade: string) {
                     player.inventoryProtectionCount += 1;
                 }
 
-                // 4. Check for New Achievements
+                // 6. Check for New Achievements
                 const newMedals = achievementEngineRef.current.checkNewAchievements(player);
                 if (newMedals.length > 0) {
                     player.achievements.push(...newMedals);
                 }
 
-                // 5. Finalize Turn
+                // 7. Finalize Turn
                 engineRef.current.endTurn();
             }
 
             updateState();
         }, 1500);
-    }, [updateState]);
+    }, [updateState, progression, battleSystem]);
 
     const startBattle = useCallback(() => {
         const state = engineRef.current.getState();
         const player = state.players[state.currentPlayerIndex];
-        const enemy = battleEngineRef.current.generateEnemy(player.level, currentSubjectId);
-        setCurrentEnemy(enemy);
         
-        // Update state to battle mode
+        // Delegate to Battle System
+        battleSystem.initBattle(player, currentSubjectId);
+        
+        // Update core engine state to battle mode
         engineRef.current.updateStatus('battle');
         updateState();
-    }, [updateState]);
+    }, [updateState, battleSystem, currentSubjectId]);
 
     const generateQuestion = useCallback((type: TileType) => {
         const nextQ = subjectServiceRef.current.getQuestion(
@@ -174,17 +155,17 @@ export function useGameEngine(initialPlayers: Player[], selectedGrade: string) {
 
     return {
         gameState,
-        currentEnemy,
+        currentEnemy: battleSystem.currentEnemy,
         currentSubjectId,
-        levelUpData,
-        xpNotification,
-        clearLevelUp: () => setLevelUpData(null),
-        clearXpNotification: () => setXpNotification(null),
+        levelUpData: progression.levelUpData,
+        xpNotification: progression.xpNotification,
+        clearLevelUp: progression.clearLevelUp,
+        clearXpNotification: progression.clearXpNotification,
         setSubject: setCurrentSubjectId,
         availableSubjects: [
             { id: 'math', name: 'Matemática', icon: '🔢', description: 'Desafios de números e lógica' },
             { id: 'portuguese', name: 'Português', icon: '📚', description: 'Rimas, letras e histórias' },
-            { id: 'science', name: 'Ciências', icon: '🔬', description: 'Descontas sobre o mundo e a vida' }
+            { id: 'science', name: 'Ciências', icon: '🔬', description: 'Descobertas sobre o mundo e a vida' }
         ],
         actions: {
             rollDice,
