@@ -62,26 +62,54 @@ export default function TeacherDashboard() {
 
     const fetchStats = async (classesList: ClassData[]) => {
         const stats: Record<string, { studentCount: number, questionCount: number }> = {};
-
-        for (const c of classesList) {
-            // Get student count
-            const { count: sCount } = await supabase
-                .from('profiles')
-                .select('*', { count: 'exact', head: true })
-                .eq('class_id', c.id);
-
-            // Get question count
-            const { count: qCount } = await supabase
-                .from('teacher_questions')
-                .select('*', { count: 'exact', head: true })
-                .eq('class_id', c.id);
-
-            stats[c.id] = {
-                studentCount: sCount || 0,
-                questionCount: qCount || 0
-            };
+        
+        if (classesList.length === 0) {
+            setClassStats(stats);
+            return;
         }
-        setClassStats(stats);
+
+        const classIds = classesList.map(c => c.id);
+
+        try {
+            // Fetch all profiles for these classes in one go
+            const { data: profilesData } = await supabase
+                .from('profiles')
+                .select('class_id')
+                .in('class_id', classIds);
+
+            // Fetch all questions for these classes in one go
+            const { data: questionsData } = await supabase
+                .from('teacher_questions')
+                .select('class_id')
+                .in('class_id', classIds);
+
+            // Initialize stats
+            classesList.forEach(c => {
+                stats[c.id] = { studentCount: 0, questionCount: 0 };
+            });
+
+            // Count profiles per class
+            if (profilesData) {
+                profilesData.forEach((p: any) => {
+                    if (p.class_id && stats[p.class_id]) {
+                        stats[p.class_id].studentCount++;
+                    }
+                });
+            }
+
+            // Count questions per class
+            if (questionsData) {
+                questionsData.forEach((q: any) => {
+                    if (q.class_id && stats[q.class_id]) {
+                        stats[q.class_id].questionCount++;
+                    }
+                });
+            }
+
+            setClassStats(stats);
+        } catch (error) {
+            console.error("Error fetching class stats", error);
+        }
     };
 
     // V2: Summary Stats
