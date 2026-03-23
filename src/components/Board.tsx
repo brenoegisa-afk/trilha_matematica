@@ -23,18 +23,18 @@ const DESKTOP_POINTS = [
     { x: 180, y: 190 }, { x: 265, y: 190 }, { x: 350, y: 190 }, { x: 435, y: 190 }, { x: 520, y: 190 }, { x: 605, y: 190 }, { x: 690, y: 190 }, { x: 775, y: 190 }, { x: 860, y: 190 }, { x: 945, y: 190 }
 ];
 
-// MOBILE: Vertical snake on 400x1400 canvas (portrait-optimized!)
+// MOBILE: Vertical snake on 380x580 canvas (compact for portrait!)
 const MOBILE_POINTS = (() => {
     const points: { x: number; y: number }[] = [];
     const cols = 5;       // 5 tiles per row
-    const spacingX = 70;  // horizontal spacing
-    const spacingY = 70;  // vertical gap between rows
-    const startX = 40;    // left margin
-    const startY = 60;    // top margin
+    const spacingX = 64;  // smaller gap for smaller mobile tiles
+    const spacingY = 64; 
+    const startX = 60;    
+    const startY = 40;    
     const rows = Math.ceil(TOTAL_TILES / cols);
 
     for (let row = 0; row < rows; row++) {
-        const isReversed = row % 2 === 1; // Snake: alternate direction each row
+        const isReversed = row % 2 === 1;
         const tilesInRow = Math.min(cols, TOTAL_TILES - row * cols);
         for (let col = 0; col < tilesInRow; col++) {
             const actualCol = isReversed ? (cols - 1 - col) : col;
@@ -61,14 +61,12 @@ export default function Board() {
             const mobile = containerWidth < 600;
             setIsMobile(mobile);
             
-            const targetW = mobile ? 400 : 1200;
-            const targetH = mobile ? 600 : 1000;
+            const targetW = mobile ? 380 : 1200;
+            const targetH = mobile ? 580 : 1000;
             
-            // Available height: viewport minus header (~70px), HUD (~60px), smaller padding buffer
-            // Dice is absolutely positioned so it can overlap the bottom slightly without breaking the view
-            const availableH = window.innerHeight - 160;
+            // Available height: viewport minus header (~65px), HUD (~80px), board margins (~40px)
+            const availableH = window.innerHeight - 185;
             
-            // Scale = minimum of fit-width and fit-height (ensures entire board is visible)
             const scaleW = (containerWidth - 20) / targetW;
             const scaleH = availableH / targetH;
             const newScale = Math.min(1, scaleW, scaleH);
@@ -82,8 +80,8 @@ export default function Board() {
 
     const boardTiles = useMemo(() => tiles.slice(0, TOTAL_TILES), [tiles]);
     const POINTS = isMobile ? MOBILE_POINTS : DESKTOP_POINTS;
-    const boardW = isMobile ? 400 : 1200;
-    const boardH = isMobile ? 600 : 1000;
+    const boardW = isMobile ? 380 : 1200;
+    const boardH = isMobile ? 580 : 1000;
 
     // SVG trail path
     const trailPath = useMemo(() => {
@@ -114,11 +112,11 @@ export default function Board() {
                 </svg>
 
                 <div className={styles.startBadge} style={{ 
-                    left: `${POINTS[0].x - 90}px`, 
+                    left: `${isMobile ? POINTS[0].x - 30 : POINTS[0].x - 90}px`, 
                     top: `${POINTS[0].y - 10}px` 
                 }}>START</div>
                 <div className={styles.finishBadge} style={{ 
-                    left: `${POINTS[POINTS.length - 1].x + 70}px`, 
+                    left: `${isMobile ? POINTS[POINTS.length - 1].x + 30 : POINTS[POINTS.length - 1].x + 70}px`, 
                     top: `${POINTS[POINTS.length - 1].y - 10}px` 
                 }}>FINISH</div>
 
