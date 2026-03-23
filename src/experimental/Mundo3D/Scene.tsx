@@ -70,7 +70,7 @@ export default function Scene({ onTriggerChallenge, isCelebrating = false }: Sce
         <Float speed={4} rotationIntensity={1} floatIntensity={1}>
           <mesh position={markerPosition} rotation={[-Math.PI / 2, 0, 0]}>
             <ringGeometry args={[0.3, 0.45, 32]} />
-            <meshBasicMaterial color="#00ff00" transparent opacity={0.6} glow />
+            <meshBasicMaterial color="#00ff00" transparent opacity={0.6} />
           </mesh>
         </Float>
 
@@ -88,7 +88,7 @@ export default function Scene({ onTriggerChallenge, isCelebrating = false }: Sce
         />
         
         {/* 🎬 Post-Processing (The "Magic" Sauce) */}
-        <EffectComposer disableNormalPass>
+        <EffectComposer>
           <Bloom 
             luminanceThreshold={0.5} 
             luminanceSmoothing={0.9} 

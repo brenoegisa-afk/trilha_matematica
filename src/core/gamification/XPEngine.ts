@@ -1,11 +1,12 @@
 import type { TileType } from '../types';
 
 export class XPEngine {
-    private baseXP = {
+    private baseXP: Record<TileType, number> = {
         'Green': 50,
         'Red': 100,
         'Yellow': 30,
         'Blue': 20,
+        'Purple': 40,
         'Normal': 10,
         'Start': 0,
         'Finish': 200

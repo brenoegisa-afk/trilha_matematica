@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Float, MeshDistortMaterial } from '@react-three/drei';
 import * as THREE from 'three';
@@ -6,7 +6,7 @@ import * as THREE from 'three';
 export default function Player({ position }: { position: THREE.Vector3 }) {
   const meshRef = useRef<THREE.Group>(null);
   
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (meshRef.current) {
       // 🚀 Smooth Lerp Movement (Movement logic)
       meshRef.current.position.lerp(position, 0.1);

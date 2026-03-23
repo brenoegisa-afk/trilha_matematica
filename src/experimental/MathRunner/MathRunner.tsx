@@ -52,7 +52,7 @@ export default function MathRunner() {
 
   // 🎮 Game Loop
   const animate = useCallback((time: number) => {
-    if (lastTimeRef.current !== undefined) {
+    if (lastTimeRef.current !== null) {
       const deltaTime = time - lastTimeRef.current;
       
       setObstacles(prev => {
