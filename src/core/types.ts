@@ -1,4 +1,4 @@
-export type TileType = 'Normal' | 'Green' | 'Red' | 'Yellow' | 'Blue' | 'Start' | 'Finish';
+export type TileType = 'Normal' | 'Green' | 'Red' | 'Yellow' | 'Blue' | 'Purple' | 'Start' | 'Finish';
 
 export interface Tile {
     position: number;

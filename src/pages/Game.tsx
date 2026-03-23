@@ -35,7 +35,6 @@ export default function Game() {
                 <button className="btn-danger" onClick={() => navigate('/')} style={{ padding: '4px 10px', fontSize: '0.85rem' }}>Sair</button>
             </header>
 
-
             <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
                 <HUD />
                 <Board />

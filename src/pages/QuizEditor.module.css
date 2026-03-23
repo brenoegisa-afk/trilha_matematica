@@ -226,3 +226,71 @@
     color: #999;
     margin-top: 50px;
 }
+
+@media (max-width: 900px) {
+    .editorBox {
+        height: 100vh;
+        max-height: 100vh;
+        border-radius: 0;
+        border: none;
+        width: 100vw;
+    }
+
+    .editorOverlay {
+        padding: 0;
+    }
+
+    .aiHelperBar {
+        padding: 10px 15px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .externalLinks {
+        margin-left: 0;
+        justify-content: center;
+        padding: 10px 0;
+        border-top: 1px dashed #ccc;
+        width: 100%;
+    }
+
+    .editorSections {
+        flex-direction: column;
+        overflow-y: auto;
+        display: block; 
+    }
+
+    .addSection {
+        width: 100% !important;
+        border-right: none;
+        border-bottom: 3px solid #eee;
+        padding: 20px;
+        overflow-y: visible;
+        flex: none;
+    }
+
+    .listSection {
+        padding: 20px;
+        overflow-y: visible;
+        flex: none;
+        background: white;
+    }
+
+    .optionsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .metaRow {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .header {
+        padding: 15px;
+    }
+
+    .header h2 {
+        font-size: 1.1rem;
+    }
+}

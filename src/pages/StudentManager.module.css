@@ -100,3 +100,95 @@
     color: #555;
     text-align: right;
 }
+
+.studentCards {
+    display: none;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.studentCard {
+    background: white;
+    border: 3px solid var(--color-ink);
+    border-radius: 16px;
+    padding: 15px;
+    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1);
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px dashed #eee;
+}
+
+.cardName {
+    font-weight: 900;
+    font-size: 1.1rem;
+    color: var(--color-ink);
+}
+
+.cardStreak {
+    font-weight: 800;
+    font-size: 0.9rem;
+    background: #fff5eb;
+    padding: 2px 8px;
+    border-radius: 8px;
+    color: #f76707;
+}
+
+.cardStats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.statItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.statItem label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    font-weight: 800;
+    color: #999;
+    margin-bottom: 2px;
+}
+
+.statItem span {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--color-ink);
+}
+
+@media (max-width: 600px) {
+    .studentTable {
+        display: none;
+    }
+
+    .studentCards {
+        display: flex;
+    }
+
+    .header h2 {
+        font-size: 1.3rem;
+    }
+
+    .modal {
+        width: 95%;
+        max-height: 90vh;
+    }
+
+    .content {
+        padding: 15px;
+    }
+
+    .statItem span {
+        font-size: 0.8rem;
+    }
+}

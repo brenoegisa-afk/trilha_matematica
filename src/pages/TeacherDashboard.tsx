@@ -35,7 +35,7 @@ export default function TeacherDashboard() {
         const checkUser = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
-                navigate('/teacher/login');
+                navigate('/login');
                 return;
             }
             setUser(session.user);

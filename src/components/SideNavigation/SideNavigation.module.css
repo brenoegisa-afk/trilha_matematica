@@ -8,7 +8,8 @@
     position: fixed;
     left: 0;
     top: 0;
-    z-index: 1000;
+    z-index: 1200;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .logo {
@@ -16,10 +17,17 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    justify-content: space-between;
 }
 
 .logoIcon {
     font-size: 2rem;
+}
+
+.logoContent {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .logoText {
@@ -27,6 +35,16 @@
     font-weight: 900;
     color: #333;
     letter-spacing: -1px;
+}
+
+.closeBtn {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
+    padding: 5px;
 }
 
 .menuList {
@@ -110,4 +128,36 @@
     font-size: 0.9rem;
     font-weight: 800;
     color: #ff9800;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1150;
+    backdrop-filter: blur(2px);
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@media (max-width: 1024px) {
+    .sideNav {
+        transform: translateX(-100%);
+        box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+    }
+    
+    .sideNav.open {
+        transform: translateX(0);
+    }
+    
+    .closeBtn {
+        display: block;
+    }
 }

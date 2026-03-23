@@ -174,3 +174,45 @@
     background: white;
     box-shadow: 0 3px 0 rgba(0,0,0,0.1);
 }
+
+/* Tablet Responsiveness */
+@media (min-width: 601px) and (max-width: 1024px) {
+    .setupContainer {
+        padding: 30px 15px;
+    }
+    .cardGrid {
+        grid-template-columns: repeat(2, 1fr); /* 2 columns for tablet */
+    }
+    .gradeGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .panel {
+        padding: 1.5rem;
+    }
+    .title {
+        font-size: 2.2rem;
+    }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+    .setupContainer {
+        padding: 15px 10px;
+    }
+    .cardGrid {
+        grid-template-columns: 1fr; /* Stack vertically */
+    }
+    .gradeGrid {
+        grid-template-columns: 1fr;
+    }
+    .panel {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    .title {
+        font-size: 1.6rem;
+    }
+    .label {
+        font-size: 1rem;
+    }
+}

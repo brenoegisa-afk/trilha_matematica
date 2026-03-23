@@ -69,28 +69,59 @@ export const StudentManager: React.FC<StudentManagerProps> = ({ classId, classNa
                     ) : students.length === 0 ? (
                         <div className={styles.empty}>Nenhum aluno vinculado a esta turma ainda.</div>
                     ) : (
-                        <table className={styles.studentTable}>
-                            <thead>
-                                <tr>
-                                    <th>Nome</th>
-                                    <th>Pontos</th>
-                                    <th>Estrelas</th>
-                                    <th>Sequência (🔥)</th>
-                                    <th>Última Partida</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {students.map(student => (
-                                    <tr key={student.id}>
-                                        <td className={styles.nameCell}>{student.name}</td>
-                                        <td>{student.score}</td>
-                                        <td>⭐ {student.stars}</td>
-                                        <td>{student.streak >= 3 ? `🔥 ${student.streak}` : student.streak}</td>
-                                        <td>{new Date(student.last_played).toLocaleDateString('pt-BR')}</td>
+                        <>
+                            {/* Desktop Table View */}
+                            <table className={styles.studentTable}>
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Pontos</th>
+                                        <th>Estrelas</th>
+                                        <th>Sequência (🔥)</th>
+                                        <th>Última Partida</th>
                                     </tr>
+                                </thead>
+                                <tbody>
+                                    {students.map(student => (
+                                        <tr key={student.id}>
+                                            <td className={styles.nameCell}>{student.name}</td>
+                                            <td>{student.score}</td>
+                                            <td>⭐ {student.stars}</td>
+                                            <td>{student.streak >= 3 ? `🔥 ${student.streak}` : student.streak}</td>
+                                            <td>{new Date(student.last_played).toLocaleDateString('pt-BR')}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+
+                            {/* Mobile Card View */}
+                            <div className={styles.studentCards}>
+                                {students.map(student => (
+                                    <div key={student.id} className={styles.studentCard}>
+                                        <div className={styles.cardHeader}>
+                                            <span className={styles.cardName}>{student.name}</span>
+                                            <span className={styles.cardStreak}>
+                                                {student.streak >= 3 ? `🔥 ${student.streak}` : `✨ ${student.streak}`}
+                                            </span>
+                                        </div>
+                                        <div className={styles.cardStats}>
+                                            <div className={styles.statItem}>
+                                                <label>Pontos</label>
+                                                <span>{student.score}</span>
+                                            </div>
+                                            <div className={styles.statItem}>
+                                                <label>Estrelas</label>
+                                                <span>⭐ {student.stars}</span>
+                                            </div>
+                                            <div className={styles.statItem}>
+                                                <label>Visto em</label>
+                                                <span>{new Date(student.last_played).toLocaleDateString('pt-BR')}</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 ))}
-                            </tbody>
-                        </table>
+                            </div>
+                        </>
                     )}
                 </div>
 

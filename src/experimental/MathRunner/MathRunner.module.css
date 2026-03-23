@@ -1,0 +1,281 @@
+.gameContainer {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(to bottom, #82ccdd 0%, #60a3bc 100%);
+  font-family: 'Outfit', sans-serif;
+  cursor: pointer;
+}
+
+/* 🏔️ Layered Parallax Background */
+.mountains {
+  position: absolute;
+  bottom: 20%;
+  left: 0;
+  width: 200%;
+  height: 250px;
+  background-color: #78e08f;
+  clip-path: polygon(0% 100%, 15% 30%, 30% 80%, 45% 40%, 65% 90%, 80% 10%, 100% 100%);
+  opacity: 0.3;
+  animation: scrollMountains 40s linear infinite;
+}
+
+@keyframes scrollMountains {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.forest {
+  position: absolute;
+  bottom: 120px;
+  left: 0;
+  width: 200%;
+  height: 180px;
+  display: flex;
+  gap: 120px;
+  animation: scrollForest 12s linear infinite;
+}
+
+@keyframes scrollForest {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.tree {
+  width: 50px;
+  height: 80px;
+  background: #38ada9;
+  border-radius: 50% 50% 10px 10px;
+  position: relative;
+}
+
+/* 🛣️ THE TRACK (Dirt Path) */
+.track {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 200%;
+  height: 140px;
+  background: #78e08f;
+  border-top: 8px solid #38ada9;
+  animation: scrollTrack 6s linear infinite;
+}
+
+@keyframes scrollTrack {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.road {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  background: #fad390;
+  box-shadow: inset 0 5px 10px rgba(0,0,0,0.05);
+}
+
+/* 🐰 CUTE RABBIT REDESIGN */
+.character {
+  position: absolute;
+  width: 80px;
+  height: 100px;
+  bottom: 110px;
+  left: 150px;
+  z-index: 100;
+}
+
+.rabbitHead {
+  width: 50px;
+  height: 45px;
+  background: #ffffff;
+  border-radius: 25px 25px 20px 20px;
+  position: absolute;
+  top: 0;
+  left: 15px;
+  z-index: 2;
+  box-shadow: inset -4px -4px 0 rgba(0,0,0,0.05);
+}
+
+.rabbitEars {
+  display: flex;
+  justify-content: space-between;
+  width: 40px;
+  position: absolute;
+  top: -30px;
+  left: 5px;
+}
+
+.ear {
+  width: 16px;
+  height: 45px;
+  background: #ffffff;
+  border-radius: 10px;
+  border-top: 8px solid #ffafaf; /* Pink inner ear */
+  transform-origin: bottom;
+  animation: earActive 0.8s ease-in-out infinite;
+}
+
+@keyframes earActive {
+  0%, 100% { transform: scaleY(1) rotate(-5deg); }
+  50% { transform: scaleY(0.9) rotate(5deg); }
+}
+
+.rabbitBody {
+  width: 55px;
+  height: 40px;
+  background: #ffffff;
+  border-radius: 20px;
+  position: absolute;
+  bottom: 15px;
+  left: 12px;
+  z-index: 1;
+}
+
+.rabbitEyes {
+  display: flex;
+  gap: 12px;
+  margin-top: 15px;
+  justify-content: center;
+}
+
+.eye {
+  width: 10px;
+  height: 10px;
+  background: #2d3436;
+  border-radius: 50%;
+}
+
+.blush {
+  position: absolute;
+  bottom: 10px;
+  width: 12px;
+  height: 6px;
+  background: #ffcccc;
+  border-radius: 50%;
+}
+
+/* 🏃‍♂️ Bounce Animation */
+.bounce {
+  animation: runBounce 0.4s ease-in-out infinite;
+}
+
+@keyframes runBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.jump {
+  animation: rabbitJump 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+@keyframes rabbitJump {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-200px); }
+  100% { transform: translateY(0); }
+}
+
+/* 🏁 MATH GATES (Colorful Arches) */
+.gate {
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  z-index: 50;
+  transition: transform 0.3s ease;
+}
+
+.gateValue {
+  background: #ffffff;
+  color: #38ada9;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2.2rem;
+  font-weight: 900;
+  margin-bottom: 25px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  border: 8px solid #f8c291;
+  transition: all 0.3s ease;
+}
+
+.correctHit .gateValue {
+  background: #78e08f;
+  color: white;
+  border-color: #ffffff;
+  transform: scale(1.4);
+  box-shadow: 0 0 30px rgba(120, 224, 143, 0.8);
+}
+
+/* 🎰 HUD (Magical Cloud) */
+.hud {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  z-index: 100;
+}
+
+.score {
+  background: rgba(255,255,255,0.3);
+  padding: 10px 30px;
+  border-radius: 30px;
+  font-size: 2.5rem;
+  color: white;
+  font-weight: 900;
+  backdrop-filter: blur(10px);
+}
+
+.questionCloud {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  background: white;
+  padding: 25px 60px;
+  border-radius: 50px;
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: #38ada9;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+.feedbackCorrect {
+  position: fixed;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 6rem;
+  font-weight: 900;
+  color: #78e08f;
+  text-shadow: 0 0 20px rgba(120, 224, 143, 0.5);
+  animation: floatUp 1s ease-out forwards;
+  z-index: 1000;
+}
+
+@keyframes floatUp {
+  0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+  20% { transform: translate(-50%, -60%) scale(1.2); opacity: 1; }
+  100% { transform: translate(-50%, -120%) scale(1); opacity: 0; }
+}
+
+.backButton {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  background: #eb4d4b;
+  color: white;
+  padding: 12px 30px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: bold;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}

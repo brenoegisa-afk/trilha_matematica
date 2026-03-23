@@ -5,8 +5,8 @@ import '../App.css';
 export default function Home() {
     const navigate = useNavigate();
 
-    // A simple array of math symbols for the parallax background
-    const symbols = ['+', '-', '×', '÷', '=', '%', '?', '!', '1', '2', '3'];
+    // A mix of symbols from Math, Portuguese, and Science for the dynamic background
+    const symbols = ['+', '-', '×', '÷', '=', 'A', 'B', 'C', '!', '?', '📖', '✨', '🪐', '🔬', '🌱'];
 
     return (
         <div className={styles.homeContainer}>
@@ -33,7 +33,6 @@ export default function Home() {
             <div className={styles.heroSection}>
                 <div className={styles.titleContainer}>
                     <h1 className={styles.mainTitle}>Trilha dos Campeões</h1>
-                    <h2 className={styles.subTitle}>DA MATEMÁTICA</h2>
                 </div>
 
                 <button
@@ -86,19 +85,19 @@ export default function Home() {
             {/* Interactive Rules Section */}
             <div className={styles.rulesSection}>
                 <h3 className={styles.rulesHeader}>Como Jogar?</h3>
-                <p className={styles.rulesSub}>Role o dado, ande pelo tabuleiro e resolva os desafios matemáticos para ganhar pontos e avançar! Conheça as cartas:</p>
+                <p className={styles.rulesSub}>Role o dado, ande pelo tabuleiro e resolva os desafios para ganhar pontos e avançar! Conheça as casas marcadas:</p>
 
                 <div className={styles.cardsContainer}>
                     {/* Green Card */}
                     <div className={styles.flipCard}>
                         <div className={`${styles.flipCardInner} ${styles.greenCard}`}>
                             <div className={styles.flipCardFront}>
-                                <div className={styles.cardIcon}>➕</div>
-                                <h4>Avanço Seguro</h4>
+                                <div className={styles.cardIcon}>✨</div>
+                                <h4>Acerto Seguro</h4>
                             </div>
                             <div className={styles.flipCardBack}>
-                                <p><strong>Acertou:</strong> Avance +1 casa e ganhe 50 pontos!</p>
-                                <span>Questões básicas de Adição e Subtração.</span>
+                                <p><strong>Acertando:</strong> Você avança 1 casa extra e ganha mais 50 pontos!</p>
+                                <p className={styles.cardHint}>Caminho tranquilo.</p>
                             </div>
                         </div>
                     </div>
@@ -107,13 +106,13 @@ export default function Home() {
                     <div className={styles.flipCard}>
                         <div className={`${styles.flipCardInner} ${styles.redCard}`}>
                             <div className={styles.flipCardFront}>
-                                <div className={styles.cardIcon}>⚠️</div>
-                                <h4>Desafio Rápido</h4>
+                                <div className={styles.cardIcon}>🔥</div>
+                                <h4>Desafio Épico</h4>
                             </div>
                             <div className={styles.flipCardBack}>
                                 <p><strong>Acertou:</strong> Avance +2 casas e ganhe 100 pontos!</p>
-                                <p><strong>Errou:</strong> Volte 1 casa!</p>
-                                <span>Risco e Recompensa.</span>
+                                <p><strong>Errou:</strong> Volte 1 ou 2 casas (dependendo da sua armadura)!</p>
+                                <p className={styles.cardHint}>Risco e Recompensa.</p>
                             </div>
                         </div>
                     </div>
@@ -123,11 +122,11 @@ export default function Home() {
                         <div className={`${styles.flipCardInner} ${styles.yellowCard}`}>
                             <div className={styles.flipCardFront}>
                                 <div className={styles.cardIcon}>🧠</div>
-                                <h4>Raciocínio</h4>
+                                <h4>Enigma Rápido</h4>
                             </div>
                             <div className={styles.flipCardBack}>
-                                <p><strong>Acertou:</strong> Ganhe 30 pontos e Jogue o dado novamente!</p>
-                                <span>Enigmas de Lógica e Sequências.</span>
+                                <p>Perguntas que vão testar o seu raciocínio lógico e conhecimentos gerais.</p>
+                                <p className={styles.cardHint}>Surpresas garantidas.</p>
                             </div>
                         </div>
                     </div>

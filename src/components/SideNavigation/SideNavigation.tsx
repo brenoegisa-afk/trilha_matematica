@@ -2,7 +2,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useGame } from '../../context/GameContext';
 import styles from './SideNavigation.module.css';
 
-export default function SideNavigation() {
+interface SideNavigationProps {
+    isOpen?: boolean;
+    onClose?: () => void;
+}
+
+export default function SideNavigation({ isOpen, onClose }: SideNavigationProps) {
     const navigate = useNavigate();
     const location = useLocation();
     const { currentUser, logout } = useGame();
@@ -16,47 +21,58 @@ export default function SideNavigation() {
         { id: 'admin', label: 'Admin', icon: '⚙️', path: '/admin/import' },
     ];
 
-    return (
-        <nav className={styles.sideNav}>
-            <div className={styles.logo}>
-                <span className={styles.logoIcon}>🏆</span>
-                <span className={styles.logoText}>Trilha</span>
-            </div>
-            
-            <div className={styles.menuList}>
-                {menuItems.map((item) => {
-                    const isActive = location.pathname === item.path;
-                    
-                    return (
-                        <button
-                            key={item.id}
-                            className={`${styles.navItem} ${isActive ? styles.active : ''}`}
-                            onClick={() => navigate(item.path)}
-                        >
-                            <span className={styles.icon}>{item.icon}</span>
-                            <span className={styles.label}>{item.label}</span>
-                        </button>
-                    );
-                })}
-            </div>
+    const handleNavigation = (path: string) => {
+        navigate(path);
+        if (onClose) onClose();
+    };
 
-            <div className={styles.footer}>
-                {currentUser ? (
-                    <div className={styles.userSection}>
-                        <div className={styles.userInfo}>
-                            <div className={styles.userEmail}>{currentUser.email}</div>
-                            <button className={styles.logoutBtn} onClick={logout}>Sair</button>
-                        </div>
-                    </div>
-                ) : (
-                    <button className={styles.loginBtn} onClick={() => navigate('/login')}>
-                        🔑 Entrar (SaaS)
-                    </button>
-                )}
-                <div className={styles.streakIndicator}>
-                    🔥 Ativo!
+    return (
+        <>
+            {/* Mobile Overlay */}
+            {isOpen && <div className={styles.overlay} onClick={onClose} />}
+            
+            <nav className={`${styles.sideNav} ${isOpen ? styles.open : ''}`}>
+                <div className={styles.logo}>
+                    <span className={styles.logoIcon}>🏆</span>
+                    <span className={styles.logoText}>Trilha</span>
+                    {onClose && <button className={styles.closeBtn} onClick={onClose}>✕</button>}
                 </div>
-            </div>
-        </nav>
+                
+                <div className={styles.menuList}>
+                    {menuItems.map((item) => {
+                        const isActive = location.pathname === item.path;
+                        
+                        return (
+                            <button
+                                key={item.id}
+                                className={`${styles.navItem} ${isActive ? styles.active : ''}`}
+                                onClick={() => handleNavigation(item.path)}
+                            >
+                                <span className={styles.icon}>{item.icon}</span>
+                                <span className={styles.label}>{item.label}</span>
+                            </button>
+                        );
+                    })}
+                </div>
+
+                <div className={styles.footer}>
+                    {currentUser ? (
+                        <div className={styles.userSection}>
+                            <div className={styles.userInfo}>
+                                <div className={styles.userEmail}>{currentUser.email}</div>
+                                <button className={styles.logoutBtn} onClick={() => { logout(); if(onClose) onClose(); }}>Sair</button>
+                            </div>
+                        </div>
+                    ) : (
+                        <button className={styles.loginBtn} onClick={() => handleNavigation('/login')}>
+                            🔑 Entrar (SaaS)
+                        </button>
+                    )}
+                    <div className={styles.streakIndicator}>
+                        🔥 Ativo!
+                    </div>
+                </div>
+            </nav>
+        </>
     );
 }

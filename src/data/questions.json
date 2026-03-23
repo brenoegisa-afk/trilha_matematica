@@ -1,5 +1,1214 @@
 {
   "subjects": {
+    "portuguese": {
+      "grades": {
+        "5": {
+          "Green": [
+            {
+              "question": "Identifique o sujeito: 'O carro vermelho quebrou na rua.'",
+              "answer": "O carro vermelho",
+              "options": [
+                "A rua",
+                "Quebrou",
+                "O carro vermelho",
+                "Vermelho"
+              ]
+            },
+            {
+              "question": "Palavra proparoxítona:",
+              "answer": "Árvore",
+              "options": [
+                "Casa",
+                "Árvore",
+                "Coração",
+                "Alegria"
+              ]
+            },
+            {
+              "question": "Verbo no infinitivo:",
+              "answer": "Cantar",
+              "options": [
+                "Cantou",
+                "Canta",
+                "Cantar",
+                "Cantarão"
+              ]
+            },
+            {
+              "question": "Qual o plural de 'Papel'?",
+              "answer": "Papéis",
+              "options": [
+                "Papeis",
+                "Papéis",
+                "Papeles",
+                "Papéus"
+              ]
+            },
+            {
+              "question": "Adjetivo para 'chuva forte':",
+              "answer": "Torrencial",
+              "options": [
+                "Calma",
+                "Torrencial",
+                "Pequena",
+                "Doce"
+              ]
+            }
+          ],
+          "Red": [
+            {
+              "question": "Substantivo coletivo de lobos:",
+              "answer": "Alcateia",
+              "options": [
+                "Matilha",
+                "Bando",
+                "Manada",
+                "Alcateia"
+              ]
+            },
+            {
+              "question": "Conjugue 'Ser' na 1ª pessoa do singular do PRESENTE:",
+              "answer": "Eu sou",
+              "options": [
+                "Eu fui",
+                "Eu era",
+                "Eu sou",
+                "Tu és"
+              ]
+            },
+            {
+              "question": "Onde está o erro: 'Ele trouce o bolo.'?",
+              "answer": "trouce",
+              "options": [
+                "Ele",
+                "trouce",
+                "o",
+                "bolo"
+              ]
+            },
+            {
+              "question": "Palavra com dígrafo:",
+              "answer": "Chave",
+              "options": [
+                "Cama",
+                "Chave",
+                "Prato",
+                "Bola"
+              ]
+            },
+            {
+              "question": "Complete: '__ muito tempo que não te vejo.'",
+              "answer": "Faz",
+              "options": [
+                "Fazem",
+                "Fazem-se",
+                "Faz",
+                "Fará"
+              ]
+            }
+          ],
+          "Yellow": [
+            {
+              "question": "Figura de linguagem: 'Chorou um rio de lágrimas.'",
+              "answer": "Hipérbole",
+              "options": [
+                "Metáfora",
+                "Hipérbole",
+                "Ironia",
+                "Pleonasmo"
+              ]
+            },
+            {
+              "question": "Uso dos Porquês: 'Não sei ___ ela chorou.'",
+              "answer": "por que",
+              "options": [
+                "porque",
+                "por que",
+                "porquê",
+                "por quê"
+              ]
+            },
+            {
+              "question": "Quem escreveu 'O Sítio do Picapau Amarelo'?",
+              "answer": "Monteiro Lobato",
+              "options": [
+                "Machado de Assis",
+                "Ziraldo",
+                "Monteiro Lobato",
+                "Maurício de Sousa"
+              ]
+            },
+            {
+              "question": "Tipo de texto que ensina a fazer algo:",
+              "answer": "Instrucional",
+              "options": [
+                "Narrativo",
+                "Descritivo",
+                "Instrucional",
+                "Argumentativo"
+              ]
+            },
+            {
+              "question": "Acentuação correta:",
+              "answer": "Amável",
+              "options": [
+                "Amavél",
+                "Amável",
+                "Âmavel",
+                "Amavel"
+              ]
+            }
+          ]
+        },
+        "1-2": {
+          "Green": [
+            {
+              "question": "Qual é a primeira letra da palavra 'GATO'?",
+              "answer": "G",
+              "options": [
+                "A",
+                "G",
+                "O",
+                "T"
+              ]
+            },
+            {
+              "question": "Quantas sílabas tem a palavra 'BOLO'?",
+              "answer": "2",
+              "options": [
+                "1",
+                "2",
+                "3",
+                "4"
+              ]
+            },
+            {
+              "question": "Qual o plural de 'Menino'?",
+              "answer": "Meninos",
+              "options": [
+                "Meninas",
+                "Os Menino",
+                "Meninos",
+                "Menino"
+              ]
+            },
+            {
+              "question": "Qual a letra final da palavra 'AMOR'?",
+              "answer": "R",
+              "options": [
+                "M",
+                "O",
+                "R",
+                "A"
+              ]
+            },
+            {
+              "question": "A palavra 'CASA' começa com vogal ou consoante?",
+              "answer": "Consoante",
+              "options": [
+                "Vogal",
+                "Consoante",
+                "Ambas",
+                "Nenhuma"
+              ]
+            }
+          ],
+          "Red": [
+            {
+              "question": "O que rima com 'MÃO'?",
+              "answer": "Pão",
+              "options": [
+                "Pé",
+                "Boca",
+                "Pão",
+                "Dedo"
+              ]
+            },
+            {
+              "question": "Qual dessas é uma vogal?",
+              "answer": "E",
+              "options": [
+                "B",
+                "C",
+                "E",
+                "F"
+              ]
+            },
+            {
+              "question": "Qual palavra tem 3 sílabas?",
+              "answer": "Macaco",
+              "options": [
+                "Cão",
+                "Gato",
+                "Macaco",
+                "Rã"
+              ]
+            },
+            {
+              "question": "Complete a frase: O céu é...",
+              "answer": "Azul",
+              "options": [
+                "Azul",
+                "Quadrado",
+                "Doce",
+                "Gato"
+              ]
+            },
+            {
+              "question": "Qual o feminino de 'Cachorro'?",
+              "answer": "Cadela",
+              "options": [
+                "Cachorra",
+                "Cadelinha",
+                "Cadela",
+                "Gata"
+              ]
+            }
+          ],
+          "Yellow": [
+            {
+              "question": "Adivinhe: O que é, o que é, cai em pé e corre deitado?",
+              "answer": "Chuva",
+              "options": [
+                "Pedra",
+                "Chuva",
+                "Bicicleta",
+                "Criança"
+              ]
+            },
+            {
+              "question": "Qual nome começa com a letra 'M'?",
+              "answer": "Maria",
+              "options": [
+                "João",
+                "Pedro",
+                "Maria",
+                "Ana"
+              ]
+            },
+            {
+              "question": "Onde nós deitamos para dormir?",
+              "answer": "Cama",
+              "options": [
+                "Sofá",
+                "Chão",
+                "Cama",
+                "Mesa"
+              ]
+            },
+            {
+              "question": "Que animal faz 'Miau'?",
+              "answer": "Gato",
+              "options": [
+                "Cachorro",
+                "Pato",
+                "Gato",
+                "Vaca"
+              ]
+            },
+            {
+              "question": "A palavra 'SOL' tem quantas letras?",
+              "answer": "3",
+              "options": [
+                "1",
+                "2",
+                "3",
+                "4"
+              ]
+            }
+          ]
+        },
+        "3-4": {
+          "Green": [
+            {
+              "question": "Qual o aumentativo de 'Gato'?",
+              "answer": "Gatão",
+              "options": [
+                "Gatinho",
+                "Gatão",
+                "Gatarrão",
+                "Gatito"
+              ]
+            },
+            {
+              "question": "Qual o sinônimo de 'Feliz'?",
+              "answer": "Alegre",
+              "options": [
+                "Triste",
+                "Alegre",
+                "Bravo",
+                "Cansado"
+              ]
+            },
+            {
+              "question": "Onde está o adjetivo: 'O menino esperto leu o livro.'?",
+              "answer": "esperto",
+              "options": [
+                "O",
+                "menino",
+                "esperto",
+                "leu"
+              ]
+            },
+            {
+              "question": "Quantas sílabas tem 'CARAMBOLA'?",
+              "answer": "4",
+              "options": [
+                "2",
+                "3",
+                "4",
+                "5"
+              ]
+            },
+            {
+              "question": "O antônimo de 'Claro' é...",
+              "answer": "Escuro",
+              "options": [
+                "Branco",
+                "Noite",
+                "Escuro",
+                "Luz"
+              ]
+            }
+          ],
+          "Red": [
+            {
+              "question": "Indique a palavra oxítona.",
+              "answer": "Café",
+              "options": [
+                "Mesa",
+                "Lápis",
+                "Café",
+                "Pássaro"
+              ]
+            },
+            {
+              "question": "Como se separa 'PASSARINHO'?",
+              "answer": "PAS-SA-RI-NHO",
+              "options": [
+                "PA-SSA-RI-NHO",
+                "PAS-SA-RI-NHO",
+                "PASSA-RI-NHO",
+                "PAS-SAR-INHO"
+              ]
+            },
+            {
+              "question": "O feminino de 'Herói' é...",
+              "answer": "Heroína",
+              "options": [
+                "Heróia",
+                "Mulher-Herói",
+                "Heroína",
+                "Valente"
+              ]
+            },
+            {
+              "question": "Complete com M ou N: CA__PO",
+              "answer": "M",
+              "options": [
+                "N",
+                "M",
+                "L",
+                "S"
+              ]
+            },
+            {
+              "question": "Identifique o verbo: 'A gata dorme no sofá.'",
+              "answer": "dorme",
+              "options": [
+                "A",
+                "gata",
+                "dorme",
+                "sofá"
+              ]
+            }
+          ],
+          "Yellow": [
+            {
+              "question": "O que é que tem coroa mas não é rei?",
+              "answer": "Abacaxi",
+              "options": [
+                "Dente",
+                "Abacaxi",
+                "Rainha",
+                "Leão"
+              ]
+            },
+            {
+              "question": "Complete o provérbio: 'De grão em grão...'",
+              "answer": "a galinha enche o papo",
+              "options": [
+                "a formiga junta",
+                "a galinha enche o papo",
+                "a vida passa",
+                "ninguém percebe"
+              ]
+            },
+            {
+              "question": "Qual gênero textual conta uma história com início, meio e fim?",
+              "answer": "Narrativa",
+              "options": [
+                "Receita",
+                "Poema",
+                "Bula",
+                "Narrativa"
+              ]
+            },
+            {
+              "question": "Qual é a pontuação final de uma pergunta?",
+              "answer": "Interrogação",
+              "options": [
+                "Ponto final",
+                "Vírgula",
+                "Exclamação",
+                "Interrogação"
+              ]
+            },
+            {
+              "question": "Palavra que indica ação no tempo passado:",
+              "answer": "Correu",
+              "options": [
+                "Corre",
+                "Correrá",
+                "Correndo",
+                "Correu"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "science": {
+      "name": "Ciências (Anos Iniciais)",
+      "description": "Explorando a natureza, os animais e o corpo humano.",
+      "themeColor": "#4caf50",
+      "icon": "🔬",
+      "skills": [
+        {
+          "id": "seres_vivos",
+          "name": "Seres Vivos e Não Vivos"
+        },
+        {
+          "id": "corpo_humano",
+          "name": "O Corpo Humano e os Sentidos"
+        },
+        {
+          "id": "ecologia_reciclagem",
+          "name": "Meio Ambiente e Reciclagem"
+        },
+        {
+          "id": "materia_energia",
+          "name": "Matéria, Estados Físicos e Energia"
+        },
+        {
+          "id": "astronomia_basica",
+          "name": "Terra e Universo (Ciclos e Estações)"
+        }
+      ],
+      "questions": [
+        {
+          "id": "sci_1_1",
+          "grade": "1",
+          "skill": "seres_vivos",
+          "difficulty": "easy",
+          "question": "O que precisa de água para viver e crescer?",
+          "answer": "Uma planta",
+          "options": [
+            "Uma pedra",
+            "Um sapato",
+            "Uma planta",
+            "Um caderno"
+          ],
+          "explanation": "As plantas são seres vivos, e todo ser vivo precisa de água para sobreviver."
+        },
+        {
+          "id": "sci_1_2",
+          "grade": "1",
+          "skill": "corpo_humano",
+          "difficulty": "easy",
+          "question": "Com qual parte do corpo nós conseguimos cheirar uma flor?",
+          "answer": "Nariz",
+          "options": [
+            "Olhos",
+            "Orelha",
+            "Nariz",
+            "Boca"
+          ],
+          "explanation": "O nariz é o órgão responsável pelo olfato, o sentido que nos permite sentir os cheiros."
+        },
+        {
+          "id": "sci_1_3",
+          "grade": "1",
+          "skill": "astronomia_basica",
+          "difficulty": "easy",
+          "question": "O que nós vemos no céu apenas de noite?",
+          "answer": "Estrelas",
+          "options": [
+            "O Sol",
+            "Estrelas",
+            "Nuvens de chuva",
+            "O arco-íris"
+          ],
+          "explanation": "Apesar do Sol também ser uma estrela, só vemos as outras estrelas quando ele se põe."
+        },
+        {
+          "id": "sci_1_4",
+          "grade": "1",
+          "skill": "seres_vivos",
+          "difficulty": "medium",
+          "question": "Qual destes animais vive na água?",
+          "answer": "Peixe",
+          "options": [
+            "Cachorro",
+            "Peixe",
+            "Gato",
+            "Pássaro"
+          ],
+          "explanation": "O peixe é um animal aquático, ou seja, vive e respira debaixo da água."
+        },
+        {
+          "id": "sci_1_5",
+          "grade": "1",
+          "skill": "ecologia_reciclagem",
+          "difficulty": "medium",
+          "question": "Onde devemos jogar o papel de bala?",
+          "answer": "Na lixeira",
+          "options": [
+            "No chão",
+            "No rio",
+            "Na lixeira",
+            "Na grama"
+          ],
+          "explanation": "Jogar lixo na lixeira ajuda a manter os lugares limpos e protege a natureza contra a poluição."
+        },
+        {
+          "id": "sci_2_1",
+          "grade": "2",
+          "skill": "materia_energia",
+          "difficulty": "easy",
+          "question": "O que acontece com um cubo de gelo se você o deixar no sol?",
+          "answer": "Ele derrete",
+          "options": [
+            "Fica maior",
+            "Ele derrete",
+            "Vira pó",
+            "Gela mais"
+          ],
+          "explanation": "O calor do sol faz com que a água em estado sólido (gelo) derreta e vire líquido."
+        },
+        {
+          "id": "sci_2_2",
+          "grade": "2",
+          "skill": "seres_vivos",
+          "difficulty": "easy",
+          "question": "Qual desses animais é capaz de voar?",
+          "answer": "Borboleta",
+          "options": [
+            "Cachorro",
+            "Sapo",
+            "Borboleta",
+            "Formiga"
+          ],
+          "explanation": "As borboletas são insetos alados (têm asas) e por isso conseguem voar."
+        },
+        {
+          "id": "sci_2_3",
+          "grade": "2",
+          "skill": "corpo_humano",
+          "difficulty": "medium",
+          "question": "Qual sentido usamos para saborear um doce ou um salgado?",
+          "answer": "Paladar",
+          "options": [
+            "Olfato",
+            "Visão",
+            "Paladar",
+            "Tato"
+          ],
+          "explanation": "O paladar, que percebemos pela língua, é o sentido que nos ajuda a identificar os sabores da comida."
+        },
+        {
+          "id": "sci_2_4",
+          "grade": "2",
+          "skill": "astronomia_basica",
+          "difficulty": "medium",
+          "question": "Quantos dias tem uma semana inteira?",
+          "answer": "7 dias",
+          "options": [
+            "5 dias",
+            "7 dias",
+            "10 dias",
+            "12 dias"
+          ],
+          "explanation": "A semana é composta por 7 dias."
+        },
+        {
+          "id": "sci_2_5",
+          "grade": "2",
+          "skill": "ecologia_reciclagem",
+          "difficulty": "hard",
+          "question": "Qual material demora mais tempo para desaparecer na natureza se for jogado fora?",
+          "answer": "Plástico",
+          "options": [
+            "Casca de maçã",
+            "Papel",
+            "Plástico",
+            "Folha de árvore"
+          ],
+          "explanation": "O plástico pode demorar mais de 400 anos para se decompor na natureza."
+        },
+        {
+          "id": "sci_3_1",
+          "grade": "3",
+          "skill": "corpo_humano",
+          "difficulty": "medium",
+          "question": "O que o esqueleto humano (nossos ossos) faz pelo nosso corpo?",
+          "answer": "Sustenta e protege",
+          "options": [
+            "Ajuda a digerir",
+            "Sustenta e protege",
+            "Respira por nós",
+            "Faz o sangue circular"
+          ],
+          "explanation": "O esqueleto forma a estrutura que sustenta o corpo e protege órgãos importantes."
+        },
+        {
+          "id": "sci_3_2",
+          "grade": "3",
+          "skill": "astronomia_basica",
+          "difficulty": "medium",
+          "question": "O que o planeta Terra faz que cria o dia e a noite?",
+          "answer": "Gira em torno de si mesmo",
+          "options": [
+            "Gira ao redor do Sol",
+            "Gira em torno de si mesmo",
+            "Fica totalmente parado",
+            "Gira ao redor da Lua"
+          ],
+          "explanation": "O movimento de rotação (girar ao redor de si mesmo) leva cerca de 24 horas e causa o dia e a noite."
+        },
+        {
+          "id": "sci_3_3",
+          "grade": "3",
+          "skill": "seres_vivos",
+          "difficulty": "medium",
+          "question": "Como as plantas conseguem alimento (energia)?",
+          "answer": "Da luz do sol e da água",
+          "options": [
+            "Comendo insetos",
+            "Bebendo leite",
+            "Caçando pequenos animais",
+            "Da luz do sol e da água"
+          ],
+          "explanation": "As plantas produzem o próprio alimento pelo processo de fotossíntese."
+        },
+        {
+          "id": "sci_3_4",
+          "grade": "3",
+          "skill": "materia_energia",
+          "difficulty": "hard",
+          "question": "A água fervendo que vira fumaça está passando para qual estado?",
+          "answer": "Gasoso",
+          "options": [
+            "Sólido",
+            "Líquido",
+            "Gasoso",
+            "Plasmático"
+          ],
+          "explanation": "O vapor da água quente chama-se estado gasoso."
+        },
+        {
+          "id": "sci_3_5",
+          "grade": "3",
+          "skill": "ecologia_reciclagem",
+          "difficulty": "hard",
+          "question": "O que é Reciclagem?",
+          "answer": "Transformar algo usado em algo novo",
+          "options": [
+            "Plantar mais árvores",
+            "Transformar algo usado em algo novo",
+            "Jogar o lixo longe",
+            "Construir casas de madeira"
+          ],
+          "explanation": "A reciclagem processa materiais descartados para virarem novos produtos."
+        }
+      ],
+      "grades": {
+        "5": {
+          "Green": [
+            {
+              "question": "Centro de controle do nosso corpo:",
+              "answer": "Cérebro",
+              "options": [
+                "Coração",
+                "Cérebro",
+                "Pulmão",
+                "Estômago"
+              ]
+            },
+            {
+              "question": "Qual é o planeta mais próximo do Sol?",
+              "answer": "Mercúrio",
+              "options": [
+                "Terra",
+                "Vênus",
+                "Mercúrio",
+                "Marte"
+              ]
+            },
+            {
+              "question": "O som se propaga melhor em qual meio?",
+              "answer": "Sólido",
+              "options": [
+                "Sólido",
+                "Líquido",
+                "Gasoso",
+                "Vácuo"
+              ]
+            },
+            {
+              "question": "Qual célula transporta oxigênio no sangue?",
+              "answer": "Hemácia",
+              "options": [
+                "Hemácia",
+                "Leucócito",
+                "Plaqueta",
+                "Neurônio"
+              ]
+            },
+            {
+              "question": "Planeta conhecido por seus anéis:",
+              "answer": "Saturno",
+              "options": [
+                "Júpiter",
+                "Saturno",
+                "Urano",
+                "Netuno"
+              ]
+            }
+          ],
+          "Red": [
+            {
+              "question": "Qual é a galáxia em que a Terra está?",
+              "answer": "Via Láctea",
+              "options": [
+                "Andrômeda",
+                "Via Láctea",
+                "Centaurus A",
+                "Sombrero"
+              ]
+            },
+            {
+              "question": "Qual osso é o mais longo do corpo humano?",
+              "answer": "Fêmur",
+              "options": [
+                "Úmero",
+                "Tíbia",
+                "Fêmur",
+                "Rádio"
+              ]
+            },
+            {
+              "question": "Que nome se dá à mudança de líquido para sólido?",
+              "answer": "Solidificação",
+              "options": [
+                "Evaporação",
+                "Condensação",
+                "Fusão",
+                "Solidificação"
+              ]
+            },
+            {
+              "question": "Unidade básica da matéria:",
+              "answer": "Átomo",
+              "options": [
+                "Célula",
+                "Átomo",
+                "Molécula",
+                "Bactéria"
+              ]
+            },
+            {
+              "question": "Qual é a velocidade da luz?",
+              "answer": "300.000 km/s",
+              "options": [
+                "300 km/s",
+                "3.000 km/s",
+                "30.000 km/s",
+                "300.000 km/s"
+              ]
+            }
+          ],
+          "Yellow": [
+            {
+              "question": "O que causa as marés dos oceanos?",
+              "answer": "Gravidade da Lua",
+              "options": [
+                "Vento",
+                "Rotação da Terra",
+                "Gravidade da Lua",
+                "Baleias gigantes"
+              ]
+            },
+            {
+              "question": "O que protege a Terra dos raios ultravioletas?",
+              "answer": "Camada de Ozônio",
+              "options": [
+                "Camada de Ozônio",
+                "Nuvens",
+                "Atmosfera Inferior",
+                "Vapor de água"
+              ]
+            },
+            {
+              "question": "O que não tem luz própria, reflete a luz do sol e orbita planetas?",
+              "answer": "Satélites",
+              "options": [
+                "Estrelas",
+                "Cometas",
+                "Satélites",
+                "Buracos Negros"
+              ]
+            },
+            {
+              "question": "Animal vertebrado de sangue quente, tem penas:",
+              "answer": "Ave",
+              "options": [
+                "Réptil",
+                "Mamífero",
+                "Ave",
+                "Anfíbio"
+              ]
+            },
+            {
+              "question": "Na cadeia alimentar, as plantas são os...",
+              "answer": "Produtores",
+              "options": [
+                "Consumidores",
+                "Produtores",
+                "Decompositores",
+                "Nada disso"
+              ]
+            }
+          ]
+        },
+        "1-2": {
+          "Green": [
+            {
+              "question": "Qual animal tem pescoço muito comprido?",
+              "answer": "Girafa",
+              "options": [
+                "Elefante",
+                "Leão",
+                "Girafa",
+                "Zebra"
+              ]
+            },
+            {
+              "question": "O que as abelhas produzem?",
+              "answer": "Mel",
+              "options": [
+                "Leite",
+                "Mel",
+                "Seda",
+                "Açúcar"
+              ]
+            },
+            {
+              "question": "Qual astro ilumina as nossas noites?",
+              "answer": "Lua",
+              "options": [
+                "Sol",
+                "Marte",
+                "Estrela Cadente",
+                "Lua"
+              ]
+            },
+            {
+              "question": "Onde vivem os peixes?",
+              "answer": "Água",
+              "options": [
+                "Terra",
+                "Água",
+                "Ar",
+                "Fogo"
+              ]
+            },
+            {
+              "question": "Que animal é o melhor amigo do homem?",
+              "answer": "Cachorro",
+              "options": [
+                "Cachorro",
+                "Gato",
+                "Pássaro",
+                "Peixe"
+              ]
+            }
+          ],
+          "Red": [
+            {
+              "question": "Quantas patas tem uma aranha?",
+              "answer": "8",
+              "options": [
+                "6",
+                "8",
+                "4",
+                "10"
+              ]
+            },
+            {
+              "question": "Qual é o único mamífero capaz de voar?",
+              "answer": "Morcego",
+              "options": [
+                "Pássaro",
+                "Borboleta",
+                "Morcego",
+                "Abelha"
+              ]
+            },
+            {
+              "question": "Qual estação do ano faz mais frio?",
+              "answer": "Inverno",
+              "options": [
+                "Verão",
+                "Primavera",
+                "Outono",
+                "Inverno"
+              ]
+            },
+            {
+              "question": "O que sai do vulcão quando ele entra em erupção?",
+              "answer": "Lava",
+              "options": [
+                "Água",
+                "Gelo",
+                "Lava",
+                "Fumaça Fria"
+              ]
+            },
+            {
+              "question": "Como se chama o bebê do cachorro?",
+              "answer": "Filhote",
+              "options": [
+                "Pinto",
+                "Bezerro",
+                "Filhote",
+                "Gatinho"
+              ]
+            }
+          ],
+          "Yellow": [
+            {
+              "question": "O que a lagarta vira quando cresce?",
+              "answer": "Borboleta",
+              "options": [
+                "Mosca",
+                "Formiga",
+                "Borboleta",
+                "Aranha"
+              ]
+            },
+            {
+              "question": "Que parte do nosso corpo usamos para ver?",
+              "answer": "Olhos",
+              "options": [
+                "Ouvidos",
+                "Nariz",
+                "Boca",
+                "Olhos"
+              ]
+            },
+            {
+              "question": "O que precisamos beber todos os dias para viver?",
+              "answer": "Água",
+              "options": [
+                "Refrigerante",
+                "Água",
+                "Suco",
+                "Leite"
+              ]
+            },
+            {
+              "question": "Qual desses não é um animal?",
+              "answer": "Pedra",
+              "options": [
+                "Gato",
+                "Sapo",
+                "Pedra",
+                "Leão"
+              ]
+            },
+            {
+              "question": "De que cor é a folha da maioria das árvores?",
+              "answer": "Verde",
+              "options": [
+                "Azul",
+                "Branca",
+                "Verde",
+                "Vermelha"
+              ]
+            }
+          ]
+        },
+        "3-4": {
+          "Green": [
+            {
+              "question": "A água dos oceanos é doce ou salgada?",
+              "answer": "Salgada",
+              "options": [
+                "Doce",
+                "Salgada",
+                "Amarga",
+                "Azeda"
+              ]
+            },
+            {
+              "question": "O que é o Sol?",
+              "answer": "Uma estrela",
+              "options": [
+                "Um planeta",
+                "Um cometa",
+                "Uma estrela",
+                "Um satélite"
+              ]
+            },
+            {
+              "question": "Qual órgão do corpo humano bate para bombear o sangue?",
+              "answer": "Coração",
+              "options": [
+                "Pulmão",
+                "Cérebro",
+                "Coração",
+                "Estômago"
+              ]
+            },
+            {
+              "question": "A Lua é o satélite natural de qual planeta?",
+              "answer": "Terra",
+              "options": [
+                "Marte",
+                "Terra",
+                "Vênus",
+                "Júpiter"
+              ]
+            },
+            {
+              "question": "O que usamos para respirar?",
+              "answer": "Pulmões",
+              "options": [
+                "Coração",
+                "Estômago",
+                "Pulmões",
+                "Rins"
+              ]
+            }
+          ],
+          "Red": [
+            {
+              "question": "Qual o estado da água gasosa?",
+              "answer": "Vapor",
+              "options": [
+                "Gelo",
+                "Vapor",
+                "Líquido",
+                "Neve"
+              ]
+            },
+            {
+              "question": "Os dinossauros foram extintos ou ainda vivem?",
+              "answer": "Extintos",
+              "options": [
+                "Extintos",
+                "Vivem escondidos",
+                "Vivem no mar",
+                "Estão na floresta"
+              ]
+            },
+            {
+              "question": "O que é fotossíntese?",
+              "answer": "Planta fazendo alimento",
+              "options": [
+                "Planta dormindo",
+                "Planta fazendo alimento",
+                "Animal bebendo água",
+                "Animal caçando"
+              ]
+            },
+            {
+              "question": "Qual gás nós respiramos?",
+              "answer": "Oxigênio",
+              "options": [
+                "Gás Carbônico",
+                "Cálcio",
+                "Oxigênio",
+                "Nitrogênio"
+              ]
+            },
+            {
+              "question": "Que força nos puxa para o chão?",
+              "answer": "Gravidade",
+              "options": [
+                "Magnetismo",
+                "Eletricidade",
+                "Gravidade",
+                "Fricção"
+              ]
+            }
+          ],
+          "Yellow": [
+            {
+              "question": "O que acontece com a água fervendo?",
+              "answer": "Evapora",
+              "options": [
+                "Congela",
+                "Evapora",
+                "Vira gelo",
+                "Sobe e cai na hora"
+              ]
+            },
+            {
+              "question": "Se o gelo derrete, ele vira o quê?",
+              "answer": "Água líquida",
+              "options": [
+                "Vapor",
+                "Água líquida",
+                "Nuvem",
+                "Chuva"
+              ]
+            },
+            {
+              "question": "Como se formam as nuvens?",
+              "answer": "Vapor de água condensa",
+              "options": [
+                "Gelo derrete",
+                "Vapor de água condensa",
+                "Vento forte chove",
+                "Fumaça acumulada"
+              ]
+            },
+            {
+              "question": "O que as plantas liberam para nós respirarmos?",
+              "answer": "Oxigênio",
+              "options": [
+                "Gás carbônico",
+                "Água",
+                "Oxigênio",
+                "Terra"
+              ]
+            },
+            {
+              "question": "Animais que só comem plantas são chamados de...",
+              "answer": "Herbívoros",
+              "options": [
+                "Carnívoros",
+                "Herbívoros",
+                "Ovíparos",
+                "Mamíferos"
+              ]
+            }
+          ]
+        }
+      }
+    },
     "math": {
       "grades": {
         "5": {
@@ -2147,965 +3356,6 @@
           ]
         }
       }
-    },
-    "portuguese": {
-      "grades": {
-        "5": {
-          "Green": [
-            {
-              "question": "Qual é a classe gramatical da palavra 'rapidamente'?",
-              "answer": "Advérbio",
-              "options": [
-                "Adjetivo",
-                "Advérbio",
-                "Substantivo",
-                "Verbo"
-              ]
-            },
-            {
-              "question": "Qual frase está na voz passiva?",
-              "answer": "O bolo foi comido.",
-              "options": [
-                "Eu comi o bolo.",
-                "O bolo foi comido.",
-                "Nós comemos.",
-                "Coma o bolo."
-              ]
-            },
-            {
-              "question": "Identifique o predicado: 'O aluno estudou para a prova.'",
-              "answer": "estudou para a prova",
-              "options": [
-                "O aluno",
-                "estudou para a prova",
-                "para a prova",
-                "O aluno estudou"
-              ]
-            },
-            {
-              "question": "Qual é a figura de linguagem em 'Meu coração é de pedra'?",
-              "answer": "Metáfora",
-              "options": [
-                "Comparação",
-                "Metáfora",
-                "Ironia",
-                "Onomatopeia"
-              ]
-            },
-            {
-              "question": "Qual dessas palavras é proparoxítona?",
-              "answer": "Lâmpada",
-              "options": [
-                "Café",
-                "Lápis",
-                "Lâmpada",
-                "Parede"
-              ]
-            },
-            {
-              "question": "Qual é o tempo verbal em 'Eu cantarei'?",
-              "answer": "Futuro",
-              "options": [
-                "Passado",
-                "Presente",
-                "Futuro",
-                "Infinitivo"
-              ]
-            }
-          ],
-          "Red": [
-            {
-              "question": "Qual a diferença entre 'mal' e 'mau'?",
-              "answer": "Mal é advérbio, mau é adjetivo",
-              "options": [
-                "São iguais",
-                "Mal é advérbio, mau é adjetivo",
-                "Mau é advérbio, mal é adjetivo",
-                "Não existe diferença"
-              ]
-            },
-            {
-              "question": "Complete com POR QUE, PORQUE, PORQUÊ ou POR QUÊ: '___ você não veio?'",
-              "answer": "Por que",
-              "options": [
-                "Por que",
-                "Porque",
-                "Porquê",
-                "Por quê"
-              ]
-            },
-            {
-              "question": "Qual frase tem concordância correta?",
-              "answer": "Os meninos brincaram.",
-              "options": [
-                "Os meninos brincou.",
-                "Os meninos brincaram.",
-                "Os menino brincaram.",
-                "Os meninos brincamos."
-              ]
-            },
-            {
-              "question": "Qual é o plural de 'cidadão'?",
-              "answer": "Cidadãos",
-              "options": [
-                "Cidadões",
-                "Cidadãos",
-                "Cidadães",
-                "Cidadãs"
-              ]
-            }
-          ],
-          "Yellow": [
-            {
-              "question": "O que é um texto dissertativo?",
-              "answer": "Texto que defende uma ideia",
-              "options": [
-                "Conta uma história",
-                "Texto que defende uma ideia",
-                "Descreve um lugar",
-                "Dá instruções"
-              ]
-            },
-            {
-              "question": "Qual recurso linguístico o autor usa ao escrever 'O vento sussurrava'?",
-              "answer": "Personificação",
-              "options": [
-                "Ironia",
-                "Personificação",
-                "Hipérbole",
-                "Metáfora"
-              ]
-            },
-            {
-              "question": "Identifique a conjunção: 'Estudei, mas não passei.'",
-              "answer": "mas",
-              "options": [
-                "Estudei",
-                "não",
-                "mas",
-                "passei"
-              ]
-            }
-          ],
-          "Blue": [
-            {
-              "question": "Quando usamos crase (à)?",
-              "answer": "Antes de palavras femininas",
-              "options": [
-                "Sempre antes de A",
-                "Antes de palavras femininas",
-                "Antes de verbos",
-                "Nunca"
-              ]
-            },
-            {
-              "question": "Qual desses é um ditongo?",
-              "answer": "ai",
-              "options": [
-                "br",
-                "ai",
-                "ss",
-                "nh"
-              ]
-            },
-            {
-              "question": "Qual pontuação separa itens em uma lista?",
-              "answer": "Vírgula",
-              "options": [
-                "Ponto",
-                "Vírgula",
-                "Dois-pontos",
-                "Ponto-e-vírgula"
-              ]
-            }
-          ]
-        },
-        "1-2": {
-          "Green": [
-            {
-              "question": "Qual a primeira letra da palavra BOLA?",
-              "answer": "B",
-              "options": [
-                "A",
-                "B",
-                "C",
-                "D"
-              ]
-            },
-            {
-              "question": "Qual palavra rima com GATO?",
-              "answer": "Pato",
-              "options": [
-                "Pato",
-                "Casa",
-                "Mesa",
-                "Bola"
-              ]
-            },
-            {
-              "question": "Complete: A ___ é vermelha.",
-              "answer": "maçã",
-              "options": [
-                "maçã",
-                "bola",
-                "porta",
-                "mesa"
-              ]
-            },
-            {
-              "question": "Quantas letras tem a palavra SOL?",
-              "answer": "3",
-              "options": [
-                "2",
-                "3",
-                "4",
-                "5"
-              ]
-            },
-            {
-              "question": "Qual a última letra da palavra CASA?",
-              "answer": "A",
-              "options": [
-                "C",
-                "S",
-                "A",
-                "E"
-              ]
-            },
-            {
-              "question": "Qual dessas é uma vogal?",
-              "answer": "E",
-              "options": [
-                "B",
-                "E",
-                "T",
-                "R"
-              ]
-            },
-            {
-              "question": "Qual palavra começa com a letra M?",
-              "answer": "Macaco",
-              "options": [
-                "Bola",
-                "Macaco",
-                "Gato",
-                "Rato"
-              ]
-            },
-            {
-              "question": "Qual a primeira letra do seu nome? (dica: começa com vogal)",
-              "answer": "A",
-              "options": [
-                "A",
-                "B",
-                "C",
-                "D"
-              ]
-            },
-            {
-              "question": "Qual palavra rima com MATO?",
-              "answer": "Rato",
-              "options": [
-                "Bola",
-                "Rato",
-                "Lua",
-                "Sol"
-              ]
-            },
-            {
-              "question": "Qual dessas NÃO é uma letra?",
-              "answer": "7",
-              "options": [
-                "A",
-                "B",
-                "7",
-                "C"
-              ]
-            },
-            {
-              "question": "Qual desses é um nome de animal?",
-              "answer": "Leão",
-              "options": [
-                "Mesa",
-                "Leão",
-                "Porta",
-                "Cadeira"
-              ]
-            },
-            {
-              "question": "Complete: O ___ late.",
-              "answer": "cachorro",
-              "options": [
-                "gato",
-                "cachorro",
-                "peixe",
-                "pássaro"
-              ]
-            }
-          ],
-          "Red": [
-            {
-              "question": "Qual é o plural de FLOR?",
-              "answer": "Flores",
-              "options": [
-                "Flors",
-                "Flores",
-                "Floris",
-                "Floras"
-              ]
-            },
-            {
-              "question": "Qual frase está correta?",
-              "answer": "O menino brinca.",
-              "options": [
-                "O menino brinca.",
-                "O menino brincam.",
-                "Os menino brinca.",
-                "Os meninos brinca."
-              ]
-            },
-            {
-              "question": "Qual é o feminino de GATO?",
-              "answer": "Gata",
-              "options": [
-                "Gata",
-                "Gato",
-                "Gate",
-                "Gatu"
-              ]
-            },
-            {
-              "question": "Qual palavra tem 4 sílabas?",
-              "answer": "Borboleta",
-              "options": [
-                "Sol",
-                "Casa",
-                "Borboleta",
-                "Flor"
-              ]
-            },
-            {
-              "question": "Qual desses NÃO é um animal?",
-              "answer": "Cadeira",
-              "options": [
-                "Gato",
-                "Peixe",
-                "Cadeira",
-                "Rato"
-              ]
-            },
-            {
-              "question": "Quantas sílabas tem CAVALO?",
-              "answer": "3",
-              "options": [
-                "2",
-                "3",
-                "4",
-                "5"
-              ]
-            },
-            {
-              "question": "Qual é o contrário de GRANDE?",
-              "answer": "Pequeno",
-              "options": [
-                "Largo",
-                "Pequeno",
-                "Alto",
-                "Gordo"
-              ]
-            },
-            {
-              "question": "Complete: Eu ___ na escola.",
-              "answer": "estudo",
-              "options": [
-                "estudo",
-                "estudas",
-                "estudam",
-                "estudei"
-              ]
-            }
-          ],
-          "Yellow": [
-            {
-              "question": "Qual é a vogal que está no meio da palavra BOLO?",
-              "answer": "O",
-              "options": [
-                "A",
-                "E",
-                "I",
-                "O"
-              ]
-            },
-            {
-              "question": "Se trocar a primeira letra de PATO por G, que palavra forma?",
-              "answer": "Gato",
-              "options": [
-                "Mato",
-                "Gato",
-                "Rato",
-                "Jato"
-              ]
-            },
-            {
-              "question": "Qual palavra NÃO rima com BOLA?",
-              "answer": "Mesa",
-              "options": [
-                "Cola",
-                "Mola",
-                "Mesa",
-                "Viola"
-              ]
-            },
-            {
-              "question": "Qual dessas palavras tem mais letras?",
-              "answer": "Elefante",
-              "options": [
-                "Sol",
-                "Lua",
-                "Gato",
-                "Elefante"
-              ]
-            },
-            {
-              "question": "Organize: escola / vou / eu / à. Qual é o sujeito?",
-              "answer": "Eu",
-              "options": [
-                "Escola",
-                "Eu",
-                "Vou",
-                "À"
-              ]
-            },
-            {
-              "question": "Em qual palavra o S tem som de Z?",
-              "answer": "Casa",
-              "options": [
-                "Sapo",
-                "Sol",
-                "Casa",
-                "Sino"
-              ]
-            }
-          ],
-          "Blue": [
-            {
-              "question": "Qual letra vem depois do A no alfabeto?",
-              "answer": "B",
-              "options": [
-                "C",
-                "B",
-                "D",
-                "E"
-              ]
-            },
-            {
-              "question": "Complete o alfabeto: A, B, C, ___",
-              "answer": "D",
-              "options": [
-                "E",
-                "D",
-                "F",
-                "G"
-              ]
-            },
-            {
-              "question": "Quantas vogais existem?",
-              "answer": "5",
-              "options": [
-                "3",
-                "4",
-                "5",
-                "6"
-              ]
-            },
-            {
-              "question": "Qual é a primeira letra do alfabeto?",
-              "answer": "A",
-              "options": [
-                "A",
-                "B",
-                "C",
-                "Z"
-              ]
-            },
-            {
-              "question": "Qual dessas palavras começa com vogal?",
-              "answer": "Escola",
-              "options": [
-                "Bola",
-                "Casa",
-                "Escola",
-                "Mesa"
-              ]
-            }
-          ]
-        },
-        "3-4": {
-          "Green": [
-            {
-              "question": "Qual é o sinônimo de BONITO?",
-              "answer": "Lindo",
-              "options": [
-                "Feio",
-                "Lindo",
-                "Triste",
-                "Grande"
-              ]
-            },
-            {
-              "question": "Qual é o antônimo de ALEGRE?",
-              "answer": "Triste",
-              "options": [
-                "Feliz",
-                "Triste",
-                "Contente",
-                "Animado"
-              ]
-            },
-            {
-              "question": "Qual palavra é um substantivo?",
-              "answer": "Mesa",
-              "options": [
-                "Correr",
-                "Bonito",
-                "Mesa",
-                "Rapidamente"
-              ]
-            },
-            {
-              "question": "Complete: Nós _____ no parque.",
-              "answer": "brincamos",
-              "options": [
-                "brinco",
-                "brincamos",
-                "brincam",
-                "brinca"
-              ]
-            },
-            {
-              "question": "Qual a sílaba tônica de MÚSICA?",
-              "answer": "MÚ",
-              "options": [
-                "MU",
-                "MÚ",
-                "SI",
-                "CA"
-              ]
-            },
-            {
-              "question": "Qual é o coletivo de LOBOS?",
-              "answer": "Alcateia",
-              "options": [
-                "Bando",
-                "Alcateia",
-                "Rebanho",
-                "Matilha"
-              ]
-            },
-            {
-              "question": "Qual dessas é uma palavra oxítona?",
-              "answer": "Café",
-              "options": [
-                "Música",
-                "Café",
-                "Lápis",
-                "Fácil"
-              ]
-            },
-            {
-              "question": "Quantas sílabas tem PARALELEPÍPEDO?",
-              "answer": "7",
-              "options": [
-                "5",
-                "6",
-                "7",
-                "8"
-              ]
-            }
-          ],
-          "Red": [
-            {
-              "question": "Qual frase tem um adjetivo?",
-              "answer": "O gato é preguiçoso.",
-              "options": [
-                "O gato dormiu.",
-                "O gato é preguiçoso.",
-                "O gato comeu.",
-                "O gato fugiu."
-              ]
-            },
-            {
-              "question": "Qual é o verbo na frase: O menino corre rápido?",
-              "answer": "corre",
-              "options": [
-                "menino",
-                "rápido",
-                "corre",
-                "o"
-              ]
-            },
-            {
-              "question": "Qual a pontuação correta: Que horas são___",
-              "answer": "?",
-              "options": [
-                ".",
-                "!",
-                "?",
-                ","
-              ]
-            },
-            {
-              "question": "Qual dessas palavras é um advérbio?",
-              "answer": "Rapidamente",
-              "options": [
-                "Bonito",
-                "Mesa",
-                "Rapidamente",
-                "Gato"
-              ]
-            },
-            {
-              "question": "Qual tipo de frase é: 'Saia daqui!'?",
-              "answer": "Exclamativa",
-              "options": [
-                "Interrogativa",
-                "Exclamativa",
-                "Declarativa",
-                "Negativa"
-              ]
-            },
-            {
-              "question": "Qual é o sujeito da frase: 'Maria comprou flores'?",
-              "answer": "Maria",
-              "options": [
-                "Comprou",
-                "Flores",
-                "Maria",
-                "Nenhum"
-              ]
-            }
-          ],
-          "Yellow": [
-            {
-              "question": "Qual gênero textual conta uma história com início, meio e fim?",
-              "answer": "Narrativa",
-              "options": [
-                "Poema",
-                "Narrativa",
-                "Receita",
-                "Carta"
-              ]
-            },
-            {
-              "question": "O que é uma onomatopeia?",
-              "answer": "Palavra que imita som",
-              "options": [
-                "Nome de pessoa",
-                "Palavra que imita som",
-                "Tipo de verbo",
-                "Nome de lugar"
-              ]
-            },
-            {
-              "question": "Em 'João come pão', qual é o sujeito?",
-              "answer": "João",
-              "options": [
-                "Come",
-                "Pão",
-                "João",
-                "Não tem"
-              ]
-            }
-          ],
-          "Blue": [
-            {
-              "question": "Qual letra usamos para representar o som nasal em 'campo'?",
-              "answer": "M",
-              "options": [
-                "N",
-                "M",
-                "L",
-                "R"
-              ]
-            },
-            {
-              "question": "Qual dessas palavras está escrita corretamente?",
-              "answer": "Exceção",
-              "options": [
-                "Excessão",
-                "Exceção",
-                "Exceçao",
-                "Excesão"
-              ]
-            },
-            {
-              "question": "Quando usamos letra maiúscula?",
-              "answer": "No início de frases",
-              "options": [
-                "Sempre",
-                "Nunca",
-                "No início de frases",
-                "Só em nomes"
-              ]
-            }
-          ]
-        }
-      }
-    },
-    "science": {
-      "name": "Ciências (Anos Iniciais)",
-      "description": "Explorando a natureza, os animais e o corpo humano.",
-      "themeColor": "#4caf50",
-      "icon": "🔬",
-      "skills": [
-        {
-          "id": "seres_vivos",
-          "name": "Seres Vivos e Não Vivos"
-        },
-        {
-          "id": "corpo_humano",
-          "name": "O Corpo Humano e os Sentidos"
-        },
-        {
-          "id": "ecologia_reciclagem",
-          "name": "Meio Ambiente e Reciclagem"
-        },
-        {
-          "id": "materia_energia",
-          "name": "Matéria, Estados Físicos e Energia"
-        },
-        {
-          "id": "astronomia_basica",
-          "name": "Terra e Universo (Ciclos e Estações)"
-        }
-      ],
-      "questions": [
-        {
-          "id": "sci_1_1",
-          "grade": "1",
-          "skill": "seres_vivos",
-          "difficulty": "easy",
-          "question": "O que precisa de água para viver e crescer?",
-          "answer": "Uma planta",
-          "options": [
-            "Uma pedra",
-            "Um sapato",
-            "Uma planta",
-            "Um caderno"
-          ],
-          "explanation": "As plantas são seres vivos, e todo ser vivo precisa de água para sobreviver."
-        },
-        {
-          "id": "sci_1_2",
-          "grade": "1",
-          "skill": "corpo_humano",
-          "difficulty": "easy",
-          "question": "Com qual parte do corpo nós conseguimos cheirar uma flor?",
-          "answer": "Nariz",
-          "options": [
-            "Olhos",
-            "Orelha",
-            "Nariz",
-            "Boca"
-          ],
-          "explanation": "O nariz é o órgão responsável pelo olfato, o sentido que nos permite sentir os cheiros."
-        },
-        {
-          "id": "sci_1_3",
-          "grade": "1",
-          "skill": "astronomia_basica",
-          "difficulty": "easy",
-          "question": "O que nós vemos no céu apenas de noite?",
-          "answer": "Estrelas",
-          "options": [
-            "O Sol",
-            "Estrelas",
-            "Nuvens de chuva",
-            "O arco-íris"
-          ],
-          "explanation": "Apesar do Sol também ser uma estrela, só vemos as outras estrelas quando ele se põe."
-        },
-        {
-          "id": "sci_1_4",
-          "grade": "1",
-          "skill": "seres_vivos",
-          "difficulty": "medium",
-          "question": "Qual destes animais vive na água?",
-          "answer": "Peixe",
-          "options": [
-            "Cachorro",
-            "Peixe",
-            "Gato",
-            "Pássaro"
-          ],
-          "explanation": "O peixe é um animal aquático, ou seja, vive e respira debaixo da água."
-        },
-        {
-          "id": "sci_1_5",
-          "grade": "1",
-          "skill": "ecologia_reciclagem",
-          "difficulty": "medium",
-          "question": "Onde devemos jogar o papel de bala?",
-          "answer": "Na lixeira",
-          "options": [
-            "No chão",
-            "No rio",
-            "Na lixeira",
-            "Na grama"
-          ],
-          "explanation": "Jogar lixo na lixeira ajuda a manter os lugares limpos e protege a natureza contra a poluição."
-        },
-        {
-          "id": "sci_2_1",
-          "grade": "2",
-          "skill": "materia_energia",
-          "difficulty": "easy",
-          "question": "O que acontece com um cubo de gelo se você o deixar no sol?",
-          "answer": "Ele derrete",
-          "options": [
-            "Fica maior",
-            "Ele derrete",
-            "Vira pó",
-            "Gela mais"
-          ],
-          "explanation": "O calor do sol faz com que a água em estado sólido (gelo) derreta e vire líquido."
-        },
-        {
-          "id": "sci_2_2",
-          "grade": "2",
-          "skill": "seres_vivos",
-          "difficulty": "easy",
-          "question": "Qual desses animais é capaz de voar?",
-          "answer": "Borboleta",
-          "options": [
-            "Cachorro",
-            "Sapo",
-            "Borboleta",
-            "Formiga"
-          ],
-          "explanation": "As borboletas são insetos alados (têm asas) e por isso conseguem voar."
-        },
-        {
-          "id": "sci_2_3",
-          "grade": "2",
-          "skill": "corpo_humano",
-          "difficulty": "medium",
-          "question": "Qual sentido usamos para saborear um doce ou um salgado?",
-          "answer": "Paladar",
-          "options": [
-            "Olfato",
-            "Visão",
-            "Paladar",
-            "Tato"
-          ],
-          "explanation": "O paladar, que percebemos pela língua, é o sentido que nos ajuda a identificar os sabores da comida."
-        },
-        {
-          "id": "sci_2_4",
-          "grade": "2",
-          "skill": "astronomia_basica",
-          "difficulty": "medium",
-          "question": "Quantos dias tem uma semana inteira?",
-          "answer": "7 dias",
-          "options": [
-            "5 dias",
-            "7 dias",
-            "10 dias",
-            "12 dias"
-          ],
-          "explanation": "A semana é composta por 7 dias."
-        },
-        {
-          "id": "sci_2_5",
-          "grade": "2",
-          "skill": "ecologia_reciclagem",
-          "difficulty": "hard",
-          "question": "Qual material demora mais tempo para desaparecer na natureza se for jogado fora?",
-          "answer": "Plástico",
-          "options": [
-            "Casca de maçã",
-            "Papel",
-            "Plástico",
-            "Folha de árvore"
-          ],
-          "explanation": "O plástico pode demorar mais de 400 anos para se decompor na natureza."
-        },
-        {
-          "id": "sci_3_1",
-          "grade": "3",
-          "skill": "corpo_humano",
-          "difficulty": "medium",
-          "question": "O que o esqueleto humano (nossos ossos) faz pelo nosso corpo?",
-          "answer": "Sustenta e protege",
-          "options": [
-            "Ajuda a digerir",
-            "Sustenta e protege",
-            "Respira por nós",
-            "Faz o sangue circular"
-          ],
-          "explanation": "O esqueleto forma a estrutura que sustenta o corpo e protege órgãos importantes."
-        },
-        {
-          "id": "sci_3_2",
-          "grade": "3",
-          "skill": "astronomia_basica",
-          "difficulty": "medium",
-          "question": "O que o planeta Terra faz que cria o dia e a noite?",
-          "answer": "Gira em torno de si mesmo",
-          "options": [
-            "Gira ao redor do Sol",
-            "Gira em torno de si mesmo",
-            "Fica totalmente parado",
-            "Gira ao redor da Lua"
-          ],
-          "explanation": "O movimento de rotação (girar ao redor de si mesmo) leva cerca de 24 horas e causa o dia e a noite."
-        },
-        {
-          "id": "sci_3_3",
-          "grade": "3",
-          "skill": "seres_vivos",
-          "difficulty": "medium",
-          "question": "Como as plantas conseguem alimento (energia)?",
-          "answer": "Da luz do sol e da água",
-          "options": [
-            "Comendo insetos",
-            "Bebendo leite",
-            "Caçando pequenos animais",
-            "Da luz do sol e da água"
-          ],
-          "explanation": "As plantas produzem o próprio alimento pelo processo de fotossíntese."
-        },
-        {
-          "id": "sci_3_4",
-          "grade": "3",
-          "skill": "materia_energia",
-          "difficulty": "hard",
-          "question": "A água fervendo que vira fumaça está passando para qual estado?",
-          "answer": "Gasoso",
-          "options": [
-            "Sólido",
-            "Líquido",
-            "Gasoso",
-            "Plasmático"
-          ],
-          "explanation": "O vapor da água quente chama-se estado gasoso."
-        },
-        {
-          "id": "sci_3_5",
-          "grade": "3",
-          "skill": "ecologia_reciclagem",
-          "difficulty": "hard",
-          "question": "O que é Reciclagem?",
-          "answer": "Transformar algo usado em algo novo",
-          "options": [
-            "Plantar mais árvores",
-            "Transformar algo usado em algo novo",
-            "Jogar o lixo longe",
-            "Construir casas de madeira"
-          ],
-          "explanation": "A reciclagem processa materiais descartados para virarem novos produtos."
-        }
-      ]
     }
   }
 }

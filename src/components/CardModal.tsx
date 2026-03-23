@@ -56,68 +56,70 @@ export default function CardModal() {
                     Vez de: <strong style={{ color: currentPlayer.color }}>{currentPlayer.name}</strong>
                 </div>
 
-                <div className={styles.content}>
-                    <p className={styles.questionText}>"{activeQuestion.question}"</p>
+                <div className={styles.scrollArea}>
+                    <div className={styles.content}>
+                        <p className={styles.questionText}>"{activeQuestion.question}"</p>
 
-                    {waitingFeedback ? (
-                        <div className={styles.educationalFeedback}>
-                            <h3 style={{ color: '#ff4757', marginBottom: '10px' }}>Puxa, não foi dessa vez!</h3>
-                            <p style={{ fontSize: '1.2rem', marginBottom: '10px' }}>A resposta certa era:<br/><strong>{activeQuestion.answer}</strong></p>
-                            {activeQuestion.explanation && (
-                                <p style={{ 
-                                    background: '#f9f9f9', 
-                                    padding: '15px', 
-                                    borderRadius: '12px', 
-                                    fontSize: '0.95rem', 
-                                    color: '#555',
-                                    borderLeft: '4px solid #ff4757',
-                                    marginBottom: '20px',
-                                    fontStyle: 'italic',
-                                    lineHeight: '1.4'
-                                }}>
-                                    💡 {activeQuestion.explanation}
-                                </p>
-                            )}
-                            <button 
-                                className={styles.optionButton} 
-                                style={{ background: '#2ed573', color: 'white', width: '100%' }}
-                                onClick={() => actions.acknowledgeFeedback()}
-                            >
-                                Entendi!
-                            </button>
-                        </div>
-                    ) : (
-                        <div className={styles.optionsGrid}>
-                            {activeQuestion.options.map((opt: string, idx: number) => {
-                                const letter = String.fromCharCode(65 + idx); 
-                                return (
-                                    <button
-                                        key={idx}
-                                        className={`${styles.optionButton} ${answerFeedback && (answerFeedback !== 'correct') ? styles.selected : ''}`}
-                                        onClick={() => actions.submitAnswer(opt)}
-                                        disabled={!!answerFeedback}
-                                    >
-                                        <span style={{ 
-                                            display: 'inline-flex', 
-                                            alignItems: 'center', 
-                                            justifyContent: 'center', 
-                                            background: '#f0f0f0', 
-                                            width: '40px', 
-                                            height: '40px', 
-                                            borderRadius: '10px', 
-                                            marginRight: '15px',
-                                            fontSize: '1.2rem',
-                                            color: '#aaa',
-                                            border: '2px solid #ddd'
-                                        }}>
-                                            {letter}
-                                        </span>
-                                        {opt}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    )}
+                        {waitingFeedback ? (
+                            <div className={styles.educationalFeedback}>
+                                <h3 style={{ color: '#ff4757', marginBottom: '10px' }}>Puxa, não foi dessa vez!</h3>
+                                <p style={{ fontSize: '1.2rem', marginBottom: '10px' }}>A resposta certa era:<br/><strong>{activeQuestion.answer}</strong></p>
+                                {activeQuestion.explanation && (
+                                    <p style={{ 
+                                        background: '#f9f9f9', 
+                                        padding: '15px', 
+                                        borderRadius: '12px', 
+                                        fontSize: '0.95rem', 
+                                        color: '#555',
+                                        borderLeft: '4px solid #ff4757',
+                                        marginBottom: '20px',
+                                        fontStyle: 'italic',
+                                        lineHeight: '1.4'
+                                    }}>
+                                        💡 {activeQuestion.explanation}
+                                    </p>
+                                )}
+                                <button 
+                                    className={styles.optionButton} 
+                                    style={{ background: '#2ed573', color: 'white', width: '100%' }}
+                                    onClick={() => actions.acknowledgeFeedback()}
+                                >
+                                    Entendi!
+                                </button>
+                            </div>
+                        ) : (
+                            <div className={styles.optionsGrid}>
+                                {activeQuestion.options.map((opt: string, idx: number) => {
+                                    const letter = String.fromCharCode(65 + idx); 
+                                    return (
+                                        <button
+                                            key={idx}
+                                            className={`${styles.optionButton} ${answerFeedback && (answerFeedback !== 'correct') ? styles.selected : ''}`}
+                                            onClick={() => actions.submitAnswer(opt)}
+                                            disabled={!!answerFeedback}
+                                        >
+                                            <span style={{ 
+                                                display: 'inline-flex', 
+                                                alignItems: 'center', 
+                                                justifyContent: 'center', 
+                                                background: '#f0f0f0', 
+                                                width: '40px', 
+                                                height: '40px', 
+                                                borderRadius: '10px', 
+                                                marginRight: '15px',
+                                                fontSize: '1.2rem',
+                                                color: '#aaa',
+                                                border: '2px solid #ddd'
+                                            }}>
+                                                {letter}
+                                            </span>
+                                            {opt}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

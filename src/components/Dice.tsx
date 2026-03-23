@@ -66,30 +66,35 @@ export default function Dice() {
             {players.length > 0 && (
                 <div className={styles.turnIndicator}>
                     Vez de: <strong style={{ color: currentPlayer.color }}>{currentPlayer.name}</strong>
+                    <div className={styles.playerMiniInfo}>
+                        <span>{currentPlayer.avatar}</span>
+                        <span>Lv.{currentPlayer.level}</span>
+                    </div>
                 </div>
             )}
 
-            <div
-                className={`${styles.scene} ${isRolling || players.length === 0 ? styles.disabled : ''}`}
-                onClick={handleRoll}
-                role="button"
-                aria-label="Rolar dado"
-            >
-                <div className={`${styles.cube} ${isRolling ? styles.rolling : ''} ${!isRolling ? styles[showClass] : ''}`}>
-                    <div className={`${styles.face} ${styles.face1}`}><DiceFace value={1} /></div>
-                    <div className={`${styles.face} ${styles.face2}`}><DiceFace value={2} /></div>
-                    <div className={`${styles.face} ${styles.face3}`}><DiceFace value={3} /></div>
-                    <div className={`${styles.face} ${styles.face4}`}><DiceFace value={4} /></div>
-                    <div className={`${styles.face} ${styles.face5}`}><DiceFace value={5} /></div>
-                    <div className={`${styles.face} ${styles.face6}`}><DiceFace value={6} /></div>
+            <div className={styles.rollActionGroup}>
+                <div
+                    className={`${styles.scene} ${isRolling || players.length === 0 ? styles.disabled : ''}`}
+                    onClick={handleRoll}
+                    role="button"
+                    aria-label="Rolar dado"
+                >
+                    <div className={`${styles.cube} ${isRolling ? styles.rolling : ''} ${!isRolling ? styles[showClass] : ''}`}>
+                        <div className={`${styles.face} ${styles.face1}`}><DiceFace value={1} /></div>
+                        <div className={`${styles.face} ${styles.face2}`}><DiceFace value={2} /></div>
+                        <div className={`${styles.face} ${styles.face3}`}><DiceFace value={3} /></div>
+                        <div className={`${styles.face} ${styles.face4}`}><DiceFace value={4} /></div>
+                        <div className={`${styles.face} ${styles.face5}`}><DiceFace value={5} /></div>
+                        <div className={`${styles.face} ${styles.face6}`}><DiceFace value={6} /></div>
+                    </div>
+                    <div className={`${styles.shadow} ${isRolling ? styles.shadowBouncing : ''}`} />
                 </div>
+                
+                <p className={styles.rollStatus}>
+                    {isRolling ? '🎲 BORA!' : 'ROLE O DADO'}
+                </p>
             </div>
-
-            <div className={`${styles.shadow} ${isRolling ? styles.shadowBouncing : ''}`} />
-
-            <p className={styles.rollHint}>
-                {isRolling ? '🎲 Rolando...' : 'Clique no dado para rolar'}
-            </p>
         </div>
     );
 }

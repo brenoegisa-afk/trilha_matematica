@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import './index.css'
 import Home from './pages/Home'
 import Setup from './pages/Setup'
@@ -15,6 +15,8 @@ import Battle from './pages/Battle'
 import ParentDashboard from './pages/ParentDashboard'
 import { BatchImporter } from './pages/BatchImporter'
 import { GameProvider } from './context/GameContext'
+import Mundo3D from './experimental/Mundo3D'
+import MathRunner from './experimental/MathRunner/MathRunner'
 
 import RootLayout from './RootLayout'
 
@@ -25,6 +27,7 @@ const router = createBrowserRouter([
     children: [
       { path: '/', element: <Home /> },
       { path: '/login', element: <Login /> },
+      { path: '/teacher/login', element: <Navigate to="/login" replace /> },
       { path: '/hub', element: <Hub /> },
       { path: '/arena', element: <Arena /> },
       { path: '/setup', element: <Setup /> },
@@ -37,7 +40,9 @@ const router = createBrowserRouter([
       { path: '/admin/import', element: <BatchImporter /> },
       { path: '/battle', element: <Battle /> }
     ]
-  }
+  },
+  { path: '/experimental/3d', element: <Mundo3D /> },
+  { path: '/experimental/runner', element: <MathRunner /> }
 ])
 
 createRoot(document.getElementById('root')!).render(

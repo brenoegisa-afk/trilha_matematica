@@ -129,9 +129,71 @@
     background: #fdfdfd;
 }
 
-@media (max-width: 600px) {
+/* Tablet Responsiveness */
+@media (min-width: 601px) and (max-width: 1024px) {
+    .hubContainer {
+        padding: 30px 20px;
+    }
+    .header {
+        margin-bottom: 30px;
+    }
     .header h1 {
-        font-size: 2rem;
+        font-size: 2.4rem;
+    }
+    .gameGrid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        max-width: 700px;
+    }
+}
+
+@media (max-width: 768px) {
+    .hubContainer {
+        padding: 20px 15px;
+    }
+
+    .header {
+        margin-bottom: 25px;
+    }
+
+    .header h1 {
+        font-size: 1.8rem;
+    }
+
+    .header p {
+        font-size: 1rem;
+    }
+
+    .gameGrid {
+        grid-template-columns: 1fr; /* Force single column stack */
+        gap: 16px;
+        margin-bottom: 30px;
+    }
+
+    .gameCard {
+        padding: 20px;
+        box-shadow: 5px 5px 0px var(--color-ink);
+        border-width: 3px;
+    }
+
+    .cardIcon {
+        font-size: 3rem;
+        margin-bottom: 12px;
+    }
+
+    .gameCard h3 {
+        font-size: 1.3rem;
+        margin-bottom: 8px;
+    }
+
+    .gameCard p {
+        font-size: 0.85rem;
+        margin-bottom: 15px;
+    }
+
+    .playBtn {
+        padding: 10px;
+        font-size: 1rem;
     }
 
     .footer {
@@ -143,5 +205,6 @@
     .backBtn,
     .teacherBtn {
         width: 100%;
+        text-align: center;
     }
 }
