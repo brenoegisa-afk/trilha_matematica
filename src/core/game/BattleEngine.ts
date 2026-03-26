@@ -1,11 +1,11 @@
-import type { Enemy } from '../types';
+import type { Enemy, Player } from '../types';
 
-export class BattleEngine {
-    private currentEnemy: Enemy | null = null;
-
-    constructor() {}
-
-    public generateEnemy(playerLevel: number, subjectId: string = 'math'): Enemy {
+/**
+ * BattleEngine — Pure functions for battle logic.
+ * Enemy state lives in Zustand, not here.
+ */
+export const BattleEngine = {
+    generateEnemy(playerLevel: number, subjectId: string = 'math'): Enemy {
         const mathEnemies = [
             { id: 'math_goblin', name: 'Goblin da Soma', icon: '👺', baseHp: 100 },
             { id: 'division_dragon', name: 'Dragão da Divisão', icon: '🐲', baseHp: 250 },
@@ -33,8 +33,8 @@ export class BattleEngine {
 
         const baseEnemy = pool[Math.floor(Math.random() * pool.length)];
         const levelMultiplier = 1 + (playerLevel - 1) * 0.2;
-        
-        this.currentEnemy = {
+
+        return {
             id: baseEnemy.id,
             name: baseEnemy.name,
             icon: baseEnemy.icon,
@@ -42,47 +42,33 @@ export class BattleEngine {
             hp: Math.floor(baseEnemy.baseHp * levelMultiplier),
             level: playerLevel
         };
+    },
 
-        return this.currentEnemy;
-    }
-
-    public calculateDamage(isCorrect: boolean, streak: number): number {
+    calculateDamage(isCorrect: boolean, streak: number): number {
         if (!isCorrect) return 0;
         const baseDamage = 50;
         const streakBonus = Math.floor(streak * 10);
         return baseDamage + streakBonus;
-    }
+    },
 
-    public isEnemyDefeated(): boolean {
-        return this.currentEnemy !== null && this.currentEnemy.hp <= 0;
-    }
+    applyDamageToEnemy(enemy: Enemy, damage: number): Enemy {
+        return { ...enemy, hp: Math.max(0, enemy.hp - damage) };
+    },
 
-    public applyDamageToEnemy(damage: number): void {
-        if (this.currentEnemy) {
-            this.currentEnemy.hp = Math.max(0, this.currentEnemy.hp - damage);
-        }
-    }
+    isEnemyDefeated(enemy: Enemy | null): boolean {
+        return enemy !== null && enemy.hp <= 0;
+    },
 
-    // New: Player Damage Logic
-    public applyDamageToPlayer(player: any): number {
-        const damage = 25; // Base damage the player takes for answering wrong
-        player.hp = Math.max(0, player.hp - damage);
-        return damage;
-    }
+    applyDamageToPlayer(player: Player): Player {
+        const damage = 25;
+        return { ...player, hp: Math.max(0, player.hp - damage) };
+    },
 
-    public isPlayerDefeated(player: any): boolean {
+    isPlayerDefeated(player: Player): boolean {
         return player.hp <= 0;
-    }
+    },
 
-    public getCurrentEnemy(): Enemy | null {
-        return this.currentEnemy;
+    resetPlayerHp(player: Player): Player {
+        return { ...player, hp: player.maxHp || 100 };
     }
-
-    public resetPlayerHp(player: any): void {
-        player.hp = player.maxHp || 100;
-    }
-
-    public endBattle(): void {
-        this.currentEnemy = null;
-    }
-}
+};

@@ -142,6 +142,12 @@
     animation: fadeIn 0.2s ease-out;
 }
 
+@media (min-width: 1025px) {
+    .overlay {
+        display: none;
+    }
+}
+
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }

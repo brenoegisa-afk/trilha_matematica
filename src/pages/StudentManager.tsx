@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
+import { DiagnosticService } from '../core/learning/DiagnosticService';
 import styles from './StudentManager.module.css';
 
 interface StudentProfile {
@@ -9,6 +10,8 @@ interface StudentProfile {
     stars: number;
     streak: number;
     last_played: string;
+    hasAlert: boolean;
+    bestSkill?: string;
 }
 
 interface StudentManagerProps {
@@ -30,20 +33,29 @@ export const StudentManager: React.FC<StudentManagerProps> = ({ classId, classNa
         try {
             const { data, error } = await supabase
                 .from('profiles')
-                .select('id, name, total_score, stars, streak, last_sync')
+                .select('id, name, total_score, stars, streak, last_sync, session_stats')
                 .eq('class_id', classId)
                 .order('total_score', { ascending: false });
 
             if (error) throw error;
 
-            const mapped: StudentProfile[] = (data || []).map(p => ({
-                id: p.id,
-                name: p.name,
-                score: p.total_score || 0,
-                stars: p.stars || 0,
-                streak: p.streak || 0,
-                last_played: p.last_sync || new Date().toISOString()
-            }));
+            const mapped: StudentProfile[] = (data || []).map(p => {
+                const mockPlayer = { sessionStats: p.session_stats, skillsMastery: [] } as any;
+                const insights = DiagnosticService.generateReport(mockPlayer);
+                const hasAlert = insights.some((i: any) => i.status === 'needs_help');
+                const bestSkill = insights.find((i: any) => i.status === 'mastered')?.skillName;
+
+                return {
+                    id: p.id,
+                    name: p.name,
+                    score: p.total_score || 0,
+                    stars: p.stars || 0,
+                    streak: p.streak || 0,
+                    last_played: p.last_sync || new Date().toISOString(),
+                    hasAlert,
+                    bestSkill
+                };
+            });
 
             setStudents(mapped);
         } catch (err) {
@@ -142,7 +154,7 @@ export const StudentManager: React.FC<StudentManagerProps> = ({ classId, classNa
                                                 <th>Pontos</th>
                                                 <th>Estrelas</th>
                                                 <th>Foco (🔥)</th>
-                                                <th>Visto por último</th>
+                                                <th>Diagnóstico Pedagógico</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -159,7 +171,11 @@ export const StudentManager: React.FC<StudentManagerProps> = ({ classId, classNa
                                                             {student.streak >= 3 ? `🔥 ${student.streak}` : `✨ ${student.streak}`}
                                                         </span>
                                                     </td>
-                                                    <td className={styles.dateCell}>{new Date(student.last_played).toLocaleDateString('pt-BR')}</td>
+                                                    <td>
+                                                        {student.hasAlert && <span style={{color: 'var(--color-red)', fontWeight: 'bold'}} title="Precisa de atenção">⚠️ Requer Atenção</span>}
+                                                        {!student.hasAlert && student.bestSkill && <span style={{color: 'var(--color-green)', fontWeight: 'bold'}}>🌟 Domina {student.bestSkill}</span>}
+                                                        {!student.hasAlert && !student.bestSkill && <span style={{color: '#888'}}>Em Progresso</span>}
+                                                    </td>
                                                 </tr>
                                             ))}
                                         </tbody>

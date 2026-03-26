@@ -1,4 +1,4 @@
-import type { Player } from '../types';
+import type { Player, Mascot } from '../types';
 
 export interface MascotStats {
     xpMultiplier: number;
@@ -89,11 +89,11 @@ export class MascotEngine {
         return this.archetypes.filter(a => a.stage === 'base');
     }
 
-    public addMascotToPlayer(player: Player, mascotId: any): void {
-        if (!player.mascots) (player as any).mascots = [];
-        const alreadyHas = player.mascots.some(m => m.id === mascotId.id);
+    public addMascotToPlayer(player: Player, mascot: Mascot): void {
+        if (!player.mascots) player.mascots = [];
+        const alreadyHas = player.mascots.some(m => m.id === mascot.id);
         if (!alreadyHas) {
-            player.mascots.push(mascotId);
+            player.mascots.push(mascot);
         }
     }
 }

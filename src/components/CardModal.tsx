@@ -77,24 +77,50 @@ export default function CardModal() {
                                         <p className={styles.feedbackMessage}>
                                             A resposta correta era: <span className={styles.correctAnswerHighlight}>{activeQuestion.answer}</span>
                                         </p>
+
+                                        {/* Structured Explanation Render */}
+                                        {activeQuestion.explanation && (
+                                            <div className={styles.explanationBox}>
+                                                {typeof activeQuestion.explanation === 'string' ? (
+                                                    // Fallback for old string explanations
+                                                    <p className={styles.explanationText}>{activeQuestion.explanation}</p>
+                                                ) : (
+                                                    // New Structured Explanation
+                                                    <div className={styles.structuredExplanation}>
+                                                        <h4 className={styles.explanationLabel}>
+                                                            {activeQuestion.explanation.title || 'Vamos aprender juntos!'}
+                                                        </h4>
+                                                        <ul className={styles.explanationSteps}>
+                                                            {activeQuestion.explanation.steps.map((step: string, index: number) => (
+                                                                <li key={index} className={styles.explanationStep}>
+                                                                    <span className={styles.stepNumber}>{index + 1}</span>
+                                                                    <span>{step}</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </>
                                 )}
 
-                                {activeQuestion.explanation && (
-                                    <div className={styles.explanationBox}>
-                                        <div className={styles.explanationLabel}>Dica Master:</div>
-                                        <p className={styles.explanationText}>
-                                            {activeQuestion.explanation}
-                                        </p>
-                                    </div>
+                                {(!activeQuestion.isReinforcement && answerFeedback === 'wrong') ? (
+                                    <button 
+                                        className={`${styles.acknowledgeButton} ${styles.reinforcementBtn}`}
+                                        onClick={() => actions.startReinforcement?.()}
+                                        style={{ backgroundColor: 'var(--color-yellow)', color: '#333' }}
+                                    >
+                                        Exercício de Reforço 🔄
+                                    </button>
+                                ) : (
+                                    <button 
+                                        className={styles.acknowledgeButton}
+                                        onClick={() => actions.acknowledgeFeedback()}
+                                    >
+                                        {answerFeedback === 'correct' ? 'Perfeito! 🎉' : 'Entendi! 👍'}
+                                    </button>
                                 )}
-
-                                <button 
-                                    className={styles.acknowledgeButton}
-                                    onClick={() => actions.acknowledgeFeedback()}
-                                >
-                                    Entendi! 🎉
-                                </button>
                             </div>
                         ) : (
                             <div className={styles.optionsGrid}>

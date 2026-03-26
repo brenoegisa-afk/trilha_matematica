@@ -1,9 +1,10 @@
 import { useGame } from '../context/GameContext';
 import styles from './GameSummary.module.css';
 import type { Player } from '../core/types';
+import { DiagnosticService } from '../core/learning/DiagnosticService';
 
 export default function GameSummary() {
-    const { gameState, players, actions } = useGame();
+    const { gameState, players } = useGame();
 
     if (gameState.status !== 'finished') return null;
 
@@ -43,6 +44,7 @@ const SKILL_NAMES: Record<string, string> = {
 function PlayerStatsCard({ player }: { player: Player }) {
     const { totalQuestions, correctAnswers, skillsPracticed } = player.sessionStats;
     const accuracy = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+    const insights = DiagnosticService.generateReport(player);
 
     return (
         <div className={styles.playerCard} style={{ borderColor: player.color }}>
@@ -101,6 +103,25 @@ function PlayerStatsCard({ player }: { player: Player }) {
                     <p className={styles.emptyText}>Nenhuma habilidade registrada nesta partida.</p>
                 )}
             </div>
+
+            {insights.length > 0 && (
+                <div className={styles.insightsSection}>
+                    <h3 className={styles.sectionTitle}>Diagnóstico Inteligente:</h3>
+                    <div className={styles.insightsList}>
+                        {insights.map((insight, idx) => (
+                            <div key={idx} className={`${styles.insightItem} ${styles[insight.status]}`}>
+                                <div className={styles.insightHeader}>
+                                    <span className={styles.insightIcon}>
+                                        {insight.status === 'mastered' ? '🌟' : insight.status === 'needs_help' ? '⚠️' : '📈'}
+                                    </span>
+                                    <span className={styles.insightSkill}>{insight.skillName}</span>
+                                </div>
+                                <p className={styles.insightMessage}>{insight.message}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {player.achievements.length > 0 && (
                 <div className={styles.achievementsSection}>

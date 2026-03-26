@@ -1,10 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import HomeButton from './components/HomeButton/HomeButton';
 import SideNavigation from './components/SideNavigation/SideNavigation';
 
 export default function RootLayout() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    // Auto-close menu when resizing to desktop
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth > 1024) {
+                setIsMenuOpen(false);
+            }
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     return (
         <div style={{ display: 'flex', minHeight: '100vh', flexDirection: 'column' }}>

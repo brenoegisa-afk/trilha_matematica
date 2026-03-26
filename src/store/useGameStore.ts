@@ -3,7 +3,9 @@ import { supabase } from '../utils/supabaseClient';
 import { triggerConfetti } from '../utils/confetti';
 import { getOrCreateProfile, getGlobalRanking, getSavedProfiles } from '../utils/saveSystem';
 import type { SaveProfile } from '../utils/saveSystem';
+import type { User } from '@supabase/supabase-js';
 
+// Pure function engines — no internal state
 import { GameEngine } from '../core/game/GameEngine';
 import { SkillEngine } from '../core/game/SkillEngine';
 import { SubjectService } from '../core/game/SubjectService';
@@ -13,34 +15,46 @@ import { AchievementEngine } from '../core/gamification/AchievementEngine';
 import { BattleEngine } from '../core/game/BattleEngine';
 import { MascotEngine } from '../core/game/MascotEngine';
 import { SessionService } from '../core/game/SessionService';
+import { ReinforcementEngine } from '../core/learning/ReinforcementEngine';
 
 import type { Player, Tile, TileType, GameStatus, Question, Enemy, Subject, GameState, Mascot } from '../core/types';
 
-// Singleton Engines
-const gameEngine = new GameEngine([]);
+// Stateful engines that still need instances (contain data catalogs, not game state)
 const skillEngine = new SkillEngine();
 const subjectService = new SubjectService();
 const xpEngine = new XPEngine();
 const streakEngine = new StreakEngine();
 const achievementEngine = new AchievementEngine();
-const battleEngine = new BattleEngine();
 const mascotEngine = new MascotEngine();
 
-const AVAILABLE_SUBJECTS = [
+const AVAILABLE_SUBJECTS: Subject[] = [
     { id: 'math', name: 'Matemática', icon: '🔢', description: 'Desafios de números e lógica' },
     { id: 'portuguese', name: 'Português', icon: '📚', description: 'Rimas, letras e histórias' },
     { id: 'science', name: 'Ciências', icon: '🔬', description: 'Descobertas sobre o mundo e a vida' }
 ];
 
+const EMPTY_GAME_STATE: GameState = {
+    players: [],
+    currentPlayerIndex: 0,
+    tiles: [],
+    status: 'setup',
+    activeCardType: null,
+    activeQuestion: null,
+    rolledValue: null,
+    answerFeedback: null,
+    waitingFeedback: false,
+    waitingVictory: null
+};
+
 interface GameStoreState {
     // --- Application State ---
     players: Player[];
-    currentUser: any | null;
+    currentUser: User | null;
     selectedGrade: string;
     currentSubjectId: string;
     availableSubjects: Subject[];
     
-    // --- Engine State Mirrors ---
+    // --- Game State (single source of truth) ---
     gameState: GameState;
     currentPlayerIndex: number;
     tiles: Tile[];
@@ -49,7 +63,7 @@ interface GameStoreState {
     activeQuestion: Question | null;
     rolledValue: number | null;
     answerFeedback: 'correct' | 'wrong' | null;
-    waitingVictory: { player: Player, mascot: any } | null;
+    waitingVictory: { player: Player, mascot: Mascot } | null;
     isSavingSessions: boolean;
     
     // --- Sub-Systems State ---
@@ -60,9 +74,9 @@ interface GameStoreState {
     // --- Actions ---
     setGrade: (grade: string) => void;
     setSubject: (id: string) => void;
-    setCurrentUser: (user: any | null) => void;
+    setCurrentUser: (user: User | null) => void;
     refreshPlayers: () => void;
-    addPlayer: (name: string, color: string, code?: string, classId?: string) => any;
+    addPlayer: (name: string, color: string, code?: string, classId?: string) => SaveProfile;
     startGame: () => void;
     rollDice: () => number;
     submitAnswer: (answer: string) => void;
@@ -72,30 +86,53 @@ interface GameStoreState {
     clearLevelUp: () => void;
     clearXpNotification: () => void;
     logout: () => void;
-    actions: any; // Compatibility export
+    actions: {
+        rollDice: () => number;
+        submitAnswer: (answer: string) => void;
+        acknowledgeFeedback: () => void;
+        acknowledgeVictory: () => void;
+        startBattle: () => void;
+        startReinforcement: () => void;
+        generateQuestion: (type: TileType) => void;
+        start: (players?: Player[]) => void;
+    };
+}
+
+/**
+ * Helper: apply GameState to the flat store fields (backward compatibility).
+ * Components read both `gameState.X` and top-level `X` — we keep both in sync.
+ */
+function flattenGameState(gs: GameState) {
+    return {
+        gameState: gs,
+        players: gs.players.length > 0 ? gs.players : undefined,
+        currentPlayerIndex: gs.currentPlayerIndex,
+        tiles: gs.tiles,
+        gameStatus: gs.status,
+        activeCardType: gs.activeCardType,
+        activeQuestion: gs.activeQuestion,
+        rolledValue: gs.rolledValue,
+        answerFeedback: gs.answerFeedback,
+        waitingVictory: gs.waitingVictory
+    };
 }
 
 export const useGameStore = create<GameStoreState>((set, get) => {
-    // Helper to sync engine state to Zustand
-    const syncEngine = () => {
-        const state = gameEngine.getState();
+    /**
+     * Update game state using a pure engine function.
+     * Replaces the old syncEngine() pattern.
+     */
+    const updateGame = (newGameState: GameState) => {
+        const flat = flattenGameState(newGameState);
         set({
-            gameState: { ...state },
-            players: state.players.length > 0 ? state.players : get().players,
-            currentPlayerIndex: state.currentPlayerIndex,
-            tiles: state.tiles,
-            gameStatus: state.status,
-            activeCardType: state.activeCardType,
-            activeQuestion: state.activeQuestion,
-            rolledValue: state.rolledValue,
-            answerFeedback: state.answerFeedback,
-            waitingVictory: state.waitingVictory
+            ...flat,
+            players: flat.players || get().players
         });
 
         // Trigger session saving when game finishes
-        if (state.status === 'finished' && !get().isSavingSessions) {
+        if (newGameState.status === 'finished' && !get().isSavingSessions) {
             set({ isSavingSessions: true });
-            const playersToSave = state.players;
+            const playersToSave = newGameState.players;
             
             (async () => {
                 console.log("💾 Salvando sessões pedagógicas...");
@@ -103,18 +140,22 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                     await SessionService.saveSession(player);
                 }
                 console.log("✅ Sessões salvas com sucesso.");
-                // We keep isSavingSessions true for the rest of the finished state
             })();
         }
     };
 
-    // Subsystem logic extracted from hooks
+    // Subsystem logic
     const applyXP = (player: Player, activeTileType: TileType | string, isCorrect: boolean, streak: number) => {
         if (!isCorrect) return;
         const oldLevel = player.level;
-        const baseXP = xpEngine.calculateXP(activeTileType as any, true, streak);
+        const baseXP = xpEngine.calculateXP(activeTileType as TileType, true, streak);
         const mascotBonus = mascotEngine.calculateXPBonus(player, baseXP);
-        const xpGained = baseXP + mascotBonus;
+        let xpGained = baseXP + mascotBonus;
+        
+        // Halve XP if this was a reinforcement question
+        if (get().gameState.activeQuestion?.isReinforcement) {
+            xpGained = Math.floor(xpGained / 2);
+        }
         
         player.score += xpGained;
         player.xp += xpGained;
@@ -132,17 +173,17 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                     m.id = nextStage.id;
                     m.name = nextStage.name;
                     m.icon = nextStage.icon;
-                    // Trigger a celebratory state
-                    set({ waitingVictory: { player, mascot: m } });
+                    const gs = get().gameState;
+                    updateGame(GameEngine.setWaitingVictory(gs, player, m));
                 }
             });
         }
     };
 
     const advanceTurn = (isCorrect: boolean) => {
-        const currentState = gameEngine.getState();
-        const player = currentState.players[currentState.currentPlayerIndex];
-        const activeTileType = currentState.activeCardType || 'Normal';
+        const gs = get().gameState;
+        const player = gs.players[gs.currentPlayerIndex];
+        const activeTileType = gs.activeCardType || 'Normal';
         
         player.streak = streakEngine.calculateNewStreak(isCorrect, player.streak);
         applyXP(player, activeTileType, isCorrect, player.streak);
@@ -151,8 +192,8 @@ export const useGameStore = create<GameStoreState>((set, get) => {
         player.sessionStats.totalQuestions += 1;
         if (isCorrect) player.sessionStats.correctAnswers += 1;
         
-        if (currentState.activeQuestion?.skillId) {
-            const skillId = currentState.activeQuestion.skillId;
+        if (gs.activeQuestion?.skillId) {
+            const skillId = gs.activeQuestion.skillId;
             if (!player.sessionStats.skillsPracticed[skillId]) {
                 player.sessionStats.skillsPracticed[skillId] = { attempts: 0, successes: 0 };
             }
@@ -162,17 +203,16 @@ export const useGameStore = create<GameStoreState>((set, get) => {
             skillEngine.updateMastery(player, skillId, isCorrect);
         }
 
-        if (currentState.status === 'battle') {
+        if (gs.status === 'battle') {
             const { currentEnemy } = get();
             if (currentEnemy) {
                 if (isCorrect) {
                     const dmgMult = mascotEngine.getDamageMultiplier(player);
-                    const damage = Math.floor(battleEngine.calculateDamage(true, player.streak) * dmgMult);
-                    battleEngine.applyDamageToEnemy(damage);
-                    set({ currentEnemy: { ...battleEngine.getCurrentEnemy()! } });
+                    const damage = Math.floor(BattleEngine.calculateDamage(true, player.streak) * dmgMult);
+                    const updatedEnemy = BattleEngine.applyDamageToEnemy(currentEnemy, damage);
+                    set({ currentEnemy: updatedEnemy });
                     
-                    if (battleEngine.isEnemyDefeated()) {
-                        // For now, reward a random base mascot if they win a battle
+                    if (BattleEngine.isEnemyDefeated(updatedEnemy)) {
                         const available = mascotEngine.getAvailableBaseMascots();
                         const rewardArchetype = available[Math.floor(Math.random() * available.length)];
                         const newMascot: Mascot = {
@@ -184,28 +224,32 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                             level: 1
                         };
                         mascotEngine.addMascotToPlayer(player, newMascot);
-                        battleEngine.resetPlayerHp(player);
-                        battleEngine.endBattle();
+                        const resetPlayer = BattleEngine.resetPlayerHp(player);
+                        // Apply HP reset to the game state player
+                        player.hp = resetPlayer.hp;
                         set({ currentEnemy: null });
-                        gameEngine.setWaitingVictory(player, newMascot);
-                        syncEngine();
+                        updateGame(GameEngine.setWaitingVictory(gs, player, newMascot));
                         return; // Wait for victory modal
                     } else {
-                        gameEngine.clearQuestion();
+                        let cleared = GameEngine.clearQuestion(gs);
                         const nextQ = subjectService.getQuestion(get().currentSubjectId, get().selectedGrade, activeTileType as TileType, player);
-                        gameEngine.setQuestion(nextQ);
+                        cleared = GameEngine.setQuestion(cleared, nextQ);
+                        updateGame(cleared);
                     }
                 } else {
-                    battleEngine.applyDamageToPlayer(player);
-                    if (battleEngine.isPlayerDefeated(player)) {
-                        battleEngine.resetPlayerHp(player);
-                        battleEngine.endBattle();
+                    const damagedPlayer = BattleEngine.applyDamageToPlayer(player);
+                    player.hp = damagedPlayer.hp;
+                    
+                    if (BattleEngine.isPlayerDefeated(player)) {
+                        const resetPlayer = BattleEngine.resetPlayerHp(player);
+                        player.hp = resetPlayer.hp;
                         set({ currentEnemy: null });
-                        gameEngine.endTurn();
+                        updateGame(GameEngine.endTurn(gs));
                     } else {
-                        gameEngine.clearQuestion();
+                        let cleared = GameEngine.clearQuestion(gs);
                         const nextQ = subjectService.getQuestion(get().currentSubjectId, get().selectedGrade, activeTileType as TileType, player);
-                        gameEngine.setQuestion(nextQ);
+                        cleared = GameEngine.setQuestion(cleared, nextQ);
+                        updateGame(cleared);
                     }
                 }
             }
@@ -223,7 +267,6 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                         if (armorProtection && !mascotProtection) {
                             player.inventoryProtectionCount -= 1;
                         }
-                        // Mascot protection is passive and doesn't consume charges
                     } else {
                         player.currentPosition = Math.max(0, player.currentPosition - 1);
                     }
@@ -235,31 +278,37 @@ export const useGameStore = create<GameStoreState>((set, get) => {
             const newMedals = achievementEngine.checkNewAchievements(player);
             if (newMedals.length > 0) player.achievements.push(...newMedals);
 
-            gameEngine.endTurn();
+            updateGame(GameEngine.endTurn(gs));
         }
-        syncEngine();
     };
 
     const actionsAPI = {
         rollDice: () => {
             try {
-                // Ensure engine has latest players before rolling
-                gameEngine.start(get().players);
-                const value = gameEngine.rollDice();
-                syncEngine();
+                const gs = get().gameState;
+                // Guard: only roll if game is in playing state
+                if (gs.status !== 'playing') {
+                    console.warn("rollDice chamado fora do estado 'playing':", gs.status);
+                    return 1;
+                }
+
+                const { state: rolledState, value } = GameEngine.rollDice(gs);
+                updateGame(rolledState);
                 
                 (async () => {
                     try {
+                        let currentState = get().gameState;
                         for (let i = 0; i < value; i++) {
                             await new Promise(resolve => setTimeout(resolve, 300));
-                            const { reachedEnd, tileType } = gameEngine.moveOneStep();
-                            syncEngine();
+                            const { state: movedState, reachedEnd, tileType } = GameEngine.moveOneStep(currentState);
+                            currentState = movedState;
+                            updateGame(currentState);
                             if (reachedEnd) break;
                             if (i === value - 1) {
-                                gameEngine.finalizeMovement(tileType || 'Normal');
-                                syncEngine();
-                                if (tileType && !gameEngine.getState().activeQuestion) {
-                                    if (['Red', 'Yellow'].includes(tileType) && gameEngine.getState().status === 'card_event') {
+                                currentState = GameEngine.finalizeMovement(currentState, tileType || 'Normal');
+                                updateGame(currentState);
+                                if (tileType && !currentState.activeQuestion) {
+                                    if (['Red', 'Yellow'].includes(tileType) && currentState.status === 'card_event') {
                                         actionsAPI.startBattle();
                                         actionsAPI.generateQuestion(tileType as TileType);
                                     } else {
@@ -270,8 +319,7 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                         }
                     } catch (loopErr) {
                         console.error("Erro no loop de movimento:", loopErr);
-                        gameEngine.endTurn();
-                        syncEngine();
+                        updateGame(GameEngine.endTurn(get().gameState));
                     }
                 })();
                 return value;
@@ -281,45 +329,62 @@ export const useGameStore = create<GameStoreState>((set, get) => {
             }
         },
         submitAnswer: (answer: string) => {
-            const state = gameEngine.getState();
-            if (!state.activeQuestion) return;
-            const isCorrect = answer === state.activeQuestion.answer;
-            gameEngine.resolveAnswer(isCorrect);
-            syncEngine();
+            const gs = get().gameState;
+            if (!gs.activeQuestion) return;
+            const isCorrect = answer === gs.activeQuestion.answer;
+            let newState = GameEngine.resolveAnswer(gs, isCorrect);
+            updateGame(newState);
             
             if (isCorrect) {
                 triggerConfetti();
                 setTimeout(() => advanceTurn(true), 1500);
             } else {
-                gameEngine.setWaitingFeedback(true);
-                syncEngine();
+                newState = GameEngine.setWaitingFeedback(newState, true);
+                updateGame(newState);
             }
         },
         acknowledgeFeedback: () => {
-            gameEngine.setWaitingFeedback(false);
+            const gs = get().gameState;
+            updateGame(GameEngine.setWaitingFeedback(gs, false));
             advanceTurn(false);
         },
         acknowledgeVictory: () => {
-            gameEngine.endTurn();
-            syncEngine();
+            updateGame(GameEngine.endTurn(get().gameState));
         },
         startBattle: () => {
-            const state = gameEngine.getState();
-            const player = state.players[state.currentPlayerIndex];
-            const enemy = battleEngine.generateEnemy(player.level, get().currentSubjectId);
+            const gs = get().gameState;
+            const player = gs.players[gs.currentPlayerIndex];
+            const enemy = BattleEngine.generateEnemy(player.level, get().currentSubjectId);
             set({ currentEnemy: enemy });
-            gameEngine.updateStatus('battle');
-            syncEngine();
+            updateGame(GameEngine.updateStatus(gs, 'battle'));
+        },
+        startReinforcement: () => {
+            const gs = get().gameState;
+            if (!gs.activeQuestion) return;
+            const player = gs.players[gs.currentPlayerIndex];
+            const activeTileType = gs.activeCardType || 'Normal';
+            
+            const reinforcementQ = ReinforcementEngine.generateReinforcement(
+                gs.activeQuestion, 
+                player, 
+                get().currentSubjectId, 
+                get().selectedGrade, 
+                activeTileType as TileType
+            );
+            
+            let newState = GameEngine.setWaitingFeedback(gs, false);
+            newState = { ...newState, answerFeedback: null, activeQuestion: reinforcementQ };
+            updateGame(newState);
         },
         generateQuestion: (type: TileType) => {
-            const player = gameEngine.getState().players[gameEngine.getState().currentPlayerIndex];
+            const gs = get().gameState;
+            const player = gs.players[gs.currentPlayerIndex];
             const nextQ = subjectService.getQuestion(get().currentSubjectId, get().selectedGrade, type, player);
-            gameEngine.setQuestion(nextQ);
-            syncEngine();
+            updateGame(GameEngine.setQuestion(gs, nextQ));
         },
-        start: async (pls?: Player[]) => {
-            gameEngine.start(pls || get().players);
-            syncEngine();
+        start: (pls?: Player[]) => {
+            const newState = GameEngine.createInitialState(pls || get().players);
+            updateGame(newState);
         }
     };
 
@@ -330,7 +395,7 @@ export const useGameStore = create<GameStoreState>((set, get) => {
         selectedGrade: '1-2',
         currentSubjectId: 'math',
         availableSubjects: AVAILABLE_SUBJECTS,
-        gameState: gameEngine.getState(),
+        gameState: { ...EMPTY_GAME_STATE },
         currentPlayerIndex: 0,
         tiles: [],
         gameStatus: 'setup',
@@ -356,24 +421,23 @@ export const useGameStore = create<GameStoreState>((set, get) => {
             if (currentUser) {
                 const { data } = await supabase.from('profiles').select('*').eq('user_id', currentUser.id);
                 if (data) {
-                    // Sync cloud profiles to local storage indirectly by updating the local profiles array
                     const profiles = getSavedProfiles();
-                    data.forEach((cloudP: any) => {
+                    data.forEach((cloudP: Record<string, unknown>) => {
                         const idx = profiles.findIndex(p => p.id === cloudP.id);
                         const mapped: SaveProfile = {
-                            id: cloudP.id,
-                            name: cloudP.name,
-                            secretCode: cloudP.secret_code,
-                            stars: cloudP.stars,
-                            equippedAvatar: cloudP.equipped_avatar,
-                            unlockedAvatars: cloudP.unlocked_avatars,
-                            gamesPlayed: cloudP.games_played,
-                            totalScore: cloudP.total_score,
-                            equippedMascot: cloudP.equipped_mascot,
-                            unlockedMascots: cloudP.unlocked_mascots,
-                            streak: cloudP.streak,
-                            class_id: cloudP.class_id,
-                            user_id: cloudP.user_id
+                            id: cloudP.id as string,
+                            name: cloudP.name as string,
+                            secretCode: cloudP.secret_code as string,
+                            stars: cloudP.stars as number,
+                            equippedAvatar: cloudP.equipped_avatar as string,
+                            unlockedAvatars: cloudP.unlocked_avatars as string[],
+                            gamesPlayed: cloudP.games_played as number,
+                            totalScore: cloudP.total_score as number,
+                            equippedMascot: cloudP.equipped_mascot as string,
+                            unlockedMascots: cloudP.unlocked_mascots as string[],
+                            streak: cloudP.streak as number,
+                            class_id: cloudP.class_id as string,
+                            user_id: cloudP.user_id as string
                         };
                         if (idx !== -1) {
                             profiles[idx] = mapped;
@@ -381,21 +445,20 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                             profiles.push(mapped);
                         }
                     });
-                    // saveProfiles is imported indirectly via saveSystem but I'll use the store logic
                     localStorage.setItem('@TrilhaCampeoes:Profiles', JSON.stringify(profiles));
                 }
             }
             
             set((state) => ({
                 players: state.players.map((p: Player) => {
-                    const profile = getOrCreateProfile(p.name, p.id ? undefined : '0000'); // ID-aware check
+                    const profile = getOrCreateProfile(p.name, p.id ? undefined : '0000');
                     return { 
                         ...p, 
                         avatar: profile.equippedAvatar, 
                         mascot: profile.equippedMascot, 
                         streak: profile.streak || 0,
                         score: profile.totalScore,
-                        level: profile.stars > 100 ? Math.floor(profile.stars / 100) + 1 : 1 // Dynamic level Calc
+                        level: profile.stars > 100 ? Math.floor(profile.stars / 100) + 1 : 1
                     };
                 })
             }));
@@ -433,12 +496,12 @@ export const useGameStore = create<GameStoreState>((set, get) => {
             const ranking = await getGlobalRanking();
             const { players } = get();
             const sortedPlayers = players.map(p => {
-                const rankIndex = ranking.findIndex((r: any) => r.name === p.name);
+                const rankIndex = ranking.findIndex((r: { name: string }) => r.name === p.name);
                 if (rankIndex !== -1 && rankIndex < 3) return { ...p, globalRank: rankIndex + 1 };
                 return p;
             });
-            gameEngine.start(sortedPlayers);
-            syncEngine();
+            const newState = GameEngine.createInitialState(sortedPlayers);
+            updateGame(newState);
         },
 
         logout: async () => {
@@ -452,6 +515,7 @@ export const useGameStore = create<GameStoreState>((set, get) => {
         acknowledgeFeedback: actionsAPI.acknowledgeFeedback,
         acknowledgeVictory: actionsAPI.acknowledgeVictory,
         startBattle: actionsAPI.startBattle,
+        startReinforcement: actionsAPI.startReinforcement,
         actions: actionsAPI
     };
 });

@@ -92,7 +92,20 @@ export default function BattleArena() {
                                             textAlign: 'left',
                                             lineHeight: '1.4'
                                         }}>
-                                            💡 {gameState.activeQuestion.explanation}
+                                            {typeof gameState.activeQuestion.explanation === 'string' ? (
+                                                <>💡 {gameState.activeQuestion.explanation}</>
+                                            ) : (
+                                                <>
+                                                    <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>
+                                                        💡 {gameState.activeQuestion.explanation.title}
+                                                    </div>
+                                                    <ul style={{ paddingLeft: '20px', margin: 0 }}>
+                                                        {gameState.activeQuestion.explanation.steps.map((step: string, idx: number) => (
+                                                            <li key={idx} style={{ marginBottom: '4px' }}>{step}</li>
+                                                        ))}
+                                                    </ul>
+                                                </>
+                                            )}
                                         </div>
                                     )}
                                     <button 

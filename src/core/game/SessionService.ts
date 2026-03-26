@@ -8,7 +8,7 @@ export interface GameSessionData {
     correct_answers: number;
     accuracy: number;
     xp_gained: number;
-    skill_stats: any;
+    skill_stats: Record<string, { attempts: number; successes: number }>;
 }
 
 export class SessionService {

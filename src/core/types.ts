@@ -11,6 +11,14 @@ export interface Tile {
     type: TileType;
 }
 
+export type Role = 'student' | 'teacher' | 'parent' | 'admin';
+
+export interface School {
+    id: string;
+    name: string;
+    createdAt?: string;
+}
+
 export interface Player {
     id: string;
     name: string;
@@ -23,6 +31,8 @@ export interface Player {
     streak: number;
     class_id?: string;
     user_id?: string; // Link to Supabase Auth User ID
+    role?: Role;
+    school_id?: string;
     globalRank?: number;
     level: number;
     xp: number;
@@ -73,6 +83,11 @@ export interface Achievement {
     unlockedAt?: Date;
 }
 
+export interface StructuredExplanation {
+    title: string;
+    steps: string[];
+}
+
 export interface Question {
     id?: string;
     question: string;
@@ -80,7 +95,18 @@ export interface Question {
     options: string[];
     skillId?: string;
     difficulty?: 'easy' | 'medium' | 'hard';
-    explanation?: string;
+    explanation?: string | StructuredExplanation;
+    isReinforcement?: boolean;
+}
+
+export type SkillStatus = 'mastered' | 'in_progress' | 'needs_help';
+
+export interface DiagnosticInsight {
+    skillId: string;
+    skillName: string;
+    status: SkillStatus;
+    trend: 'improving' | 'declining' | 'stable';
+    message: string;
 }
 
 export interface Enemy {
@@ -97,6 +123,7 @@ export interface Class {
     name: string;
     grade: string;
     teacherId: string;
+    schoolId?: string;
     studentIds: string[];
 }
 
@@ -104,6 +131,15 @@ export interface TeacherProfile {
     id: string;
     name: string;
     classes: string[];
+    schoolId?: string;
+    role?: Role;
+}
+
+export interface ParentProfile {
+    id: string;
+    name: string;
+    childrenIds: string[]; // references student IDs
+    role?: Role;
 }
 
 export type GameStatus = 'setup' | 'playing' | 'card_event' | 'battle' | 'finished';

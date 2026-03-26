@@ -1,4 +1,4 @@
-import type { Question } from '../types';
+import type { Question, StructuredExplanation } from '../types';
 
 /**
  * ExplanationEngine
@@ -17,37 +17,96 @@ export class ExplanationEngine {
             return { ...question, explanation: dynamicExplanation };
         }
 
-        return question;
+        // Fallback for subjects without dynamic logic (pt/sci)
+        return { 
+            ...question, 
+            explanation: {
+                title: 'Não se preocupe em errar!',
+                steps: [
+                    'O erro faz parte do aprendizado.',
+                    `A resposta correta era: ${question.answer}.`,
+                    'Preste atenção para não errar a próxima!'
+                ]
+            }
+        };
     }
 
-    private static generateExplanation(text: string, answer: string): string | null {
-        // Pattern 1: Simple Addition (e.g., "Quanto é 34 + 44?", "Some: 10 + 5 = ?", "6 + 4")
+    private static generateExplanation(text: string, answer: string): StructuredExplanation | null {
+        // Pattern 1: Simple Addition
         const addMatch = text.match(/(\d+)\s*\+\s*(\d+)/);
         if (addMatch) {
             const a = parseInt(addMatch[1]);
             const b = parseInt(addMatch[2]);
-            if (a < 10 && b < 10) return `Dica: Você pode usar os dedos ou contar a partir do ${Math.max(a, b)}. ${Math.max(a, b)} + ${Math.min(a, b)} é igual a ${answer}!`;
-            return `Dica para somar ${a} e ${b}: Tente somar as dezenas primeiro (${Math.floor(a/10)*10} + ${Math.floor(b/10)*10} = ${Math.floor(a/10)*10 + Math.floor(b/10)*10}) e depois as unidades (${a%10} + ${b%10} = ${a%10 + b%10}). O total é ${answer}!`;
+            if (a < 10 && b < 10) {
+                return {
+                    title: 'Dica de Soma Rápida',
+                    steps: [
+                        `Guarde o número maior (${Math.max(a, b)}) na cabeça.`,
+                        `Levante ${Math.min(a, b)} dedos na mão e conte a partir do ${Math.max(a, b)}...`,
+                        `O resultado final é ${answer}!`
+                    ]
+                };
+            }
+            return {
+                title: 'Somando Números Grandes',
+                steps: [
+                    `Vamos dividir o problema: sume as dezenas primeiro (${Math.floor(a/10)*10} + ${Math.floor(b/10)*10} = ${Math.floor(a/10)*10 + Math.floor(b/10)*10}).`,
+                    `Agora some as unidades separadamente (${a%10} + ${b%10} = ${a%10 + b%10}).`,
+                    `Junte os dois resultados e você terá ${answer}!`
+                ]
+            };
         }
 
-        // Pattern 2: Simple Subtraction (e.g., "Quanto é 15 - 6?")
+        // Pattern 2: Simple Subtraction
         const subMatch = text.match(/(\d+)\s*-\s*(\d+)/);
         if (subMatch) {
             const a = parseInt(subMatch[1]);
             const b = parseInt(subMatch[2]);
-            return `Para subtrair ${b} de ${a}, você pode pensar: quanto falta de ${b} para chegar em ${a}? O resultado é ${answer}.`;
+            return {
+                title: 'Entendendo a Subtração',
+                steps: [
+                    `Na subtração, pense no quanto falta para o menor chegar no maior.`,
+                    `Conte a partir de ${b} até chegar em ${a}.`,
+                    `A diferença entre eles é exatamente ${answer}.`
+                ]
+            };
         }
 
-        // Pattern 3: Multiplication (e.g., "Quanto é 3 x 7?", "5 * 10")
+        // Pattern 3: Multiplication
         const multMatch = text.match(/(\d+)\s*[x\*]\s*(\d+)/i);
         if (multMatch) {
             const a = parseInt(multMatch[1]);
             const b = parseInt(multMatch[2]);
-            if (a === 2 || b === 2) return `Multiplicar por 2 é o mesmo que dobrar o valor! O dobro de ${a === 2 ? b : a} é ${answer}.`;
-            if (a === 10 || b === 10) return `Multiplicar por 10 é fácil: basta adicionar um zero ao final do número! ${a === 10 ? b : a} vira ${answer}.`;
-            return `Multiplicar ${a} por ${b} é o mesmo que somar o número ${a}, ${b} vezes! O resultado é ${answer}.`;
+            if (a === 2 || b === 2) {
+                return {
+                    title: 'O Dobro',
+                    steps: [
+                        `Multiplicar por 2 é exatamente o mesmo que "dobrar" o número!`,
+                        `Pense em somar o número a ele mesmo: ${a === 2 ? b : a} + ${a === 2 ? b : a}.`,
+                        `O resultado final é ${answer}.`
+                    ]
+                };
+            }
+            if (a === 10 || b === 10) {
+                return {
+                    title: 'Regra do Dez',
+                    steps: [
+                        `Para multiplicar por 10, basta pegar o número original (${a === 10 ? b : a}).`,
+                        `Cole um 0 (zero) no final dele.`,
+                        `Pronto! O resultado é ${answer}. Viu como é fácil?`
+                    ]
+                };
+            }
+            return {
+                title: 'O Segredo da Multiplicação',
+                steps: [
+                    `Multiplicar é uma forma rápida de somar!`,
+                    `Isso significa que você pega o número ${a} e soma ele com ele mesmo ${b} vezes.`,
+                    `Por exemplo: ${a} + ${a} + ... (${b} vezes). O total é ${answer}.`
+                ]
+            };
         }
 
-        return null;
+        return null; // Let the fallback handle unknown patterns
     }
 }

@@ -62,11 +62,6 @@ export default function Hub() {
                 <button onClick={() => navigate('/')} className={styles.backBtn}>
                     ⬅ Voltar ao Início
                 </button>
-                <div className={styles.teacherAccess}>
-                    <button onClick={() => navigate('/login')} className={styles.teacherBtn}>
-                        🎓 Área do Professor / Pais
-                    </button>
-                </div>
             </footer>
 
         </div>

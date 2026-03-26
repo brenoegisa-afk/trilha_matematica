@@ -1,9 +1,18 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Home.module.css';
 import '../App.css';
+import { ParentGate } from '../components/ParentGate';
 
 export default function Home() {
     const navigate = useNavigate();
+    const [showGateFor, setShowGateFor] = useState<'teacher' | 'parent' | null>(null);
+
+    const handleGateSuccess = () => {
+        if (showGateFor === 'teacher') navigate('/teacher');
+        if (showGateFor === 'parent') navigate('/parent');
+        setShowGateFor(null);
+    };
 
     // A mix of symbols from Math, Portuguese, and Science for the dynamic background
     const symbols = ['+', '-', '×', '÷', '=', 'A', 'B', 'C', '!', '?', '📖', '✨', '🪐', '🔬', '🌱'];
@@ -63,7 +72,7 @@ export default function Home() {
                     </button>
                     <button
                         className={styles.teacherButton}
-                        onClick={() => navigate('/teacher')}
+                        onClick={() => setShowGateFor('teacher')}
                         style={{
                             padding: '10px 20px',
                             fontSize: '1.2rem',
@@ -78,8 +87,32 @@ export default function Home() {
                     >
                         👨‍🏫 PROFESSOR
                     </button>
+                    <button
+                        className={styles.parentButton}
+                        onClick={() => setShowGateFor('parent')}
+                        style={{
+                            padding: '10px 20px',
+                            fontSize: '1.2rem',
+                            backgroundColor: 'white',
+                            color: 'var(--color-ink)',
+                            border: '3px solid var(--color-ink)',
+                            borderRadius: '12px',
+                            fontWeight: '800',
+                            cursor: 'pointer',
+                            boxShadow: '4px 4px 0px rgba(0,0,0,0.1)'
+                        }}
+                    >
+                        👨‍👩‍👧 PAIS
+                    </button>
                 </div>
             </div>
+
+            {showGateFor && (
+                <ParentGate 
+                    onSuccess={handleGateSuccess}
+                    onCancel={() => setShowGateFor(null)}
+                />
+            )}
 
 
             {/* Interactive Rules Section */}

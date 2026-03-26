@@ -1,25 +1,9 @@
-export class TurnEngine {
-    private currentPlayerIndex: number = 0;
-    private playerCount: number = 0;
-
-    constructor(playerCount: number) {
-        this.playerCount = playerCount;
+/**
+ * TurnEngine — Pure functions for turn management.
+ * No internal state — all state lives in Zustand.
+ */
+export const TurnEngine = {
+    nextPlayer(currentIndex: number, playerCount: number): number {
+        return (currentIndex + 1) % playerCount;
     }
-
-    public get current(): number {
-        return this.currentPlayerIndex;
-    }
-
-    public next(): number {
-        this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.playerCount;
-        return this.currentPlayerIndex;
-    }
-
-    public reset(): void {
-        this.currentPlayerIndex = 0;
-    }
-
-    public setPlayerCount(count: number): void {
-        this.playerCount = count;
-    }
-}
+};

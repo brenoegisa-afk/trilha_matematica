@@ -10,6 +10,7 @@ export default function Login() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [isSignUp, setIsSignUp] = useState(false);
+    const [role, setRole] = useState<'teacher' | 'parent'>('teacher');
 
     // Check if already logged in
     useEffect(() => {
@@ -25,9 +26,16 @@ export default function Login() {
 
         try {
             if (isSignUp) {
-                const { error } = await supabase.auth.signUp({ email, password });
+                const { data, error } = await supabase.auth.signUp({ email, password });
                 if (error) throw error;
-                alert('Verifique seu e-mail para confirmar o cadastro!');
+                
+                if (data.user) {
+                    await supabase.from('profiles')
+                        .update({ role: role })
+                        .eq('user_id', data.user.id);
+                }
+                
+                alert('Mágico! Verifique seu e-mail para confirmar o cadastro!');
             } else {
                 const { error } = await supabase.auth.signInWithPassword({ email, password });
                 if (error) throw error;
@@ -50,6 +58,25 @@ export default function Login() {
                 </p>
 
                 <form onSubmit={handleAuth} className={styles.form}>
+                    {isSignUp && (
+                        <div className={styles.roleSelection} style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+                            <button 
+                                type="button" 
+                                onClick={() => setRole('teacher')}
+                                style={{ flex: 1, padding: '10px', borderRadius: '10px', border: role === 'teacher' ? '3px solid var(--color-blue)' : '2px solid #e2e8f0', background: role === 'teacher' ? '#eff6ff' : 'white', cursor: 'pointer', fontWeight: 'bold' }}
+                            >
+                                👨‍🏫 Professor
+                            </button>
+                            <button 
+                                type="button" 
+                                onClick={() => setRole('parent')}
+                                style={{ flex: 1, padding: '10px', borderRadius: '10px', border: role === 'parent' ? '3px solid var(--color-blue)' : '2px solid #e2e8f0', background: role === 'parent' ? '#eff6ff' : 'white', cursor: 'pointer', fontWeight: 'bold' }}
+                            >
+                                👨‍👩‍👧 Família
+                            </button>
+                        </div>
+                    )}
+
                     <div className={styles.inputGroup}>
                         <label>E-mail</label>
                         <input 

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useGameStore } from '../store/useGameStore';
 import styles from './Inventory.module.css';
 import { getSavedProfiles } from '../utils/saveSystem';
-import type { SaveProfile } from '../utils/saveSystem';
+// Import removed
 import type { Mascot, Player } from '../core/types';
 import { useNavigate } from 'react-router-dom';
 import { MascotEngine } from '../core/game/MascotEngine';

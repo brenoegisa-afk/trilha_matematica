@@ -199,6 +199,67 @@
     margin: 10px 0;
 }
 
+.insightsSection {
+    background: white;
+    border: 3px solid #eef2f7;
+    border-radius: 24px;
+    padding: 20px;
+    margin-top: 15px;
+}
+
+.insightsList {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.insightItem {
+    padding: 16px;
+    border-radius: 16px;
+    border-left: 6px solid #ccc;
+    background: #f8fbff;
+}
+
+.insightItem.mastered {
+    border-left-color: var(--color-green);
+    background: #eaffee;
+}
+
+.insightItem.in_progress {
+    border-left-color: var(--color-blue);
+    background: #e0f4ff;
+}
+
+.insightItem.needs_help {
+    border-left-color: var(--color-red);
+    background: #ffe5e5;
+}
+
+.insightHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.insightIcon {
+    font-size: 1.5rem;
+}
+
+.insightSkill {
+    font-weight: 900;
+    font-size: 1.1rem;
+    color: var(--color-ink);
+}
+
+.insightMessage {
+    margin: 0;
+    font-size: 1rem;
+    color: #475569;
+    line-height: 1.4;
+    font-weight: 500;
+}
+
 .achievementsSection {
     padding: 10px 0;
 }
