@@ -38,11 +38,15 @@ export default function Dice() {
     }, [activeQuestion, gameStatus]);
 
     const handleRoll = useCallback(() => {
-        if (isRolling || players.length === 0) return;
+        console.log('Dice: Tentativa de clique no dado', { isRolling, playersCount: players.length, gameStatus });
+        
+        if (isRolling || players.length === 0 || gameStatus !== 'playing') {
+            console.warn('Dice: Clique ignorado', { isRolling, gameStatus });
+            return;
+        }
 
         setIsRolling(true);
 
-        // Visual rapid spin pre-roll
         let count = 0;
         const quickShuffle = setInterval(() => {
             setCurrentFace(Math.floor(Math.random() * 6) + 1);
@@ -50,14 +54,18 @@ export default function Dice() {
             if (count > 6) clearInterval(quickShuffle);
         }, 80);
 
-        // After animation, lock actual value
         setTimeout(() => {
-            clearInterval(quickShuffle);
-            const finalValue = rollDice();
-            setCurrentFace(finalValue);
-            setIsRolling(false);
+            try {
+                clearInterval(quickShuffle);
+                const finalValue = rollDice();
+                setCurrentFace(finalValue);
+                setIsRolling(false);
+            } catch (err) {
+                console.error('Dice: Erro ao rolar', err);
+                setIsRolling(false);
+            }
         }, 1200);
-    }, [isRolling, players.length, rollDice]);
+    }, [isRolling, players.length, gameStatus, rollDice]);
 
     const showClass = `show${currentFace}`;
 

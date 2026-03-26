@@ -75,47 +75,12 @@ export function getOrCreateProfile(name: string, code: string = '0000'): SavePro
     return newProfile;
 }
 
-// REAL CLOUD SYNC IMPLEMENTATION
+import { useSyncStore } from '../store/useSyncStore';
 
-let syncTimeout: any = null;
-
+// The cloud sync is now handled by React Query (CloudSyncProvider.tsx)
+// and queued reliably via Zustand to avoid race conditions and dataloss.
 export async function syncProfileToCloud(profile: SaveProfile) {
-    if (syncTimeout) clearTimeout(syncTimeout);
-
-    syncTimeout = setTimeout(async () => {
-        try {
-            const { data: { session } } = await supabase.auth.getSession();
-            const currentUserId = session?.user?.id;
-
-            const { error } = await supabase.from('profiles').upsert({
-                id: profile.id,
-                name: profile.name,
-                secret_code: profile.secretCode,
-                stars: profile.stars,
-                equipped_avatar: profile.equippedAvatar,
-                unlocked_avatars: profile.unlockedAvatars,
-                games_played: profile.gamesPlayed,
-                total_score: profile.totalScore,
-                equipped_mascot: profile.equippedMascot || '',
-                unlocked_mascots: profile.unlockedMascots || [],
-                streak: profile.streak || 1,
-                class_id: profile.class_id || null,
-                user_id: profile.user_id || currentUserId || null,
-                last_sync: new Date().toISOString()
-            });
-
-            if (error) {
-                if (error.message?.includes('Lock')) {
-                    console.debug("Sincronização adiada por trava de sessão.");
-                    return;
-                }
-                throw error;
-            }
-            console.log("Perfil sincronizado com sucesso:", profile.name);
-        } catch (e) {
-            console.warn("Sincronização em segundo plano falhou. O jogo continuará offline.", e);
-        }
-    }, 1000); // 1s debounce to avoid spam
+    useSyncStore.getState().addToQueue(profile);
 }
 
 export async function getGlobalRanking() {

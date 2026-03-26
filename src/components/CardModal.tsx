@@ -62,29 +62,38 @@ export default function CardModal() {
 
                         {waitingFeedback ? (
                             <div className={styles.educationalFeedback}>
-                                <h3 style={{ color: '#ff4757', marginBottom: '10px' }}>Puxa, não foi dessa vez!</h3>
-                                <p style={{ fontSize: '1.2rem', marginBottom: '10px' }}>A resposta certa era:<br/><strong>{activeQuestion.answer}</strong></p>
-                                {activeQuestion.explanation && (
-                                    <p style={{ 
-                                        background: '#f9f9f9', 
-                                        padding: '15px', 
-                                        borderRadius: '12px', 
-                                        fontSize: '0.95rem', 
-                                        color: '#555',
-                                        borderLeft: '4px solid #ff4757',
-                                        marginBottom: '20px',
-                                        fontStyle: 'italic',
-                                        lineHeight: '1.4'
-                                    }}>
-                                        💡 {activeQuestion.explanation}
-                                    </p>
+                                {answerFeedback === 'correct' ? (
+                                    <>
+                                        <div className={styles.feedbackIcon}>🌟</div>
+                                        <h3 className={styles.feedbackTitleSuccess}>Excelente!</h3>
+                                        <p className={styles.feedbackMessage}>
+                                            Você acertou! A resposta é mesmo <strong>{activeQuestion.answer}</strong>.
+                                        </p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className={styles.feedbackIcon}>💡</div>
+                                        <h3 className={styles.feedbackTitleError}>Puxa, quase lá!</h3>
+                                        <p className={styles.feedbackMessage}>
+                                            A resposta correta era: <span className={styles.correctAnswerHighlight}>{activeQuestion.answer}</span>
+                                        </p>
+                                    </>
                                 )}
+
+                                {activeQuestion.explanation && (
+                                    <div className={styles.explanationBox}>
+                                        <div className={styles.explanationLabel}>Dica Master:</div>
+                                        <p className={styles.explanationText}>
+                                            {activeQuestion.explanation}
+                                        </p>
+                                    </div>
+                                )}
+
                                 <button 
-                                    className={styles.optionButton} 
-                                    style={{ background: '#2ed573', color: 'white', width: '100%' }}
+                                    className={styles.acknowledgeButton}
                                     onClick={() => actions.acknowledgeFeedback()}
                                 >
-                                    Entendi!
+                                    Entendi! 🎉
                                 </button>
                             </div>
                         ) : (
@@ -103,11 +112,11 @@ export default function CardModal() {
                                                 alignItems: 'center', 
                                                 justifyContent: 'center', 
                                                 background: '#f0f0f0', 
-                                                width: '40px', 
-                                                height: '40px', 
-                                                borderRadius: '10px', 
-                                                marginRight: '15px',
-                                                fontSize: '1.2rem',
+                                                width: '32px', 
+                                                height: '32px', 
+                                                borderRadius: '8px', 
+                                                marginRight: '12px',
+                                                fontSize: '1rem',
                                                 color: '#aaa',
                                                 border: '2px solid #ddd'
                                             }}>

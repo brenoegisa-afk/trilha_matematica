@@ -4,12 +4,12 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(0, 0, 0, 0.45);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2000;
-    backdrop-filter: blur(10px);
+    z-index: 5000;
+    backdrop-filter: blur(8px);
     animation: fadeIn 0.4s ease-out;
 }
 
@@ -99,23 +99,60 @@
     margin-top: 5px;
 }
 
+.buffBox {
+    background: #f1f2f6;
+    padding: 15px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    font-size: 1rem;
+    color: #2f3542;
+    border: 1px solid #dfe4ea;
+}
+
+.buttonGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
 .continueButton {
-    background: linear-gradient(135deg, #2ed573, #7bed9f);
+    background: var(--color-green);
     color: white;
     border: none;
-    padding: 20px 60px;
-    border-radius: 20px;
-    font-size: 1.5rem;
+    padding: 15px 30px;
+    border-radius: 15px;
+    font-size: 1.1rem;
     font-weight: 800;
     cursor: pointer;
-    box-shadow: 0 10px 0 #26af5a;
+    box-shadow: 0 4px 6px rgba(46, 204, 113, 0.2);
     transition: all 0.2s;
-    width: 100%;
+}
+
+.continueButton:hover {
+    transform: scale(1.05);
+    background: #27ae60;
 }
 
 .continueButton:active {
     transform: translateY(5px);
     box-shadow: 0 5px 0 #26af5a;
+}
+
+.shareButton {
+    background: #f1f2f6;
+    color: var(--color-ink);
+    border: 2px solid #dfe4ea;
+    padding: 12px 20px;
+    border-radius: 15px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.shareButton:hover {
+    background: #e1e3e8;
 }
 
 .confetti {

@@ -15,6 +15,7 @@ export default function SideNavigation({ isOpen, onClose }: SideNavigationProps)
     const menuItems = [
         { id: 'home', label: 'Início', icon: '🏠', path: '/' },
         { id: 'game', label: 'Jogar', icon: '🎮', path: '/setup' },
+        { id: 'inventory', label: 'Mochila', icon: '🎒', path: '/inventory' },
         { id: 'ranking', label: 'Ranking', icon: '🏆', path: '/ranking' },
         { id: 'shop', label: 'Lojinha', icon: '🛒', path: '/shop' },
         { id: 'parent', label: 'Pais', icon: '👪', path: '/parent' },

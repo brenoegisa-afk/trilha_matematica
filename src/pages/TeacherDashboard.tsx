@@ -4,6 +4,7 @@ import { supabase } from '../utils/supabaseClient';
 import styles from './TeacherDashboard.module.css';
 import QuizEditor from './QuizEditor';
 import { StudentManager } from './StudentManager';
+import TeacherSessionMonitor from '../components/TeacherSessionMonitor';
 
 
 interface ClassData {
@@ -22,6 +23,7 @@ export default function TeacherDashboard() {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [activeQuizClass, setActiveQuizClass] = useState<ClassData | null>(null);
     const [activeStudentClass, setActiveStudentClass] = useState<ClassData | null>(null);
+    const [activeMonitorClass, setActiveMonitorClass] = useState<ClassData | null>(null);
     const [classStats, setClassStats] = useState<Record<string, { studentCount: number, questionCount: number }>>({});
 
     // V2 Modal States
@@ -215,6 +217,18 @@ export default function TeacherDashboard() {
                         <label>Questões no Banco</label>
                         <div className={styles.statValue}>📝 {totalQuestions}</div>
                     </div>
+                    {/* NEW: Global Weekly Engagement Placeholder/Calc */}
+                    <div className={`${styles.statCard} ${styles.wideCard}`}>
+                        <label>Engajamento Semanal (Média)</label>
+                        <div className={styles.chartPlaceholder}>
+                            <div className={styles.chartBar} style={{ height: '40%' }}></div>
+                            <div className={styles.chartBar} style={{ height: '70%' }}></div>
+                            <div className={styles.chartBar} style={{ height: '90%' }}></div>
+                            <div className={styles.chartBar} style={{ height: '60%' }}></div>
+                            <div className={styles.chartBar} style={{ height: '85%' }}></div>
+                        </div>
+                        <small>Atividade crescente nos últimos 5 dias 📈</small>
+                    </div>
                 </div>
 
                 <div className={styles.actionsBar}>
@@ -235,6 +249,7 @@ export default function TeacherDashboard() {
                             <div key={c.id} className={styles.classCard}>
                                 <div className={styles.classHeader}>
                                     <div>
+                                        <div className={styles.classTypeBadge}>Turma Digital</div>
                                         <h3>{c.name}</h3>
                                         <span className={styles.date}>{new Date(c.created_at).toLocaleDateString()}</span>
                                     </div>
@@ -280,6 +295,14 @@ export default function TeacherDashboard() {
                                         onClick={() => setActiveQuizClass(c)}
                                     >
                                         Criar Perguntas
+                                    </button>
+
+                                    <button
+                                        className={styles.monitorBtn}
+                                        onClick={() => setActiveMonitorClass(c)}
+                                        style={{ backgroundColor: 'var(--color-yellow)', color: 'var(--color-ink)' }}
+                                    >
+                                        📊 Ver Atividade
                                     </button>
                                 </div>
                             </div>
@@ -348,6 +371,13 @@ export default function TeacherDashboard() {
                     classId={activeStudentClass.id}
                     className={activeStudentClass.name}
                     onClose={() => setActiveStudentClass(null)}
+                />
+            )}
+
+            {activeMonitorClass && (
+                <TeacherSessionMonitor
+                    classId={activeMonitorClass.id}
+                    onClose={() => setActiveMonitorClass(null)}
                 />
             )}
 

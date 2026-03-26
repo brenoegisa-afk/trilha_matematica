@@ -4,11 +4,11 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(0, 0, 0, 0.45);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 2000;
+    z-index: 4000;
     backdrop-filter: blur(8px);
 }
 
@@ -232,10 +232,45 @@
 
 /* Mobile */
 @media (max-width: 600px) {
+    .arenaContainer {
+        padding: 15px;
+        gap: 15px;
+    }
+    .battleHeader h2 {
+        font-size: 1.4rem;
+    }
+    .battleHeader p {
+        font-size: 0.8rem;
+    }
     .entities {
-        flex-direction: column;
+        flex-direction: row; /* Keep them side by side to save vertical space */
+        gap: 10px;
+    }
+    .enemyIcon, .playerIcon {
+        font-size: 2.5rem;
     }
     .vs {
-        margin: 10px 0;
+        font-size: 1.5rem;
+        margin: 0;
+    }
+    .questionText {
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+    }
+    .optionButton {
+        padding: 8px;
+        font-size: 1rem;
+    }
+    .optionsGrid {
+        gap: 8px;
+    }
+    .hpBarLabel {
+        font-size: 0.75rem;
+    }
+    .hpText {
+        font-size: 0.7rem;
+    }
+    .inputArea {
+        padding: 12px;
     }
 }

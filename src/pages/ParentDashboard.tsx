@@ -1,31 +1,73 @@
 import { useState, useEffect } from 'react';
-import { getSavedProfiles } from '../utils/saveSystem';
-import styles from './TeacherDashboard.module.css'; // Reusing styles for consistency or mapping to a new one
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '../utils/supabaseClient';
+import styles from './TeacherDashboard.module.css';
+import { useNavigate } from 'react-router-dom';
 
 export default function ParentDashboard() {
-    const [children, setChildren] = useState<any[]>([]);
+    const navigate = useNavigate();
+    const [user, setUser] = useState<any>(null);
 
     useEffect(() => {
-        const profiles = getSavedProfiles();
-        setChildren(profiles);
-    }, []);
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (!session) {
+                navigate('/login');
+            } else {
+                setUser(session.user);
+            }
+        });
+    }, [navigate]);
+
+    const { data: children, isLoading } = useQuery({
+        queryKey: ['parent-profiles', user?.id],
+        queryFn: async () => {
+            if (!user) return [];
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('stars', { ascending: false });
+
+            if (error) throw error;
+            return data || [];
+        },
+        enabled: !!user,
+    });
+
+    if (isLoading) return <div className={styles.loader}>Carregando campeões...</div>;
 
     return (
         <div className={styles.dashboardContainer} style={{ padding: '40px' }}>
             <div className={styles.welcomeSection}>
                 <h1>Espaço dos Pais 👪</h1>
                 <p>Acompanhe o brilho e a evolução dos seus campeões.</p>
+                {user && <small style={{ opacity: 0.6 }}>Conectado como: {user.email}</small>}
             </div>
 
             <div className={styles.statsRow}>
-                {children.map(child => (
-                    <div key={child.id} className={styles.statCard} style={{ cursor: 'default' }}>
-                        <div style={{ fontSize: '3rem', marginBottom: '10px' }}>{child.avatar}</div>
+                {children?.map((child: any) => (
+                    <div key={child.id} className={styles.statCard} style={{ cursor: 'default', minWidth: '280px' }}>
+                        <div style={{ fontSize: '3rem', marginBottom: '10px' }}>{child.equipped_avatar || '👤'}</div>
                         <h2 style={{ margin: 0 }}>{child.name}</h2>
+                        
+                        {child.class_id && (
+                            <span style={{ 
+                                backgroundColor: 'var(--color-blue)', 
+                                color: 'white', 
+                                padding: '2px 8px', 
+                                borderRadius: '10px', 
+                                fontSize: '0.7rem',
+                                marginTop: '5px',
+                                display: 'inline-block'
+                            }}>
+                                Turma Vinculada 🏫
+                            </span>
+                        )}
+
                         <div style={{ marginTop: '15px', textAlign: 'left', width: '100%' }}>
                             <div style={{ marginBottom: '8px', display: 'flex', justifyContent: 'space-between' }}>
                                 <span>Pontuação Total:</span>
-                                <strong>{child.totalScore || 0}</strong>
+                                <strong>{child.total_score || 0}</strong>
                             </div>
                             <div style={{ marginBottom: '8px', display: 'flex', justifyContent: 'space-between' }}>
                                 <span>Estrelas:</span>
@@ -38,7 +80,7 @@ export default function ParentDashboard() {
                         </div>
                         <div style={{ marginTop: '20px', width: '100%', height: '10px', backgroundColor: '#eee', borderRadius: '5px' }}>
                             <div style={{ 
-                                width: `${Math.min(100, (child.xp % 100))}%`, 
+                                width: `${Math.min(100, (child.xp || 0) % 100)}%`, 
                                 height: '100%', 
                                 backgroundColor: 'var(--color-green)', 
                                 borderRadius: '5px' 
@@ -49,10 +91,16 @@ export default function ParentDashboard() {
                 ))}
             </div>
 
-            {children.length === 0 && (
+            {(!children || children.length === 0) && (
                 <div className={styles.emptyState}>
-                    <p>Nenhum perfil de aluno encontrado neste dispositivo.</p>
-                    <p>Peça ao seu filho para criar um perfil e começar a jogar!</p>
+                    <p>Você ainda não tem perfis de filhos vinculados à sua conta.</p>
+                    <button 
+                        onClick={() => navigate('/setup')} 
+                        className={styles.createBtn}
+                        style={{ marginTop: '20px' }}
+                    >
+                        Vincular Perfil Agora
+                    </button>
                 </div>
             )}
 

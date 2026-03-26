@@ -12,7 +12,8 @@
                 "Quebrou",
                 "O carro vermelho",
                 "Vermelho"
-              ]
+              ],
+              "explanation": "O sujeito é o herói da frase! Para achá-lo, pergunte: 'Quem quebrou?'. Resposta: 'O carro vermelho'."
             },
             {
               "question": "Palavra proparoxítona:",
@@ -22,7 +23,8 @@
                 "Árvore",
                 "Coração",
                 "Alegria"
-              ]
+              ],
+              "explanation": "Proparoxítonas têm a sílaba forte na antepenúltima! Dica: TODAS as proparoxítonas recebem acento."
             },
             {
               "question": "Verbo no infinitivo:",
@@ -32,7 +34,8 @@
                 "Canta",
                 "Cantar",
                 "Cantarão"
-              ]
+              ],
+              "explanation": "O infinitivo é o 'nome' do verbo, sem tempo nem pessoa. Geralmente termina em AR, ER ou IR."
             },
             {
               "question": "Qual o plural de 'Papel'?",
@@ -42,7 +45,8 @@
                 "Papéis",
                 "Papeles",
                 "Papéus"
-              ]
+              ],
+              "explanation": "Palavras terminadas em 'el' fazem o plural em 'éis'. E não esqueça do acento agudo!"
             },
             {
               "question": "Adjetivo para 'chuva forte':",
@@ -52,7 +56,8 @@
                 "Torrencial",
                 "Pequena",
                 "Doce"
-              ]
+              ],
+              "explanation": "'Torrencial' vem de torrente (muita água). É o adjetivo perfeito para uma chuva muito forte."
             }
           ],
           "Red": [

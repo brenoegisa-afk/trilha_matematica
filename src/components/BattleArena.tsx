@@ -78,17 +78,17 @@ export default function BattleArena() {
                             <p className={styles.questionText}>"{gameState.activeQuestion.question}"</p>
                             {gameState.waitingFeedback ? (
                                 <div className={styles.educationalFeedback}>
-                                    <h3 style={{ color: '#ff4757', marginBottom: '10px' }}>Puxa, não foi dessa vez!</h3>
-                                    <p style={{ fontSize: '1.2rem', marginBottom: '10px', fontWeight: 'bold' }}>A resposta certa era:<br/><span style={{fontSize: '2rem', color: '#ff4757'}}>{gameState.activeQuestion.answer}</span></p>
+                                    <h3 style={{ color: '#ff4757', marginBottom: '8px', fontSize: '1.2rem' }}>Puxa, não foi dessa vez!</h3>
+                                    <p style={{ fontSize: '1rem', marginBottom: '10px', fontWeight: 'bold' }}>A resposta certa era:<br/><span style={{fontSize: '1.5rem', color: '#ff4757'}}>{gameState.activeQuestion.answer}</span></p>
                                     {gameState.activeQuestion.explanation && (
                                         <div style={{ 
                                             background: 'rgba(255, 255, 255, 0.9)', 
-                                            padding: '15px', 
+                                            padding: '12px', 
                                             borderRadius: '12px', 
-                                            fontSize: '1rem', 
+                                            fontSize: '0.9rem', 
                                             color: '#333',
                                             borderLeft: '4px solid #ff4757',
-                                            marginBottom: '20px',
+                                            marginBottom: '15px',
                                             textAlign: 'left',
                                             lineHeight: '1.4'
                                         }}>
@@ -97,7 +97,7 @@ export default function BattleArena() {
                                     )}
                                     <button 
                                         className={styles.optionButton} 
-                                        style={{ background: '#2ed573', color: 'white', width: '100%', padding: '15px', borderRadius: '15px', border: 'none', fontSize: '1.2rem', fontWeight: 'bold', cursor: 'pointer' }}
+                                        style={{ background: '#2ed573', color: 'white', width: '100%', padding: '12px', borderRadius: '12px', border: 'none', fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer' }}
                                         onClick={() => actions.acknowledgeFeedback()}
                                     >
                                         Continuar Batalha!
@@ -117,11 +117,11 @@ export default function BattleArena() {
                                                 alignItems: 'center', 
                                                 justifyContent: 'center', 
                                                 background: '#f0f0f0', 
-                                                width: '40px', 
-                                                height: '40px', 
-                                                borderRadius: '10px', 
-                                                marginRight: '15px',
-                                                fontSize: '1.2rem',
+                                                width: '28px', 
+                                                height: '28px', 
+                                                borderRadius: '8px', 
+                                                marginRight: '10px',
+                                                fontSize: '0.9rem',
                                                 color: '#aaa',
                                                 border: '2px solid #ddd'
                                             }}>

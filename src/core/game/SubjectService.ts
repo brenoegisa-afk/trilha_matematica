@@ -1,6 +1,7 @@
-import type { Question, Subject, Skill } from '../types';
+import type { Question, Subject, Skill, Player } from '../types';
 import questionsData from '../../data/questions.json';
 import { ExplanationEngine } from './ExplanationEngine';
+import { MathEngine } from '../learning/MathEngine';
 
 // Extension of the current data structure to support subjects and skills
 // In a real scenario, this would come from an API
@@ -33,8 +34,14 @@ export class SubjectService {
      * Adaptative question fetching
      * Bridges the old 'TileType' system with the new 'Skill' system
      */
-    public getQuestion(subjectId: string, grade: string, tileType: string): Question {
-        // Navigate the new structure: subjects -> subjectId -> grades -> grade -> pool
+    public getQuestion(subjectId: string, grade: string, tileType: string, player?: Player): Question {
+        // Intercept math subject for dynamic procedural generation
+        if (subjectId === 'math') {
+            const dynamicQ = MathEngine.generate(grade, tileType, player);
+            return dynamicQ; // MathEngine already formats strings and assigns explicit skills
+        }
+
+        // Navigate the static structure for other subjects (Portuguese/Science)
         const subjectPool = (questionsData.subjects as any)[subjectId];
         
         if (subjectPool && subjectPool.grades && subjectPool.grades[grade]) {
@@ -44,11 +51,8 @@ export class SubjectService {
                 const q = tilePool[Math.floor(Math.random() * tilePool.length)];
                 
                 // Injetar Skill baseada na matéria e cor (Fallback inteligente)
-                let skillId = subjectId === 'math' ? 'math_basic' : 'port_grammar';
-                if (subjectId === 'math') {
-                    if (tileType === 'Green') skillId = 'math_expressions';
-                    if (tileType === 'Yellow') skillId = 'math_logic';
-                }
+                let skillId = 'port_grammar';
+                if (subjectId === 'science') skillId = 'sci_nature';
                 
                 return ExplanationEngine.enhance({ ...q, skillId });
             }
@@ -56,10 +60,10 @@ export class SubjectService {
 
         // Fallback robusto
         return ExplanationEngine.enhance({
-            question: subjectId === 'math' ? "Quanto é 1 + 1?" : "Qual a primeira letra de ABA?",
-            answer: subjectId === 'math' ? "2" : "A",
-            options: subjectId === 'math' ? ["1", "2", "3", "4"] : ["A", "B", "C", "D"],
-            skillId: subjectId === 'math' ? 'math_basic' : 'port_grammar'
+            question: "Qual a primeira letra de ABA?",
+            answer: "A",
+            options: ["A", "B", "C", "D"],
+            skillId: 'port_grammar'
         });
     }
 }

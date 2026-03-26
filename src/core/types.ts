@@ -1,5 +1,11 @@
 export type TileType = 'Normal' | 'Green' | 'Red' | 'Yellow' | 'Blue' | 'Purple' | 'Start' | 'Finish';
 
+export interface SessionStats {
+    totalQuestions: number;
+    correctAnswers: number;
+    skillsPracticed: Record<string, { attempts: number; successes: number }>;
+}
+
 export interface Tile {
     position: number;
     type: TileType;
@@ -25,6 +31,7 @@ export interface Player {
     maxHp: number;
     mascots: Mascot[];
     skillsMastery: SkillMastery[];
+    sessionStats: SessionStats;
 }
 
 export interface Skill {
@@ -53,10 +60,9 @@ export interface Mascot {
     id: string;
     name: string;
     icon: string;
-    buff: {
-        type: 'xp_boost' | 'protection' | 'damage';
-        value: number;
-    };
+    equipped: boolean;
+    xp: number;
+    level: number;
 }
 
 export interface Achievement {

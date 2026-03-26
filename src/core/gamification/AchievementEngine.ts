@@ -6,7 +6,9 @@ export class AchievementEngine {
         { id: 'streak_3', name: 'Tripliquei!', description: 'Acertou 3 questões seguidas!', icon: '🔥' },
         { id: 'streak_7', name: 'Invencível', description: 'Acertou 7 questões seguidas!', icon: '⚡' },
         { id: 'xp_1000', name: 'Veterano', description: 'Alcançou 1.000 XP totais', icon: '⭐' },
-        { id: 'math_master', name: 'Mestre da Matemática', description: 'Acertou 50 questões no total', icon: '🧠' }
+        { id: 'math_master', name: 'Mestre da Matemática', description: 'Acertou 50 questões no total', icon: '🧠' },
+        { id: 'mascot_evolve', name: 'Mestre Evolutivo', description: 'Seu mascote alcançou uma nova forma!', icon: '🧬' },
+        { id: 'all_subjects', name: 'Polímata', description: 'Demonstrou conhecimento em todas as áreas!', icon: '🌍' }
     ];
 
     constructor() {}
@@ -20,6 +22,19 @@ export class AchievementEngine {
         }
         if (player.streak >= 7 && !this.hasAchievement(player, 'streak_7')) {
             newlyUnlocked.push(this.getAchievement('streak_7')!);
+        }
+
+        // Check Evolution
+        const hasEvolved = player.mascots.some(m => m.id.includes('prime') || m.id.includes('sage'));
+        if (hasEvolved && !this.hasAchievement(player, 'mascot_evolve')) {
+            newlyUnlocked.push(this.getAchievement('mascot_evolve')!);
+        }
+
+        // Check Subject Mastery (Simplified check)
+        const expertMath = player.skillsMastery.some(s => s.skillId.includes('math') && s.level === 'silver');
+        const expertPort = player.skillsMastery.some(s => s.skillId.includes('port') && s.level === 'silver');
+        if (expertMath && expertPort && !this.hasAchievement(player, 'all_subjects')) {
+            newlyUnlocked.push(this.getAchievement('all_subjects')!);
         }
 
         // Check XP achievements

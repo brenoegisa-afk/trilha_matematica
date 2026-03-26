@@ -64,7 +64,7 @@ export default function RootLayout() {
                 }
                 @media (min-width: 1025px) {
                     .main-content-area {
-                        margin-left: 240px;
+                        margin-left: 210px;
                     }
                 }
             `}</style>
