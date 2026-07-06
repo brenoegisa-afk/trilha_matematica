@@ -7,6 +7,7 @@ import type { Mascot, Player } from '../core/types';
 import { useNavigate } from 'react-router-dom';
 import { MascotEngine } from '../core/game/MascotEngine';
 import type { MascotArchetype } from '../core/game/MascotEngine';
+import { SkillTree } from '../components/SkillTree';
 
 const mascotEngine = new MascotEngine();
 
@@ -14,6 +15,7 @@ export default function Inventory() {
     const navigate = useNavigate();
     const { players: sessionPlayers, refreshPlayers } = useGameStore();
     const [selectedPlayerIndex, setSelectedPlayerIndex] = useState(0);
+    const [activeTab, setActiveTab] = useState<'mascots' | 'tree'>('mascots');
 
     // Fallback logic: if no session players, use saved profiles
     const savedProfiles = getSavedProfiles();
@@ -96,8 +98,24 @@ export default function Inventory() {
                 ))}
             </div>
 
+            <div className={styles.tabs}>
+                <button 
+                    className={`${styles.tabBtn} ${activeTab === 'mascots' ? styles.activeTab : ''}`}
+                    onClick={() => setActiveTab('mascots')}
+                >
+                    🐾 Mascotes
+                </button>
+                <button 
+                    className={`${styles.tabBtn} ${activeTab === 'tree' ? styles.activeTab : ''}`}
+                    onClick={() => setActiveTab('tree')}
+                >
+                    🧠 Trilha
+                </button>
+            </div>
+
             <div className={styles.mainContent}>
-                <section className={styles.mascotGrid}>
+                {activeTab === 'mascots' ? (
+                    <section className={styles.mascotGrid}>
                     <h2>Seus Mascotes</h2>
                     {player.mascots.length === 0 ? (
                         <div className={styles.noMascots}>
@@ -139,6 +157,11 @@ export default function Inventory() {
                         </div>
                     )}
                 </section>
+                ) : (
+                    <section className={styles.treeSection}>
+                        <SkillTree player={player} />
+                    </section>
+                )}
 
                 <aside className={styles.statsPanel}>
                     <h2>Estatísticas Ativas</h2>

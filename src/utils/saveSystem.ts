@@ -15,9 +15,19 @@ export interface SaveProfile {
     streak?: number;
     class_id?: string;
     user_id?: string; // Link to Supabase Auth User ID
+    skillsMastery?: any[]; // SkillMastery[] persisted
+    srsReviews?: any[];    // SrsReview[] persisted
 }
 
 const STORAGE_KEY = '@TrilhaCampeoes:Profiles';
+
+// Helper: Fast SHA-256 hash natively
+export async function hashPin(pin: string): Promise<string> {
+    const msgUint8 = new TextEncoder().encode(pin);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+}
 
 export function getSavedProfiles(): SaveProfile[] {
     try {
@@ -51,7 +61,7 @@ export function getOrCreateProfile(name: string, code: string = '0000'): SavePro
     }
 
     const newProfile: SaveProfile = {
-        id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+        id: crypto.randomUUID(),
         name: name,
         secretCode: code,
         stars: 0,
@@ -63,7 +73,9 @@ export function getOrCreateProfile(name: string, code: string = '0000'): SavePro
         unlockedMascots: [],
         streak: 1,
         class_id: '',
-        user_id: ''
+        user_id: '',
+        skillsMastery: [],
+        srsReviews: []
     };
 
     profiles.push(newProfile);

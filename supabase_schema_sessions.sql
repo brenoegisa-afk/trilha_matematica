@@ -1,5 +1,13 @@
+-- ============================================
+-- Schema: game_sessions
+-- ============================================
+-- ⚠️  As RLS policies deste arquivo foram MOVIDAS para
+--     supabase/fix_rls_policies.sql para evitar conflitos.
+--     Este arquivo contém apenas DDL (schema).
+-- ============================================
+
 -- Tabela para armazenar o histórico de partidas (Sessões)
-CREATE TABLE game_sessions (
+CREATE TABLE IF NOT EXISTS game_sessions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     player_id TEXT NOT NULL,
     class_id TEXT,
@@ -12,18 +20,11 @@ CREATE TABLE game_sessions (
 );
 
 -- Índices para busca rápida por aluno ou turma
-CREATE INDEX idx_sessions_player ON game_sessions (player_id);
-CREATE INDEX idx_sessions_class ON game_sessions (class_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_player ON game_sessions (player_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_class ON game_sessions (class_id);
 
 -- Permissões de RLS (Row Level Security)
 ALTER TABLE game_sessions ENABLE ROW LEVEL SECURITY;
 
--- Permitir inserção pública (ou autenticada se preferir)
-CREATE POLICY "Allow public insert to game_sessions" 
-ON game_sessions FOR INSERT 
-WITH CHECK (true);
-
--- Permitir leitura baseada no class_id para professores (ou por player_id)
-CREATE POLICY "Allow select based on player_id" 
-ON game_sessions FOR SELECT 
-USING (true); -- Ajustar conforme necessidade de privacidade
+-- ⚠️  RLS POLICIES estão em supabase/fix_rls_policies.sql
+--     NÃO duplique policies aqui.

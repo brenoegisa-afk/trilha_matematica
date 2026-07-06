@@ -236,6 +236,45 @@
     50% { transform: translateY(-15px); }
 }
 
+.tabs {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.tabBtn {
+    padding: 12px 24px;
+    background: white;
+    border: 2px solid #cbd5e1;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--font-title);
+}
+
+.tabBtn:hover {
+    background: #f8fafc;
+}
+
+.activeTab {
+    background: var(--color-blue);
+    color: white;
+    border-color: var(--color-blue);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+.activeTab:hover {
+    background: var(--color-blue);
+}
+
+.treeSection {
+    grid-column: 1 / -1; /* Make it take full width, ignoring the 350px right panel */
+    width: 100%;
+}
+
 @media (max-width: 1000px) {
     .mainContent {
         grid-template-columns: 1fr;

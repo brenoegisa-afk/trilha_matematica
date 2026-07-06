@@ -6,6 +6,12 @@ export interface SessionStats {
     skillsPracticed: Record<string, { attempts: number; successes: number }>;
 }
 
+export interface SrsReview {
+    skillId: string;
+    targetTurn: number; // turno no qual a revisão deve aparecer
+    difficulty: 'easy' | 'medium' | 'hard';
+}
+
 export interface Tile {
     position: number;
     type: TileType;
@@ -17,6 +23,14 @@ export interface School {
     id: string;
     name: string;
     createdAt?: string;
+}
+
+export interface NodeMastery {
+    nodeId: string;
+    points: number;    // 0 a masteryThreshold+
+    attempts: number;
+    successes: number;
+    mastered: boolean;
 }
 
 export interface Player {
@@ -41,6 +55,8 @@ export interface Player {
     maxHp: number;
     mascots: Mascot[];
     skillsMastery: SkillMastery[];
+    nodeMastery?: Record<string, NodeMastery>;
+    srsReviews: SrsReview[];
     sessionStats: SessionStats;
 }
 
@@ -97,6 +113,8 @@ export interface Question {
     difficulty?: 'easy' | 'medium' | 'hard';
     explanation?: string | StructuredExplanation;
     isReinforcement?: boolean;
+    isReview?: boolean;
+    bnccCode?: string;
 }
 
 export type SkillStatus = 'mastered' | 'in_progress' | 'needs_help';

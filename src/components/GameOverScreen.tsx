@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGame } from '../context/GameContext';
 import { updateProfile } from '../utils/saveSystem';
 import MathChest from './MathChest';
@@ -7,6 +7,12 @@ import styles from './GameOverScreen.module.css';
 export default function GameOverScreen() {
     const { players, gameStatus } = useGame();
     const [showChestId, setShowChestId] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (gameStatus === 'finished') {
+            import('../utils/confetti').then(m => m.triggerConfetti());
+        }
+    }, [gameStatus]);
 
     if (gameStatus !== 'finished') return null;
 

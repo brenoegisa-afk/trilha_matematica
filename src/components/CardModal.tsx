@@ -24,11 +24,32 @@ export default function CardModal() {
 
     const getCardStyle = (type: TileType) => {
         switch (type) {
-            case 'Green': return { bg: 'var(--color-green)', title: 'Adição Bônus', icon: '✨', border: 'var(--color-green-dark)' };
+            case 'Green': return { bg: 'var(--color-green)', title: 'Operações Básicas', icon: '✨', border: 'var(--color-green-dark)' };
             case 'Red': return { bg: 'var(--color-red)', title: 'Desafio Rápido', icon: '⚔️', border: 'var(--color-red-dark)' };
             case 'Yellow': return { bg: 'var(--color-yellow)', title: 'Raciocínio', icon: '🧠', border: 'var(--color-yellow-dark)' };
             case 'Blue': return { bg: 'var(--color-blue)', title: 'Item Especial', icon: '💎', border: 'var(--color-blue-dark)' };
             default: return { bg: '#fff', title: 'Carta', icon: '🃏', border: '#ccc' };
+        }
+    };
+
+    const playAudio = (text: string, e?: React.MouseEvent) => {
+        if (e) {
+            e.stopPropagation(); // Evita que o clique no áudio selecione a opção
+        }
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel(); // Para áudio anterior
+            
+            // Corrige a pronúncia de sinais matemáticos em português
+            let spokenText = text
+                .replace(/-/g, ' menos ')
+                .replace(/\+/g, ' mais ')
+                .replace(/x/i, ' vezes ')
+                .replace(/÷/g, ' dividido por ')
+                .replace(/=/g, ' igual a ');
+
+            const utterance = new SpeechSynthesisUtterance(spokenText);
+            utterance.lang = 'pt-BR';
+            window.speechSynthesis.speak(utterance);
         }
     };
 
@@ -56,9 +77,25 @@ export default function CardModal() {
                     Vez de: <strong style={{ color: currentPlayer.color }}>{currentPlayer.name}</strong>
                 </div>
 
+                <div style={{ position: 'absolute', top: '16px', right: '16px', display: 'flex', gap: '8px' }}>
+                    {activeQuestion.isReview && (
+                        <span style={{ background: 'var(--color-yellow)', color: '#333', padding: '4px 8px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                            🔄 Revisão
+                        </span>
+                    )}
+                    {activeQuestion.bnccCode && (
+                        <span style={{ background: '#eee', color: '#666', padding: '4px 8px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 'bold', border: '1px solid #ccc' }}>
+                            {activeQuestion.bnccCode}
+                        </span>
+                    )}
+                </div>
+
                 <div className={styles.scrollArea}>
                     <div className={styles.content}>
-                        <p className={styles.questionText}>"{activeQuestion.question}"</p>
+                        <div className={styles.questionText}>
+                            <span>"{activeQuestion.question}"</span>
+                            <button className={styles.ttsButton} onClick={() => playAudio(activeQuestion.question)} title="Ouvir Pergunta">🔊</button>
+                        </div>
 
                         {waitingFeedback ? (
                             <div className={styles.educationalFeedback}>
@@ -132,23 +169,35 @@ export default function CardModal() {
                                             className={`${styles.optionButton} ${answerFeedback && (answerFeedback !== 'correct') ? styles.selected : ''}`}
                                             onClick={() => actions.submitAnswer(opt)}
                                             disabled={!!answerFeedback}
+                                            style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}
                                         >
-                                            <span style={{ 
-                                                display: 'inline-flex', 
-                                                alignItems: 'center', 
-                                                justifyContent: 'center', 
-                                                background: '#f0f0f0', 
-                                                width: '32px', 
-                                                height: '32px', 
-                                                borderRadius: '8px', 
-                                                marginRight: '12px',
-                                                fontSize: '1rem',
-                                                color: '#aaa',
-                                                border: '2px solid #ddd'
-                                            }}>
-                                                {letter}
-                                            </span>
-                                            {opt}
+                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                <span style={{ 
+                                                    display: 'inline-flex', 
+                                                    alignItems: 'center', 
+                                                    justifyContent: 'center', 
+                                                    background: '#f0f0f0', 
+                                                    width: '32px', 
+                                                    height: '32px', 
+                                                    borderRadius: '8px', 
+                                                    marginRight: '12px',
+                                                    fontSize: '1rem',
+                                                    color: '#aaa',
+                                                    border: '2px solid #ddd',
+                                                    flexShrink: 0
+                                                }}>
+                                                    {letter}
+                                                </span>
+                                                <span style={{ flex: 1 }}>{opt}</span>
+                                            </div>
+                                            <div 
+                                                className={styles.ttsButton} 
+                                                style={{ width: '40px', height: '40px', fontSize: '1.2rem', marginLeft: '10px' }}
+                                                onClick={(e) => playAudio(opt, e)}
+                                                title="Ouvir Alternativa"
+                                            >
+                                                🔊
+                                            </div>
                                         </button>
                                     );
                                 })}

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../utils/supabaseClient';
 import styles from './TeacherDashboard.module.css';
-import QuizEditor from './QuizEditor';
 import { StudentManager } from './StudentManager';
 import TeacherSessionMonitor from '../components/TeacherSessionMonitor';
 
@@ -21,7 +20,6 @@ export default function TeacherDashboard() {
     const [loading, setLoading] = useState(true);
     const [newClassName, setNewClassName] = useState('');
     const [showCreateModal, setShowCreateModal] = useState(false);
-    const [activeQuizClass, setActiveQuizClass] = useState<ClassData | null>(null);
     const [activeStudentClass, setActiveStudentClass] = useState<ClassData | null>(null);
     const [activeMonitorClass, setActiveMonitorClass] = useState<ClassData | null>(null);
     const [classStats, setClassStats] = useState<Record<string, { studentCount: number, questionCount: number }>>({});
@@ -81,7 +79,7 @@ export default function TeacherDashboard() {
 
             // Fetch all questions for these classes in one go
             const { data: questionsData } = await supabase
-                .from('teacher_questions')
+                .from('custom_questions')
                 .select('class_id')
                 .in('class_id', classIds);
 
@@ -123,8 +121,12 @@ export default function TeacherDashboard() {
         e.preventDefault();
         if (!newClassName.trim() || !user) return;
 
-        // Generate a 6-character random access code
-        const accessCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        // Generate a 6-character random access code (clean alphabet, no 0/O/1/I)
+        const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        let accessCode = '';
+        for (let i = 0; i < 6; i++) {
+            accessCode += ALPHABET.charAt(Math.floor(Math.random() * ALPHABET.length));
+        }
 
         const { data, error } = await supabase
             .from('classes')
@@ -291,13 +293,6 @@ export default function TeacherDashboard() {
                                     </button>
 
                                     <button
-                                        className={styles.quizBtn}
-                                        onClick={() => setActiveQuizClass(c)}
-                                    >
-                                        Criar Perguntas
-                                    </button>
-
-                                    <button
                                         className={styles.monitorBtn}
                                         onClick={() => setActiveMonitorClass(c)}
                                         style={{ backgroundColor: 'var(--color-yellow)', color: 'var(--color-ink)' }}
@@ -355,17 +350,6 @@ export default function TeacherDashboard() {
                 </div>
             )}
 
-            {activeQuizClass && (
-                <QuizEditor
-                    classId={activeQuizClass.id}
-                    className={activeQuizClass.name}
-                    onClose={() => {
-                        setActiveQuizClass(null);
-                        fetchClasses(user.id); // Refresh stats
-                    }}
-                />
-            )}
-
             {activeStudentClass && (
                 <StudentManager
                     classId={activeStudentClass.id}
@@ -377,6 +361,7 @@ export default function TeacherDashboard() {
             {activeMonitorClass && (
                 <TeacherSessionMonitor
                     classId={activeMonitorClass.id}
+                    className={activeMonitorClass.name}
                     onClose={() => setActiveMonitorClass(null)}
                 />
             )}

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
+import { supabase } from '../utils/supabaseClient';
+import { hashPin, updateProfile } from '../utils/saveSystem';
 import styles from './Setup.module.css';
 
 const AVAILABLE_COLORS = [
@@ -10,22 +12,75 @@ const AVAILABLE_COLORS = [
     { id: 'yellow', label: 'Amarela', hex: 'var(--color-yellow)' }
 ];
 
+interface ClassStudent {
+    id: string;
+    name: string;
+    secret_code: string;
+    class_id: string;
+    total_score: number;
+    stars: number;
+    streak: number;
+}
+
 export default function Setup() {
     const navigate = useNavigate();
-    const { players, addPlayer, startGame, selectedGrade, setGrade, refreshPlayers, availableSubjects, currentSubjectId, setSubject } = useGame();
-    const [name, setName] = useState('');
-    const [secretCode, setSecretCode] = useState('');
+    const { players, addPlayer, startGame, selectedGrade, setGrade, refreshPlayers, availableSubjects, currentSubjectId, setSubject, setClassConfig } = useGame();
+    
+    // Class flow state
     const [classCode, setClassCode] = useState('');
+    const [classStudents, setClassStudents] = useState<ClassStudent[] | null>(null);
+    const [selectedStudentId, setSelectedStudentId] = useState('');
+    const [secretCode, setSecretCode] = useState('');
     const [selectedColor, setSelectedColor] = useState('red');
     const [classLoading, setClassLoading] = useState(false);
+    const [consentChecked, setConsentChecked] = useState(false);
+    const [classActiveFocus, setClassActiveFocus] = useState<string | null>(null);
+    const [currentClassId, setCurrentClassId] = useState<string | null>(null);
 
     useEffect(() => {
         refreshPlayers();
     }, []);
 
+    const handleFetchClass = async () => {
+        if (!classCode.trim()) return;
+        setClassLoading(true);
+        try {
+            const { data: classData, error: classError } = await supabase
+                .from('classes')
+                .select('id, active_focus_skill')
+                .eq('access_code', classCode.toUpperCase())
+                .single();
+
+            if (classError || !classData) {
+                alert('Código de Turma inválido!');
+                setClassLoading(false);
+                return;
+            }
+
+            const { data: studentsData, error: studentsError } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('class_id', classData.id)
+                .order('name');
+
+            if (studentsError) throw studentsError;
+
+            setClassStudents(studentsData || []);
+            setClassActiveFocus(classData.active_focus_skill || null);
+            setCurrentClassId(classData.id);
+        } catch (e) {
+            console.error(e);
+            alert('Erro ao buscar alunos da turma.');
+        } finally {
+            setClassLoading(false);
+        }
+    };
+
     const handleAddPlayer = async () => {
-        if (!name.trim()) return;
-        if (players.length >= 4) return;
+        if (!selectedStudentId) {
+            alert('Selecione seu nome na lista!');
+            return;
+        }
 
         const colorHex = AVAILABLE_COLORS.find(c => c.id === selectedColor)?.hex || 'black';
         if (players.some(p => p.color === colorHex)) {
@@ -33,43 +88,58 @@ export default function Setup() {
             return;
         }
 
-        if (name.trim() && secretCode.length < 4) {
-            alert('O Código Secreto deve ter 4 números!');
+        if (secretCode.length < 4) {
+            alert('O PIN deve ter 4 números!');
             return;
         }
 
-        let finalClassId = '';
-        if (classCode.trim()) {
-            setClassLoading(true);
-            const { data, error } = await import('../utils/supabaseClient').then(m =>
-                m.supabase.from('classes').select('id').eq('access_code', classCode.toUpperCase()).single()
-            );
+        const studentData = classStudents?.find(s => s.id === selectedStudentId);
+        if (!studentData) return;
 
-            if (error || !data) {
-                alert('Código de Turma inválido!');
-                setClassLoading(false);
-                return;
-            }
-            finalClassId = data.id;
-            setClassLoading(false);
+        // Hash input pin to compare with DB
+        const inputHash = await hashPin(secretCode);
+        if (inputHash !== studentData.secret_code) {
+            alert('PIN Incorreto! Tente novamente.');
+            return;
         }
 
-        const profile = addPlayer(name, colorHex, secretCode, finalClassId);
+        // Add player to game context (returns a new local profile or updates existing)
+        const profile = addPlayer(studentData.name, colorHex, studentData.secret_code, studentData.class_id);
 
-        if (finalClassId) {
-            import('../utils/saveSystem').then(m => m.updateProfile(profile.id, { class_id: finalClassId }));
-        }
+        // Sync local profile state with DB state so progress survives device switch
+        updateProfile(profile.id, {
+            id: studentData.id, // Override local UUID with DB UUID to keep them linked
+            totalScore: studentData.total_score || 0,
+            stars: studentData.stars || 0,
+            streak: studentData.streak || 1
+        });
 
-        setName('');
         setSecretCode('');
-        setClassCode('');
+        setSelectedStudentId('');
+        // No longer returning home if players >= 4, allowed to add indefinitely
     };
 
     const location = useLocation();
     const gameMode = location.state?.gameMode || 'trilha';
 
-    const handleStart = () => {
+    const handleStart = async () => {
         if (players.length === 0) return;
+
+        // Load class config (focus + custom questions) before starting
+        if (currentClassId) {
+            let customQuestions: any[] = [];
+            try {
+                const { data } = await supabase
+                    .from('custom_questions')
+                    .select('*')
+                    .eq('class_id', currentClassId);
+                if (data) customQuestions = data;
+            } catch (e) {
+                console.warn('custom_questions table not ready yet:', e);
+            }
+            setClassConfig(classActiveFocus, customQuestions);
+        }
+
         startGame();
 
         if (gameMode === 'arena') {
@@ -152,68 +222,115 @@ export default function Setup() {
                 {renderGradeSelector()}
             </div>
 
-            {/* Panel 3: Player Creation */}
+            {/* Panel 3: Player Creation (Cloud Flow) */}
             <div className={styles.panel}>
-                <label className={styles.label}>Criar Jogador ({players.length}/4)</label>
+                <label className={styles.label}>Turma e Jogadores ({players.length} na fila)</label>
                 
-                <input
-                    type="text"
-                    className={styles.inputField}
-                    style={{ marginBottom: '10px' }}
-                    value={name}
-                    onChange={e => setName(e.target.value)}
-                    placeholder="Seu Nome de Herói"
-                />
+                {!classStudents ? (
+                    <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+                        <input
+                            type="text"
+                            maxLength={6}
+                            className={styles.inputField}
+                            style={{ flex: 1, textAlign: 'center', textTransform: 'uppercase' }}
+                            value={classCode}
+                            onChange={e => setClassCode(e.target.value.toUpperCase())}
+                            placeholder="Código da Turma (Ex: A99B)"
+                        />
+                        <button 
+                            className="btn-primary" 
+                            onClick={handleFetchClass}
+                            disabled={!classCode.trim() || classLoading}
+                        >
+                            {classLoading ? '⏳' : 'Buscar'}
+                        </button>
+                    </div>
+                ) : (
+                    <>
+                        <div style={{ marginBottom: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ color: 'white' }}>✅ Turma Encontrada!</span>
+                            <button 
+                                onClick={() => { setClassStudents(null); setClassCode(''); }}
+                                style={{ background: 'none', border: 'none', color: '#ff4d4f', cursor: 'pointer', textDecoration: 'underline' }}
+                            >
+                                Trocar Turma
+                            </button>
+                        </div>
+                        
+                        <select 
+                            className={styles.inputField} 
+                            style={{ marginBottom: '10px', cursor: 'pointer' }}
+                            value={selectedStudentId}
+                            onChange={e => setSelectedStudentId(e.target.value)}
+                        >
+                            <option value="">-- Escolha seu nome --</option>
+                            {classStudents.filter(s => !players.some(p => p.name === s.name)).map(student => (
+                                <option key={student.id} value={student.id}>{student.name}</option>
+                            ))}
+                        </select>
 
-                <input
-                    type="password"
-                    inputMode="numeric"
-                    maxLength={4}
-                    className={styles.inputField}
-                    style={{ marginBottom: '10px', letterSpacing: '8px', textAlign: 'center' }}
-                    value={secretCode}
-                    onChange={e => setSecretCode(e.target.value.replace(/\D/g, ''))}
-                    placeholder="Senha (4 números)"
-                />
+                        <input
+                            type="password"
+                            inputMode="numeric"
+                            maxLength={4}
+                            className={styles.inputField}
+                            style={{ marginBottom: '10px', letterSpacing: '8px', textAlign: 'center' }}
+                            value={secretCode}
+                            onChange={e => setSecretCode(e.target.value.replace(/\D/g, ''))}
+                            placeholder="PIN (4 números)"
+                        />
 
-                <input
-                    type="text"
-                    maxLength={6}
-                    className={styles.inputField}
-                    style={{ marginBottom: '15px', textAlign: 'center' }}
-                    value={classCode}
-                    onChange={e => setClassCode(e.target.value.toUpperCase())}
-                    placeholder="Código da Turma (Ex: A99B)"
-                />
+                        <label className={styles.label} style={{ fontSize: '0.9rem', textAlign: 'center' }}>Cor da Tampinha:</label>
+                        <div className={styles.colorPicker} style={{ marginBottom: '20px' }}>
+                            {AVAILABLE_COLORS.map(c => {
+                                const isTaken = players.some(p => p.color === c.hex);
+                                return (
+                                    <div
+                                        key={c.id}
+                                        className={styles.colorDot}
+                                        onClick={() => !isTaken && setSelectedColor(c.id)}
+                                        style={{
+                                            backgroundColor: c.hex,
+                                            opacity: isTaken ? 0.2 : 1,
+                                            boxShadow: selectedColor === c.id ? `0 0 0 4px var(--color-ink)` : 'none',
+                                            cursor: isTaken ? 'not-allowed' : 'pointer'
+                                        }}
+                                    />
+                                );
+                            })}
+                        </div>
 
-                <label className={styles.label} style={{ fontSize: '0.9rem', textAlign: 'center' }}>Cor da Tampinha:</label>
-                <div className={styles.colorPicker} style={{ marginBottom: '20px' }}>
-                    {AVAILABLE_COLORS.map(c => {
-                        const isTaken = players.some(p => p.color === c.hex);
-                        return (
-                            <div
-                                key={c.id}
-                                className={styles.colorDot}
-                                onClick={() => !isTaken && setSelectedColor(c.id)}
-                                style={{
-                                    backgroundColor: c.hex,
-                                    opacity: isTaken ? 0.2 : 1,
-                                    boxShadow: selectedColor === c.id ? `0 0 0 4px var(--color-ink)` : 'none',
-                                    cursor: isTaken ? 'not-allowed' : 'pointer'
-                                }}
+                        <label
+                            style={{
+                                display: 'flex',
+                                alignItems: 'flex-start',
+                                gap: '8px',
+                                color: 'white',
+                                fontSize: '0.8rem',
+                                marginBottom: '12px',
+                                cursor: 'pointer',
+                                lineHeight: 1.4
+                            }}
+                        >
+                            <input
+                                type="checkbox"
+                                checked={consentChecked}
+                                onChange={e => setConsentChecked(e.target.checked)}
+                                style={{ marginTop: '3px', accentColor: 'var(--color-green)' }}
                             />
-                        );
-                    })}
-                </div>
+                            Concordo que os dados inseridos sejam usados exclusivamente para fins pedagógicos nesta plataforma.
+                        </label>
 
-                <button 
-                    className="btn-primary" 
-                    style={{ width: '100%', padding: '15px' }}
-                    onClick={handleAddPlayer} 
-                    disabled={!name.trim() || secretCode.length < 4 || players.length >= 4 || classLoading}
-                >
-                    {classLoading ? '⏳ Criando...' : '➕ Adicionar Herói!'}
-                </button>
+                        <button 
+                            className="btn-primary" 
+                            style={{ width: '100%', padding: '15px' }}
+                            onClick={handleAddPlayer} 
+                            disabled={!selectedStudentId || secretCode.length < 4 || !consentChecked}
+                        >
+                            ➕ Adicionar Herói!
+                        </button>
+                    </>
+                )}
             </div>
 
             {/* Panel 4: Queue & Start (Only visible if players exist) */}

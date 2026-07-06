@@ -16,6 +16,7 @@ import { BattleEngine } from '../core/game/BattleEngine';
 import { MascotEngine } from '../core/game/MascotEngine';
 import { SessionService } from '../core/game/SessionService';
 import { ReinforcementEngine } from '../core/learning/ReinforcementEngine';
+import { BnccMap } from '../core/learning/BnccMap';
 
 import type { Player, Tile, TileType, GameStatus, Question, Enemy, Subject, GameState, Mascot } from '../core/types';
 
@@ -56,6 +57,10 @@ interface GameStoreState {
     
     // --- Game State (single source of truth) ---
     gameState: GameState;
+    classConfig?: {
+        activeFocusSkill: string | null;
+        customQuestions: any[];
+    };
     currentPlayerIndex: number;
     tiles: Tile[];
     gameStatus: GameStatus;
@@ -86,6 +91,7 @@ interface GameStoreState {
     clearLevelUp: () => void;
     clearXpNotification: () => void;
     logout: () => void;
+    setClassConfig: (activeFocusSkill: string | null, customQuestions: any[]) => void;
     actions: {
         rollDice: () => number;
         submitAnswer: (answer: string) => void;
@@ -201,6 +207,21 @@ export const useGameStore = create<GameStoreState>((set, get) => {
             if (isCorrect) player.sessionStats.skillsPracticed[skillId].successes += 1;
 
             skillEngine.updateMastery(player, skillId, isCorrect);
+            
+            // SRS Queueing
+            if (!player.srsReviews) player.srsReviews = [];
+            const turnDelay = isCorrect ? 15 : 5;
+            const currentTurn = player.sessionStats.totalQuestions;
+            const existingReviewIndex = player.srsReviews.findIndex(r => r.skillId === skillId);
+            if (existingReviewIndex >= 0) {
+                player.srsReviews[existingReviewIndex].targetTurn = currentTurn + turnDelay;
+            } else {
+                player.srsReviews.push({
+                    skillId,
+                    targetTurn: currentTurn + turnDelay,
+                    difficulty: isCorrect ? 'medium' : 'easy'
+                });
+            }
         }
 
         if (gs.status === 'battle') {
@@ -268,7 +289,8 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                             player.inventoryProtectionCount -= 1;
                         }
                     } else {
-                        player.currentPosition = Math.max(0, player.currentPosition - 1);
+                        // Sem punição de recuo (Fase 2)
+                        player.currentPosition = Math.max(0, player.currentPosition);
                     }
                 }
             } else if (activeTileType === 'Blue' && isCorrect) {
@@ -328,6 +350,9 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                 return 1;
             }
         },
+        setClassConfig: (activeFocusSkill, customQuestions) => {
+            set({ classConfig: { activeFocusSkill, customQuestions } });
+        },
         submitAnswer: (answer: string) => {
             const gs = get().gameState;
             if (!gs.activeQuestion) return;
@@ -379,7 +404,65 @@ export const useGameStore = create<GameStoreState>((set, get) => {
         generateQuestion: (type: TileType) => {
             const gs = get().gameState;
             const player = gs.players[gs.currentPlayerIndex];
-            const nextQ = subjectService.getQuestion(get().currentSubjectId, get().selectedGrade, type, player);
+            const config = get().classConfig;
+            
+            // 1. Tentar injetar questão customizada do professor (30% de chance)
+            if (config?.customQuestions && config.customQuestions.length > 0 && Math.random() < 0.3) {
+                const pool = config.customQuestions;
+                const picked = pool[Math.floor(Math.random() * pool.length)];
+                let parsedOptions: string[];
+                try {
+                    parsedOptions = typeof picked.options === 'string' ? JSON.parse(picked.options) : picked.options;
+                } catch { parsedOptions = [picked.answer, '?', '??', '???']; }
+                
+                const customQ: Question = {
+                    id: picked.id,
+                    question: picked.question,
+                    answer: picked.answer,
+                    options: parsedOptions.filter((o: string) => o), // remove vazias
+                    skillId: picked.skill_id,
+                    difficulty: 'medium'
+                };
+                if (customQ.skillId) {
+                    const bncc = BnccMap.getCode(customQ.skillId, get().selectedGrade);
+                    if (bncc) customQ.bnccCode = bncc;
+                }
+                updateGame(GameEngine.setQuestion(gs, customQ));
+                return;
+            }
+            
+            // 2. Verificar foco ativo da turma
+            let forcedSkillId: string | undefined = config?.activeFocusSkill || undefined;
+            let isReview = false;
+            
+            // 3. Apenas puxa revisão SRS se NÃO houver um Foco Ativo travando a matéria
+            if (!forcedSkillId && player.srsReviews && player.srsReviews.length > 0) {
+                const currentTurn = player.sessionStats.totalQuestions;
+                const dueReviewIndex = player.srsReviews.findIndex(r => currentTurn >= r.targetTurn);
+                
+                if (dueReviewIndex >= 0) {
+                    const review = player.srsReviews[dueReviewIndex];
+                    const subjectPrefix = get().currentSubjectId.substring(0,4);
+                    if (review.skillId.startsWith(subjectPrefix)) {
+                        forcedSkillId = review.skillId;
+                        isReview = true;
+                        player.srsReviews.splice(dueReviewIndex, 1);
+                    }
+                }
+            }
+            
+            // 4. Gerar questão padrão (automática)
+            const nextQ = subjectService.getQuestion(get().currentSubjectId, get().selectedGrade, type, player, forcedSkillId);
+            
+            if (isReview) {
+                nextQ.isReview = true;
+            }
+            
+            if (nextQ.skillId) {
+                const bncc = BnccMap.getCode(nextQ.skillId, get().selectedGrade);
+                if (bncc) nextQ.bnccCode = bncc;
+            }
+            
             updateGame(GameEngine.setQuestion(gs, nextQ));
         },
         start: (pls?: Player[]) => {
@@ -437,7 +520,9 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                             unlockedMascots: cloudP.unlocked_mascots as string[],
                             streak: cloudP.streak as number,
                             class_id: cloudP.class_id as string,
-                            user_id: cloudP.user_id as string
+                            user_id: cloudP.user_id as string,
+                            skillsMastery: cloudP.skills_mastery as any[],
+                            srsReviews: cloudP.srs_reviews as any[]
                         };
                         if (idx !== -1) {
                             profiles[idx] = mapped;
@@ -458,7 +543,9 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                         mascot: profile.equippedMascot, 
                         streak: profile.streak || 0,
                         score: profile.totalScore,
-                        level: profile.stars > 100 ? Math.floor(profile.stars / 100) + 1 : 1
+                        level: profile.stars > 100 ? Math.floor(profile.stars / 100) + 1 : 1,
+                        skillsMastery: profile.skillsMastery || [],
+                        srsReviews: profile.srsReviews || []
                     };
                 })
             }));
@@ -485,7 +572,9 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                 id: profile.id, name: profile.name, color, avatar: profile.equippedAvatar,
                 mascot: profile.equippedMascot, streak: profile.streak || 1, class_id: profile.class_id || classId,
                 user_id: profile.user_id || currentUser?.id, currentPosition: 0, inventoryProtectionCount: 0,
-                score: 0, level: 1, xp: 0, achievements: [], hp: 100, maxHp: 100, mascots: [], skillsMastery: [],
+                score: 0, level: 1, xp: 0, achievements: [], hp: 100, maxHp: 100, mascots: [], 
+                skillsMastery: profile.skillsMastery || [],
+                srsReviews: profile.srsReviews || [],
                 sessionStats: { totalQuestions: 0, correctAnswers: 0, skillsPracticed: {} }
             };
             set({ players: [...players, newPlayer] });

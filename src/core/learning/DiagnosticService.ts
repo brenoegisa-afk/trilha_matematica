@@ -1,4 +1,5 @@
 import type { Player, DiagnosticInsight, SkillStatus } from '../types';
+import { CurriculumGraph } from './CurriculumGraph';
 
 /**
  * DiagnosticService
@@ -14,9 +15,46 @@ export class DiagnosticService {
         // Use the active session stats and overall mastery
         const sessionSkills = player.sessionStats?.skillsPracticed || {};
         const overallMastery = player.skillsMastery || [];
+        const nodeMastery = player.nodeMastery || {};
 
-        // If no skills practiced this session, return empty or fallback
-        if (Object.keys(sessionSkills).length === 0) {
+        // 1. Curriculum Graph Insights (New Phase 7 logic)
+        // Find nodes the student practiced recently or is struggling with
+        const strugglingNodes = Object.values(nodeMastery).filter(nm => 
+            !nm.mastered && nm.attempts >= 3 && (nm.successes / nm.attempts) <= 0.4
+        );
+
+        if (strugglingNodes.length > 0) {
+            strugglingNodes.sort((a, b) => (a.successes / a.attempts) - (b.successes / b.attempts));
+            const worstNode = strugglingNodes[0];
+            const nodeInfo = CurriculumGraph.getNode(worstNode.nodeId);
+            
+            if (nodeInfo) {
+                // Find if there's a weak prerequisite
+                const pointsMap: Record<string, number> = {};
+                for (const [id, data] of Object.entries(nodeMastery)) {
+                    pointsMap[id] = data.points;
+                }
+                const weakPrereq = CurriculumGraph.findWeakPrerequisite(nodeInfo.id, pointsMap);
+
+                let message = `O aluno está com dificuldades no conceito "${nodeInfo.name}".`;
+                if (weakPrereq) {
+                    message += ` Recomendamos revisar o pré-requisito: "${weakPrereq.name}".`;
+                } else {
+                    message += ` O sistema está ajustando as questões para reforçar esse tópico.`;
+                }
+
+                insights.push({
+                    skillId: nodeInfo.skillId,
+                    skillName: nodeInfo.name, // Use the specific node name
+                    status: 'needs_help',
+                    trend: 'declining',
+                    message
+                });
+            }
+        }
+
+        // 2. Legacy Skill Insights (If no skills practiced this session, return)
+        if (Object.keys(sessionSkills).length === 0 && insights.length === 0) {
             return [];
         }
 
@@ -24,8 +62,6 @@ export class DiagnosticService {
             const mastery = overallMastery.find(m => m.skillId === skillId);
             const accuracy = stats.successes / stats.attempts;
             
-            // Basic trend estimation (just based on session for now)
-            // In a real database, we'd compare against previous explicit sessions
             let status: SkillStatus = 'in_progress';
             let trend: DiagnosticInsight['trend'] = 'stable';
             
@@ -52,13 +88,15 @@ export class DiagnosticService {
             };
         });
 
-        // Sort by attempts to prioritize the most practiced skills
         skillData.sort((a, b) => b.attempts - a.attempts);
 
-        // Take top 3 for the report
-        const topSkills = skillData.slice(0, 3);
+        // Fill remaining insights up to 3
+        for (const s of skillData) {
+            if (insights.length >= 3) break;
+            
+            // Skip if we already added a specific node insight for this skill
+            if (insights.some(i => i.skillId === s.skillId)) continue;
 
-        topSkills.forEach(s => {
             let message = '';
             if (s.status === 'mastered') {
                 message = `Excelente! Você demonstrou forte domínio em ${s.skillName} (${Math.round(s.accuracy * 100)}%).`;
@@ -79,7 +117,7 @@ export class DiagnosticService {
                 trend: s.trend,
                 message
             });
-        });
+        }
 
         return insights;
     }

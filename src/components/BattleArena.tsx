@@ -6,6 +6,26 @@ export default function BattleArena() {
     const { currentEnemy, players, currentPlayerIndex, gameState, actions } = useGame();
     const [hitAnimation, setHitAnimation] = useState<'player' | 'enemy' | null>(null);
 
+    const playAudio = (text: string, e?: React.MouseEvent) => {
+        if (e) {
+            e.stopPropagation();
+        }
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+            
+            let spokenText = text
+                .replace(/-/g, ' menos ')
+                .replace(/\+/g, ' mais ')
+                .replace(/x/i, ' vezes ')
+                .replace(/÷/g, ' dividido por ')
+                .replace(/=/g, ' igual a ');
+
+            const utterance = new SpeechSynthesisUtterance(spokenText);
+            utterance.lang = 'pt-BR';
+            window.speechSynthesis.speak(utterance);
+        }
+    };
+
     useEffect(() => {
         if (gameState.answerFeedback === 'correct') {
             setHitAnimation('enemy');
@@ -75,7 +95,16 @@ export default function BattleArena() {
                         <p className={styles.loadingText}>Preparando próximo desafio...</p>
                     ) : (
                         <div className={`${styles.questionContainer} ${gameState.answerFeedback === 'correct' ? styles.correct : gameState.answerFeedback === 'wrong' ? styles.wrong : ''}`}>
-                            <p className={styles.questionText}>"{gameState.activeQuestion.question}"</p>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                                <p className={styles.questionText} style={{ margin: 0 }}>"{gameState.activeQuestion.question}"</p>
+                                <button 
+                                    onClick={() => playAudio(gameState.activeQuestion!.question)} 
+                                    title="Ouvir Pergunta"
+                                    style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: '5px' }}
+                                >
+                                    🔊
+                                </button>
+                            </div>
                             {gameState.waitingFeedback ? (
                                 <div className={styles.educationalFeedback}>
                                     <h3 style={{ color: '#ff4757', marginBottom: '8px', fontSize: '1.2rem' }}>Puxa, não foi dessa vez!</h3>
@@ -125,22 +154,32 @@ export default function BattleArena() {
                                             onClick={() => actions.submitAnswer(opt)}
                                             disabled={!!gameState.answerFeedback}
                                         >
-                                            <span style={{ 
-                                                display: 'inline-flex', 
-                                                alignItems: 'center', 
-                                                justifyContent: 'center', 
-                                                background: '#f0f0f0', 
-                                                width: '28px', 
-                                                height: '28px', 
-                                                borderRadius: '8px', 
-                                                marginRight: '10px',
-                                                fontSize: '0.9rem',
-                                                color: '#aaa',
-                                                border: '2px solid #ddd'
-                                            }}>
-                                                {String.fromCharCode(65 + idx)}
-                                            </span>
-                                            {opt}
+                                            <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+                                                <span style={{ 
+                                                    display: 'inline-flex', 
+                                                    alignItems: 'center', 
+                                                    justifyContent: 'center', 
+                                                    background: '#f0f0f0', 
+                                                    width: '28px', 
+                                                    height: '28px', 
+                                                    borderRadius: '8px', 
+                                                    marginRight: '10px',
+                                                    fontSize: '0.9rem',
+                                                    color: '#aaa',
+                                                    border: '2px solid #ddd',
+                                                    flexShrink: 0
+                                                }}>
+                                                    {String.fromCharCode(65 + idx)}
+                                                </span>
+                                                <span style={{ flex: 1, textAlign: 'left' }}>{opt}</span>
+                                            </div>
+                                            <div 
+                                                style={{ fontSize: '1.2rem', padding: '4px', cursor: 'pointer' }}
+                                                onClick={(e) => playAudio(opt, e)}
+                                                title="Ouvir Alternativa"
+                                            >
+                                                🔊
+                                            </div>
                                         </button>
                                     ))}
                                 </div>

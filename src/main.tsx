@@ -72,13 +72,17 @@ const router = createBrowserRouter([
   }
 ])
 
+import { ErrorBoundary } from './components/ErrorBoundary'
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <GameProvider>
-        <CloudSyncProvider />
-        <RouterProvider router={router} />
-      </GameProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <GameProvider>
+          <CloudSyncProvider />
+          <RouterProvider router={router} />
+        </GameProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )

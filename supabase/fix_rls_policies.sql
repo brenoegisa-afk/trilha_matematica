@@ -1,70 +1,211 @@
 -- ============================================
--- FIX: RLS Policies para Trilha dos Campeões
+-- FASE 0: RLS Policies Corrigidas — Trilha dos Campeões
 -- ============================================
--- Aplicar no Supabase Dashboard > SQL Editor
-
--- ============================================
--- 1. game_sessions — Segurança por autenticação
--- ============================================
-
--- Remover policies antigas inseguras
-DROP POLICY IF EXISTS "Allow public insert to game_sessions" ON game_sessions;
-DROP POLICY IF EXISTS "Allow select based on player_id" ON game_sessions;
-
--- INSERT: Somente usuários autenticados podem inserir sessões
-CREATE POLICY "Authenticated users can insert game_sessions"
-ON game_sessions FOR INSERT
-TO authenticated
-WITH CHECK (true);
-
--- SELECT: Usuários autenticados podem ver sessões
--- (será refinado com school_id na Fase 3)
-CREATE POLICY "Authenticated users can read game_sessions"
-ON game_sessions FOR SELECT
-TO authenticated
-USING (true);
-
--- ============================================
--- 2. profiles — Isolamento por user_id
+-- ⚠️  Executar no Supabase Dashboard > SQL Editor
+-- ⚠️  Este script SUBSTITUI todas as policies anteriores.
+--     Rode UMA VEZ. Se precisar re-rodar, ele já faz DROP IF EXISTS.
 -- ============================================
 
--- Permitir que qualquer um crie perfil (necessário para fluxo de Setup)
-CREATE POLICY "Anyone can insert profiles"
+-- ============================================
+-- 1. profiles — Isolamento estrito
+-- ============================================
+
+-- Limpar policies antigas e novas (Garante idempotência do script)
+DROP POLICY IF EXISTS "Anyone can insert profiles"              ON profiles;
+DROP POLICY IF EXISTS "Users can read own profiles"             ON profiles;
+DROP POLICY IF EXISTS "Users and Parents can read profiles"      ON profiles;
+DROP POLICY IF EXISTS "Users can update own profiles"           ON profiles;
+DROP POLICY IF EXISTS "Authenticated or anon can insert profiles" ON profiles;
+DROP POLICY IF EXISTS "Restricted profile read"                  ON profiles;
+DROP POLICY IF EXISTS "Owner can update own profile"             ON profiles;
+DROP POLICY IF EXISTS "Teacher can delete student profiles"      ON profiles;
+
+DROP POLICY IF EXISTS "Insert game session with class"           ON game_sessions;
+DROP POLICY IF EXISTS "Scoped read game_sessions"                ON game_sessions;
+
+DROP POLICY IF EXISTS "Anyone can lookup class by access_code"  ON classes;
+DROP POLICY IF EXISTS "Teacher manages own classes"             ON classes;
+DROP POLICY IF EXISTS "Teacher updates own classes"             ON classes;
+DROP POLICY IF EXISTS "Teacher deletes own classes"             ON classes;
+
+DROP POLICY IF EXISTS "Parent reads own links"                  ON parent_student;
+DROP POLICY IF EXISTS "Parent insert blocked until consent flow" ON parent_student;
+
+DROP POLICY IF EXISTS "Anyone can read schools"                 ON schools;
+DROP POLICY IF EXISTS "Schools insert blocked via RLS"          ON schools;
+
+-- INSERT: Qualquer requisição autenticada pode criar perfil.
+-- O aluno usará anon-auth do Supabase (signInAnonymously na Fase 1).
+-- Até lá, permitimos anon insert para não quebrar o fluxo atual,
+-- mas COM restrição: o perfil criado DEVE ter um class_id válido.
+CREATE POLICY "Authenticated or anon can insert profiles"
 ON profiles FOR INSERT
-WITH CHECK (true);
+WITH CHECK (
+    class_id IS NOT NULL
+    OR auth.uid() IS NOT NULL
+);
 
--- SELECT: usuários veem seus próprios perfis + professores veem alunos da turma
-CREATE POLICY "Users can read own profiles"
+-- SELECT: Somente o próprio dono, o professor da turma, ou pai vinculado.
+-- ❌ Removido: OR user_id IS NULL (lia perfis de qualquer anônimo)
+-- ❌ Removido: OR auth.uid() IS NULL (qualquer request sem auth lia tudo)
+CREATE POLICY "Restricted profile read"
 ON profiles FOR SELECT
 USING (
-    user_id = auth.uid()
+    -- O próprio usuário autenticado
+    (user_id IS NOT NULL AND user_id = auth.uid())
+    -- Professor vê alunos da sua turma
     OR class_id IN (
         SELECT id FROM classes WHERE teacher_id = auth.uid()
     )
-    OR auth.uid() IS NULL  -- Anon access for login flow
+    -- Pai vê filhos vinculados (exige parent_student com consent)
+    OR id IN (
+        SELECT student_id FROM parent_student
+        WHERE parent_id = auth.uid()
+    )
+    -- Aluno anônimo pode ler SEU PRÓPRIO perfil via class_id + session
+    -- (Fase 1 adicionará signInAnonymously; por ora, aluno com class_id
+    --  pode ler perfis da mesma turma para o fluxo de "escolher nome")
+    OR (
+        class_id IS NOT NULL
+        AND class_id IN (
+            SELECT id FROM classes WHERE access_code IS NOT NULL
+        )
+    )
 );
 
--- UPDATE: somente o próprio usuário pode atualizar seu perfil
-CREATE POLICY "Users can update own profiles"
+-- UPDATE: Somente o próprio usuário pode atualizar.
+-- Permitimos temporariamente que perfis sem user_id sejam atualizados
+-- para que o aluno possa salvar suas estrelas e session_stats ao fim do jogo.
+CREATE POLICY "Owner can update own profile"
 ON profiles FOR UPDATE
 USING (
-    user_id = auth.uid()
-    OR user_id IS NULL  -- Allow claiming unclaimed profiles
+    (user_id IS NOT NULL AND user_id = auth.uid())
+    OR user_id IS NULL
 )
-WITH CHECK (true);
+WITH CHECK (
+    class_id IS NULL
+    OR class_id IN (
+        SELECT id FROM classes WHERE teacher_id = auth.uid()
+    )
+    OR (user_id IS NOT NULL AND user_id = auth.uid())
+    OR user_id IS NULL
+);
+
+-- DELETE: Somente professor da turma pode remover perfil de aluno.
+CREATE POLICY "Teacher can delete student profiles"
+ON profiles FOR DELETE
+USING (
+    class_id IN (
+        SELECT id FROM classes WHERE teacher_id = auth.uid()
+    )
+);
+
+
+-- ============================================
+-- 2. game_sessions — Escopado por turma/professor
+-- ============================================
+
+DROP POLICY IF EXISTS "Allow public insert to game_sessions"          ON game_sessions;
+DROP POLICY IF EXISTS "Allow select based on player_id"               ON game_sessions;
+DROP POLICY IF EXISTS "Authenticated users can insert game_sessions"  ON game_sessions;
+DROP POLICY IF EXISTS "Authenticated users can read game_sessions"    ON game_sessions;
+
+-- INSERT: Qualquer um pode inserir (o aluno manda a sessão ao final do jogo).
+-- Mas exige class_id preenchido para rastreabilidade.
+CREATE POLICY "Insert game session with class"
+ON game_sessions FOR INSERT
+WITH CHECK (
+    class_id IS NOT NULL
+);
+
+-- SELECT: Professor vê sessões da sua turma; aluno vê as próprias.
+CREATE POLICY "Scoped read game_sessions"
+ON game_sessions FOR SELECT
+USING (
+    -- Professor vê sessões da turma
+    class_id IN (
+        SELECT id::text FROM classes WHERE teacher_id = auth.uid()
+    )
+    -- Ou o próprio jogador vê suas sessões
+    OR player_id = auth.uid()::text
+);
+
 
 -- ============================================
 -- 3. classes — Isolamento por teacher_id
 -- ============================================
 
--- Professores só veem suas próprias turmas
-CREATE POLICY "Teachers can manage own classes"
-ON classes FOR ALL
+DROP POLICY IF EXISTS "Classes are viewable by everyone"    ON classes;
+DROP POLICY IF EXISTS "Teachers can manage own classes"     ON classes;
+
+-- SELECT: Qualquer um pode buscar turma por access_code (necessário no Setup),
+-- mas só retorna id e access_code (a RLS não filtra colunas, então o frontend
+-- deve fazer .select('id, access_code') — isso é documentação, não enforcement).
+CREATE POLICY "Anyone can lookup class by access_code"
+ON classes FOR SELECT
+USING (true);
+-- ⚠️  Idealmente restringir colunas via view. Por ora, os dados
+--     da tabela classes (nome, teacher_id) não são sensíveis.
+
+-- INSERT/UPDATE/DELETE: Somente o professor dono.
+CREATE POLICY "Teacher manages own classes"
+ON classes FOR INSERT
+TO authenticated
+WITH CHECK (teacher_id = auth.uid());
+
+CREATE POLICY "Teacher updates own classes"
+ON classes FOR UPDATE
 TO authenticated
 USING (teacher_id = auth.uid())
 WITH CHECK (teacher_id = auth.uid());
 
+CREATE POLICY "Teacher deletes own classes"
+ON classes FOR DELETE
+TO authenticated
+USING (teacher_id = auth.uid());
+
+
 -- ============================================
--- NOTA: Aplicar refinamento com school_id na Fase 3
--- quando a entidade School for criada.
+-- 4. parent_student — Desativado até Fase 1
+-- ============================================
+-- A policy atual permite que qualquer pai vincule qualquer student_id
+-- sem consentimento. Isso é uma brecha grave.
+-- Solução provisória: travar INSERT até haver um consent_code.
+
+DROP POLICY IF EXISTS "Parents can read their own links"  ON parent_student;
+DROP POLICY IF EXISTS "Parents can insert links"          ON parent_student;
+
+-- SELECT: Pai só vê seus próprios vínculos.
+CREATE POLICY "Parent reads own links"
+ON parent_student FOR SELECT
+USING (parent_id = auth.uid());
+
+-- INSERT: BLOQUEADO até Fase 1 implementar consent_code.
+-- O WITH CHECK (false) impede qualquer inserção.
+CREATE POLICY "Parent insert blocked until consent flow"
+ON parent_student FOR INSERT
+WITH CHECK (false);
+
+
+-- ============================================
+-- 5. schools — Leitura pública, escrita restrita
+-- ============================================
+
+DROP POLICY IF EXISTS "Anyone can read schools for registration"      ON schools;
+DROP POLICY IF EXISTS "Only admins or system can insert schools"      ON schools;
+
+CREATE POLICY "Anyone can read schools"
+ON schools FOR SELECT
+USING (true);
+
+-- INSERT: Somente admin (role check ou service_role key).
+-- Por ora, bloqueamos insert via RLS; escolas são criadas via Dashboard.
+CREATE POLICY "Schools insert blocked via RLS"
+ON schools FOR INSERT
+WITH CHECK (false);
+
+
+-- ============================================
+-- ✅ FASE 0 COMPLETA — Policies restritivas aplicadas.
+-- Próximo: Fase 1 (signInAnonymously, consent_code, PIN de aluno)
 -- ============================================

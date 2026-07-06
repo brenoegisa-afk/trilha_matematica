@@ -43,14 +43,14 @@ export function BatchImporter(props: BatchImporterProps) {
 
             const questionsToInsert = questionsList.map((q: any) => ({
                 class_id: classId || data.classId,
-                grade_level: gradeLevel || q.grade_level || data.grade || '1-2',
+                skill_id: q.skill_id || data.skill_id || 'math_basic',
                 question: q.question,
                 answer: q.answer,
                 options: q.options
             }));
 
             if (classId) {
-                const { error } = await supabase.from('teacher_questions').insert(questionsToInsert);
+                const { error } = await supabase.from('custom_questions').insert(questionsToInsert);
                 if (error) throw error;
             }
 
@@ -70,7 +70,7 @@ export function BatchImporter(props: BatchImporterProps) {
                 className={styles.textarea}
                 value={jsonInput}
                 onChange={(e) => setJsonInput(e.target.value)}
-                placeholder='{ "subject": "portuguese", "grade": "1", "questions": [...] }'
+                placeholder='[ { "question": "...", "answer": "A", "options": ["A","B","C","D"], "skill_id": "math_basic" } ]'
             />
             
             <div className={styles.actions}>
@@ -81,13 +81,16 @@ export function BatchImporter(props: BatchImporterProps) {
             {status && <p className={styles.status}>{status}</p>}
 
             <div className={styles.tips}>
-                <h3>Guia de Dificuldade (BNCC):</h3>
+                <h3>IDs de Habilidades Disponíveis:</h3>
                 <ul>
-                    <li><strong>1º Ano:</strong> Identificação visual, rimas, somas básicas.</li>
-                    <li><strong>2º Ano:</strong> Comparação de grandezas, interpretação de frases.</li>
-                    <li><strong>3º Ano:</strong> Tabuadas, concordância verbal elementar.</li>
-                    <li><strong>4º Ano:</strong> Divisão exata, frações simples, gramática básica.</li>
-                    <li><strong>5º Ano:</strong> Problemas de lógica multietapa, ortografia complexa.</li>
+                    <li><strong>math_basic:</strong> Soma e Subtração</li>
+                    <li><strong>math_logic:</strong> Raciocínio Lógico</li>
+                    <li><strong>math_expressions:</strong> Multiplicação e Divisão</li>
+                    <li><strong>math_fractions:</strong> Frações</li>
+                    <li><strong>port_grammar:</strong> Gramática</li>
+                    <li><strong>port_reading:</strong> Leitura e Interpretação</li>
+                    <li><strong>sci_nature:</strong> Natureza e Meio Ambiente</li>
+                    <li><strong>sci_body:</strong> Corpo Humano</li>
                 </ul>
             </div>
         </div>

@@ -26,6 +26,9 @@ export function CloudSyncProvider() {
                 streak: profile.streak || 1,
                 class_id: profile.class_id || null,
                 user_id: profile.user_id || currentUserId || null,
+                session_stats: (profile as any).session_stats || null,
+                skills_mastery: profile.skillsMastery || [],
+                srs_reviews: profile.srsReviews || [],
                 last_sync: new Date().toISOString()
             });
 

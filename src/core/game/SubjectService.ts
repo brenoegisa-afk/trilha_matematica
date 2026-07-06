@@ -2,6 +2,7 @@ import type { Question, Subject, Skill, Player } from '../types';
 import questionsData from '../../data/questions.json';
 import { ExplanationEngine } from './ExplanationEngine';
 import { MathEngine } from '../learning/MathEngine';
+import { CurriculumEngine } from '../learning/CurriculumEngine';
 
 // Extension of the current data structure to support subjects and skills
 // In a real scenario, this would come from an API
@@ -34,11 +35,22 @@ export class SubjectService {
      * Adaptative question fetching
      * Bridges the old 'TileType' system with the new 'Skill' system
      */
-    public getQuestion(subjectId: string, grade: string, tileType: string, player?: Player): Question {
+    public getQuestion(subjectId: string, grade: string, tileType: string, player?: Player, forcedSkillId?: string): Question {
         // Intercept math subject for dynamic procedural generation
         if (subjectId === 'math') {
-            const dynamicQ = MathEngine.generate(grade, tileType, player);
-            return dynamicQ; // MathEngine already formats strings and assigns explicit skills
+            let potentialSkillId = forcedSkillId;
+            if (!forcedSkillId) {
+                if (tileType === 'Yellow') potentialSkillId = 'math_logic';
+                else if (tileType === 'Red') potentialSkillId = 'math_expressions';
+                else potentialSkillId = 'math_basic';
+            }
+
+            if (player) {
+                const node = CurriculumEngine.pickNode(player, subjectId, potentialSkillId);
+                return MathEngine.generateFromNode(node);
+            } else {
+                return MathEngine.generate(grade, tileType, player, potentialSkillId);
+            }
         }
 
         // Navigate the static structure for other subjects (Portuguese/Science)
@@ -51,8 +63,8 @@ export class SubjectService {
                 const q = tilePool[Math.floor(Math.random() * tilePool.length)];
                 
                 // Injetar Skill baseada na matéria e cor (Fallback inteligente)
-                let skillId = 'port_grammar';
-                if (subjectId === 'science') skillId = 'sci_nature';
+                let skillId = forcedSkillId || 'port_grammar';
+                if (!forcedSkillId && subjectId === 'science') skillId = 'sci_nature';
                 
                 return ExplanationEngine.enhance({ ...q, skillId });
             }
