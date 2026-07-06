@@ -98,7 +98,7 @@ Use um dos seguintes skill_id: math_basic, math_logic, math_expressions, math_fr
         navigator.clipboard.writeText(prompt).then(() => {
             setCopied(true);
             setTimeout(() => setCopied(false), 3000);
-        }).catch(err => alert("Erro ao copiar o prompt!"));
+        }).catch(() => alert("Erro ao copiar o prompt!"));
     };
 
     const fetchProfiles = useCallback(async () => {

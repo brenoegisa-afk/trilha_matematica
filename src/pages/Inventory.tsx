@@ -47,6 +47,7 @@ export default function Inventory() {
             level: 1
         })),
         skillsMastery: [],
+        srsReviews: [],
         sessionStats: { totalQuestions: 0, correctAnswers: 0, skillsPracticed: {} }
     }));
 

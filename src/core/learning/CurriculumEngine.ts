@@ -8,7 +8,7 @@
  *   3. Se ele está errando muito, verifica o pré-requisito
  */
 
-import type { Player, SkillMastery, NodeMastery } from '../types';
+import type { Player, NodeMastery } from '../types';
 import { CurriculumGraph, type CurriculumNode } from './CurriculumGraph';
 
 export class CurriculumEngine {

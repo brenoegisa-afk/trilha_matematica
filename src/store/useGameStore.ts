@@ -350,7 +350,7 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                 return 1;
             }
         },
-        setClassConfig: (activeFocusSkill, customQuestions) => {
+        setClassConfig: (activeFocusSkill: string | null, customQuestions: any[]) => {
             set({ classConfig: { activeFocusSkill, customQuestions } });
         },
         submitAnswer: (answer: string) => {
@@ -605,6 +605,7 @@ export const useGameStore = create<GameStoreState>((set, get) => {
         acknowledgeVictory: actionsAPI.acknowledgeVictory,
         startBattle: actionsAPI.startBattle,
         startReinforcement: actionsAPI.startReinforcement,
+        setClassConfig: actionsAPI.setClassConfig,
         actions: actionsAPI
     };
 });

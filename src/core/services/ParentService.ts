@@ -50,6 +50,7 @@ export class ParentService {
             maxHp: dbProfile.max_hp || 100,
             mascots: dbProfile.mascots || [],
             skillsMastery: dbProfile.skills_mastery || [],
+            srsReviews: dbProfile.srs_reviews || [],
             sessionStats: dbProfile.session_stats || {
                 totalQuestions: 0,
                 correctAnswers: 0,

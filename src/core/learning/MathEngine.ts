@@ -276,8 +276,6 @@ const NODE_GENERATORS: Record<string, NodeGenerator> = {
 
     // ─── FRAÇÕES ───
     frac_intro: (node) => {
-        const fracs = [['1/2', 'metade'], ['1/4', 'um quarto'], ['1/3', 'um terço']];
-        const [frac, name] = fracs[randomInt(0, 2)];
         return {
             question: `🍕 Uma pizza foi cortada em 4 partes iguais. João comeu 1 parte. Que fração ele comeu?`,
             answer: '1/4',

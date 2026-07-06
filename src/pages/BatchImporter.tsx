@@ -9,7 +9,7 @@ interface BatchImporterProps {
 }
 
 export function BatchImporter(props: BatchImporterProps) {
-    const { classId, gradeLevel, onClose } = props;
+    const { classId, onClose } = props;
     const [jsonInput, setJsonInput] = useState('');
     const [status, setStatus] = useState('');
 
