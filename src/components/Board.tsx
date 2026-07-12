@@ -125,9 +125,16 @@ export default function Board() {
                     const pos = POINTS[i];
                     if (!pos) return null;
 
-                    const colorCycle = ['Green', 'Yellow', 'Blue', 'Red'];
-                    const colorOverride = colorCycle[i % 4]; 
-                    const tileClass = styles[`tile${colorOverride}`];
+                    // Início/Fim são representados pelos badges START/FINISH acima.
+                    if (tile.type === 'Start' || tile.type === 'Finish') return null;
+
+                    // A cor/ícone agora refletem o COMPORTAMENTO REAL da casa (tile.type),
+                    // não a posição — antes usava-se `i % 4`, o que fazia o que a criança via
+                    // (ex.: verde "+") não corresponder ao que acontecia (ex.: batalha vermelha).
+                    const tileColor = ['Green', 'Yellow', 'Blue', 'Red'].includes(tile.type)
+                        ? tile.type
+                        : 'Green';
+                    const tileClass = styles[`tile${tileColor}`];
 
                     const getTileIcon = (color: string, subjectId: string) => {
                         if (subjectId === 'portuguese') {
@@ -158,7 +165,7 @@ export default function Board() {
                         >
                             <div className={styles.tileInner}>
                                 <div className={styles.mathMark}>
-                                    {getTileIcon(colorOverride, currentSubjectId)}
+                                    {getTileIcon(tileColor, currentSubjectId)}
                                 </div>
                                 <span className={styles.tileStep}>{i + 1}</span>
                             </div>

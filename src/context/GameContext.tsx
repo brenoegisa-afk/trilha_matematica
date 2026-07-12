@@ -17,12 +17,28 @@ export function GameProvider({ children }: { children: ReactNode }) {
     const setCurrentUser = useGameStore(state => state.setCurrentUser);
 
     useEffect(() => {
+        // Garante uma sessão ativa. Se não houver (aluno sem login de e-mail),
+        // cria uma sessão ANÔNIMA para que o perfil tenha um dono (auth.uid())
+        // e a RLS restritiva funcione. Professores/pais depois fazem login por
+        // e-mail, que substitui a sessão anônima.
         supabase.auth.getSession().then(({ data: { session } }) => {
-            setCurrentUser(session?.user ?? null);
+            if (session) {
+                setCurrentUser(session.user);
+            } else {
+                supabase.auth.signInAnonymously().then(({ data, error }) => {
+                    if (error) console.error('Falha ao iniciar sessão anônima', error);
+                    setCurrentUser(data?.session?.user ?? null);
+                });
+            }
         });
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
             setCurrentUser(session?.user ?? null);
+            // Num tablet compartilhado, ao sair da conta do professor/pai,
+            // recria a sessão anônima para o próximo aluno conseguir sincronizar.
+            if (event === 'SIGNED_OUT') {
+                supabase.auth.signInAnonymously();
+            }
         });
 
         return () => subscription.unsubscribe();

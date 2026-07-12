@@ -30,6 +30,14 @@ export default function Hub() {
             icon: '🐾',
             active: true,
             color: 'var(--color-red)'
+        },
+        {
+            id: 'tabuada',
+            title: 'Desafio da Tabuada',
+            description: 'Complete a grade e saiba toda a tabuada de cor!',
+            icon: '✖️',
+            active: true,
+            color: 'var(--color-yellow)'
         }
     ];
 

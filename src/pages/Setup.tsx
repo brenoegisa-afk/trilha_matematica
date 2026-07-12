@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
 import { supabase } from '../utils/supabaseClient';
-import { hashPin, updateProfile } from '../utils/saveSystem';
+import { updateProfile } from '../utils/saveSystem';
 import styles from './Setup.module.css';
 
 const AVAILABLE_COLORS = [
@@ -12,14 +12,11 @@ const AVAILABLE_COLORS = [
     { id: 'yellow', label: 'Amarela', hex: 'var(--color-yellow)' }
 ];
 
+// O roster devolvido pela RPC get_class_roster contém APENAS id + name.
+// Nenhum dado sensível (secret_code, notas) trafega para a tela de login.
 interface ClassStudent {
     id: string;
     name: string;
-    secret_code: string;
-    class_id: string;
-    total_score: number;
-    stars: number;
-    streak: number;
 }
 
 export default function Setup() {
@@ -57,15 +54,13 @@ export default function Setup() {
                 return;
             }
 
-            const { data: studentsData, error: studentsError } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('class_id', classData.id)
-                .order('name');
+            // Roster via RPC server-side: devolve só id + name (sem secret_code/notas).
+            const { data: rosterData, error: rosterError } = await supabase
+                .rpc('get_class_roster', { p_access_code: classCode.toUpperCase() });
 
-            if (studentsError) throw studentsError;
+            if (rosterError) throw rosterError;
 
-            setClassStudents(studentsData || []);
+            setClassStudents((rosterData as ClassStudent[]) || []);
             setClassActiveFocus(classData.active_focus_skill || null);
             setCurrentClassId(classData.id);
         } catch (e) {
@@ -93,29 +88,60 @@ export default function Setup() {
             return;
         }
 
-        const studentData = classStudents?.find(s => s.id === selectedStudentId);
-        if (!studentData) return;
+        setClassLoading(true);
+        try {
+            // Garante uma sessão (anônima) para que o perfil tenha um dono.
+            const { data: sess } = await supabase.auth.getSession();
+            if (!sess.session) {
+                const { error: anonErr } = await supabase.auth.signInAnonymously();
+                if (anonErr) throw anonErr;
+            }
 
-        // Hash input pin to compare with DB
-        const inputHash = await hashPin(secretCode);
-        if (inputHash !== studentData.secret_code) {
-            alert('PIN Incorreto! Tente novamente.');
-            return;
+            // Verificação do PIN NO SERVIDOR. Se o PIN bater, a RPC reivindica
+            // o perfil (user_id = auth.uid()) e devolve os dados do aluno.
+            // O hash (secret_code) nunca é enviado ao cliente.
+            const { data: rows, error } = await supabase.rpc('student_login', {
+                p_student_id: selectedStudentId,
+                p_pin: secretCode
+            });
+
+            // Distingue erro de servidor (RPC falhou) de PIN que simplesmente não bate.
+            if (error) {
+                console.error('Erro na RPC student_login:', error);
+                alert('Erro ao verificar o PIN (servidor): ' + error.message);
+                return;
+            }
+
+            const student = Array.isArray(rows) ? rows[0] : rows;
+            if (!student) {
+                alert('PIN Incorreto! Tente novamente.');
+                return;
+            }
+
+            // Add player to game context (returns a new local profile or updates existing)
+            const profile = addPlayer(student.name, colorHex, '', student.class_id);
+
+            // Sincroniza o perfil local com o estado do banco (sobrevive à troca de tablet)
+            updateProfile(profile.id, {
+                id: student.id, // Override local UUID com o UUID do banco para manter o vínculo
+                user_id: student.user_id,
+                totalScore: student.total_score || 0,
+                stars: student.stars || 0,
+                streak: student.streak || 1,
+                class_id: student.class_id,
+                skillsMastery: student.skills_mastery || [],
+                srsReviews: student.srs_reviews || [],
+                nodeMastery: student.node_mastery || {}
+            });
+
+            setSecretCode('');
+            setSelectedStudentId('');
+        } catch (e) {
+            console.error(e);
+            alert('Erro ao entrar. Verifique sua conexão e tente novamente.');
+        } finally {
+            setClassLoading(false);
         }
-
-        // Add player to game context (returns a new local profile or updates existing)
-        const profile = addPlayer(studentData.name, colorHex, studentData.secret_code, studentData.class_id);
-
-        // Sync local profile state with DB state so progress survives device switch
-        updateProfile(profile.id, {
-            id: studentData.id, // Override local UUID with DB UUID to keep them linked
-            totalScore: studentData.total_score || 0,
-            stars: studentData.stars || 0,
-            streak: studentData.streak || 1
-        });
-
-        setSecretCode('');
-        setSelectedStudentId('');
         // No longer returning home if players >= 4, allowed to add indefinitely
     };
 
@@ -144,6 +170,8 @@ export default function Setup() {
 
         if (gameMode === 'arena') {
             navigate('/arena', { state: { fromSetup: true } });
+        } else if (gameMode === 'tabuada') {
+            navigate('/tabuada', { state: { fromSetup: true } });
         } else if (gameMode === 'battle') {
             navigate('/battle');
         } else {
@@ -248,7 +276,7 @@ export default function Setup() {
                 ) : (
                     <>
                         <div style={{ marginBottom: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ color: 'white' }}>✅ Turma Encontrada!</span>
+                            <span style={{ color: 'var(--color-ink)', fontWeight: 700 }}>✅ Turma Encontrada!</span>
                             <button 
                                 onClick={() => { setClassStudents(null); setClassCode(''); }}
                                 style={{ background: 'none', border: 'none', color: '#ff4d4f', cursor: 'pointer', textDecoration: 'underline' }}
@@ -305,7 +333,7 @@ export default function Setup() {
                                 display: 'flex',
                                 alignItems: 'flex-start',
                                 gap: '8px',
-                                color: 'white',
+                                color: 'var(--color-ink)',
                                 fontSize: '0.8rem',
                                 marginBottom: '12px',
                                 cursor: 'pointer',

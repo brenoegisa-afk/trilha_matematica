@@ -1,11 +1,100 @@
-import type { Player, DiagnosticInsight, SkillStatus } from '../types';
+import type { Player, DiagnosticInsight, SkillStatus, NodeMastery } from '../types';
 import { CurriculumGraph } from './CurriculumGraph';
+
+export interface GraphNodeProgress {
+    id: string;
+    name: string;
+    icon: string;
+    bnccCode: string;
+    accuracy: number;   // 0..1
+    attempts: number;
+    weakPrereqName?: string; // pré-requisito a reforçar (só para travados)
+}
+
+export interface GraphMisconception {
+    nodeName: string;
+    wrongAnswer: string;
+    count: number;
+}
+
+export interface GraphProgress {
+    mastered: GraphNodeProgress[];
+    inProgress: GraphNodeProgress[];
+    struggling: GraphNodeProgress[];
+    misconceptions: GraphMisconception[];
+    masteredCount: number;
+    deepestMastered: number; // profundidade (ano) do nó dominado mais avançado
+}
 
 /**
  * DiagnosticService
  * Analyzes player's skill mastery to generate actionable insights and reports.
  */
 export class DiagnosticService {
+    /**
+     * Traduz o node_mastery bruto do aluno numa visão pedagógica para o professor:
+     * o que ele domina, o que está praticando, onde travou (com o pré-requisito a
+     * reforçar) e quais equívocos cometeu (distratores escolhidos).
+     */
+    public static generateGraphProgress(nodeMastery: Record<string, NodeMastery>): GraphProgress {
+        const mastered: GraphNodeProgress[] = [];
+        const inProgress: GraphNodeProgress[] = [];
+        const struggling: GraphNodeProgress[] = [];
+        const misconceptions: GraphMisconception[] = [];
+        let deepestMastered = 0;
+
+        const pointsMap: Record<string, number> = {};
+        for (const [id, data] of Object.entries(nodeMastery)) {
+            pointsMap[id] = data.points;
+        }
+
+        for (const nm of Object.values(nodeMastery)) {
+            const node = CurriculumGraph.getNode(nm.nodeId);
+            if (!node) continue;
+
+            const accuracy = nm.attempts > 0 ? nm.successes / nm.attempts : 0;
+            const base: GraphNodeProgress = {
+                id: node.id,
+                name: node.name,
+                icon: node.icon,
+                bnccCode: node.bnccCode,
+                accuracy,
+                attempts: nm.attempts
+            };
+
+            if (nm.mastered) {
+                mastered.push(base);
+                if (node.depth > deepestMastered) deepestMastered = node.depth;
+            } else if (nm.attempts >= 3 && accuracy <= 0.4) {
+                const weakPrereq = CurriculumGraph.findWeakPrerequisite(node.id, pointsMap);
+                struggling.push({ ...base, weakPrereqName: weakPrereq?.name });
+            } else if (nm.attempts > 0) {
+                inProgress.push(base);
+            }
+
+            // Equívocos (distratores) capturados neste nó
+            if (nm.misconceptions) {
+                for (const [wrongAnswer, count] of Object.entries(nm.misconceptions)) {
+                    misconceptions.push({ nodeName: node.name, wrongAnswer, count });
+                }
+            }
+        }
+
+        mastered.sort((a, b) => a.name.localeCompare(b.name));
+        inProgress.sort((a, b) => b.attempts - a.attempts);
+        struggling.sort((a, b) => a.accuracy - b.accuracy);
+        misconceptions.sort((a, b) => b.count - a.count);
+
+        return {
+            mastered,
+            inProgress,
+            struggling,
+            misconceptions,
+            masteredCount: mastered.length,
+            deepestMastered
+        };
+    }
+
     /**
      * Generates a diagnostic report containing insights on up to 3 key skills.
      */

@@ -17,6 +17,8 @@ export interface SaveProfile {
     user_id?: string; // Link to Supabase Auth User ID
     skillsMastery?: any[]; // SkillMastery[] persisted
     srsReviews?: any[];    // SrsReview[] persisted
+    nodeMastery?: Record<string, any>; // NodeMastery por nó do grafo curricular
+    tabuadaMastery?: Record<string, any>; // Fluência por fato da tabuada
 }
 
 const STORAGE_KEY = '@TrilhaCampeoes:Profiles';
@@ -75,7 +77,9 @@ export function getOrCreateProfile(name: string, code: string = '0000'): SavePro
         class_id: '',
         user_id: '',
         skillsMastery: [],
-        srsReviews: []
+        srsReviews: [],
+        nodeMastery: {},
+        tabuadaMastery: {}
     };
 
     profiles.push(newProfile);

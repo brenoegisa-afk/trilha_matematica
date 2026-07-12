@@ -1,0 +1,240 @@
+.wrap {
+    min-height: 100vh;
+    background: radial-gradient(circle at top, #6a5cff, #3b2fb8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 14px 12px 28px;
+    gap: 14px;
+    box-sizing: border-box;
+}
+
+.topbar {
+    width: 100%;
+    max-width: 560px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.title {
+    color: #fff;
+    font-weight: 900;
+    font-size: 1.4rem;
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.25);
+    margin: 0;
+}
+
+.exitBtn {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    padding: 6px 14px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+/* Barra de progresso da coleção */
+.progressCard {
+    width: 100%;
+    max-width: 560px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 10px 14px;
+    color: #fff;
+}
+
+.progressTop {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 800;
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+}
+
+.progressTrack {
+    height: 12px;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, #ffd23f, #58cc02);
+    border-radius: 999px;
+    transition: width 0.4s ease;
+}
+
+/* Cartão da pergunta */
+.playCard {
+    width: 100%;
+    max-width: 560px;
+    background: #fff;
+    border-radius: 22px;
+    padding: 18px 16px 20px;
+    box-shadow: 0 14px 0 rgba(0, 0, 0, 0.18), 0 22px 40px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    position: relative;
+}
+
+.statsRow {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 8px;
+    font-weight: 900;
+    color: #555;
+}
+
+.combo { color: #ff7a00; }
+
+.prompt {
+    font-size: 3rem;
+    font-weight: 900;
+    color: #2b2b6b;
+    margin: 6px 0 12px;
+    letter-spacing: 1px;
+}
+
+.answerBox {
+    height: 64px;
+    border-radius: 14px;
+    border: 4px solid #d7d7f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: #2b2b6b;
+    margin-bottom: 12px;
+    background: #f7f7ff;
+}
+
+.answerBox.correct { border-color: #58cc02; background: #eafce0; color: #46a302; }
+.answerBox.wrong { border-color: #ff4b4b; background: #ffecec; color: #d33131; }
+
+.feedbackMsg {
+    min-height: 22px;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+.feedbackMsg.correct { color: #46a302; }
+.feedbackMsg.wrong { color: #d33131; }
+
+/* Teclado numérico */
+.keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.key {
+    padding: 16px 0;
+    font-size: 1.5rem;
+    font-weight: 900;
+    border-radius: 14px;
+    border: none;
+    background: #eef0ff;
+    color: #2b2b6b;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #c9cdf0;
+    transition: transform 0.06s ease;
+    user-select: none;
+}
+.key:active { transform: translateY(3px); box-shadow: 0 1px 0 #c9cdf0; }
+.keyOk { background: #58cc02; color: #fff; box-shadow: 0 4px 0 #46a302; }
+.keyDel { background: #ffd7d7; color: #d33131; box-shadow: 0 4px 0 #f0b0b0; }
+
+/* Toast de fato dominado */
+.toast {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ffd23f;
+    color: #6b4e00;
+    font-weight: 900;
+    padding: 8px 16px;
+    border-radius: 999px;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+    animation: pop 0.3s ease;
+    white-space: nowrap;
+}
+
+@keyframes pop {
+    0% { transform: translateX(-50%) scale(0.6); opacity: 0; }
+    100% { transform: translateX(-50%) scale(1); opacity: 1; }
+}
+
+/* Grade da tabuada */
+.gridCard {
+    width: 100%;
+    max-width: 560px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 18px;
+    padding: 14px;
+    overflow-x: auto;
+}
+
+.gridTitle {
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.9rem;
+    margin: 0 0 10px;
+    text-align: center;
+}
+
+.grid {
+    display: grid;
+    gap: 4px;
+    margin: 0 auto;
+    width: max-content;
+}
+
+.cell {
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 800;
+    background: rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.headCell {
+    background: transparent;
+    color: #ffd23f;
+    font-weight: 900;
+}
+
+.cellMastered {
+    background: #58cc02;
+    color: #fff;
+    box-shadow: 0 2px 0 #46a302;
+}
+
+.cellProgress {
+    background: rgba(255, 210, 63, 0.55);
+    color: #6b4e00;
+}
+
+.cellCurrent {
+    outline: 3px solid #fff;
+    outline-offset: 1px;
+    animation: blink 1s ease-in-out infinite;
+}
+
+@keyframes blink {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.12); }
+}
+
+@media (max-width: 420px) {
+    .cell { width: 26px; height: 26px; font-size: 0.62rem; }
+    .prompt { font-size: 2.4rem; }
+}

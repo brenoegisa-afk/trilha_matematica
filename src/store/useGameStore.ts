@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { supabase } from '../utils/supabaseClient';
 import { triggerConfetti } from '../utils/confetti';
-import { getOrCreateProfile, getGlobalRanking, getSavedProfiles } from '../utils/saveSystem';
+import { playSfx } from '../utils/sfx';
+import { getOrCreateProfile, getGlobalRanking, getSavedProfiles, updateProfile } from '../utils/saveSystem';
 import type { SaveProfile } from '../utils/saveSystem';
 import type { User } from '@supabase/supabase-js';
 
@@ -16,6 +17,7 @@ import { BattleEngine } from '../core/game/BattleEngine';
 import { MascotEngine } from '../core/game/MascotEngine';
 import { SessionService } from '../core/game/SessionService';
 import { ReinforcementEngine } from '../core/learning/ReinforcementEngine';
+import { CurriculumEngine } from '../core/learning/CurriculumEngine';
 import { BnccMap } from '../core/learning/BnccMap';
 
 import type { Player, Tile, TileType, GameStatus, Question, Enemy, Subject, GameState, Mascot } from '../core/types';
@@ -75,7 +77,8 @@ interface GameStoreState {
     currentEnemy: Enemy | null;
     levelUpData: { playerName: string, oldLevel: number, newLevel: number } | null;
     xpNotification: { amount: number } | null;
-    
+    nodeUnlockData: { playerName: string, nodeName: string, nodeIcon: string, nextNodeName?: string } | null;
+
     // --- Actions ---
     setGrade: (grade: string) => void;
     setSubject: (id: string) => void;
@@ -90,6 +93,7 @@ interface GameStoreState {
     startBattle: () => void;
     clearLevelUp: () => void;
     clearXpNotification: () => void;
+    clearNodeUnlock: () => void;
     logout: () => void;
     setClassConfig: (activeFocusSkill: string | null, customQuestions: any[]) => void;
     actions: {
@@ -124,6 +128,16 @@ function flattenGameState(gs: GameState) {
 }
 
 export const useGameStore = create<GameStoreState>((set, get) => {
+    // Guarda a alternativa escolhida entre submitAnswer e advanceTurn (que roda
+    // depois, após o feedback), para registrar o distrator no grafo curricular.
+    let lastSelectedOption: string | null = null;
+
+    // Anti-chute por tempo: marca quando a questão apareceu e se a resposta veio
+    // rápida demais para ter sido lida (provável tap na sorte).
+    let questionShownAt = Date.now();
+    let lastAnswerTooFast = false;
+    const MIN_READ_MS = 800; // abaixo disso, um acerto conta como "baixa confiança"
+
     /**
      * Update game state using a pure engine function.
      * Replaces the old syncEngine() pattern.
@@ -143,6 +157,9 @@ export const useGameStore = create<GameStoreState>((set, get) => {
             (async () => {
                 console.log("💾 Salvando sessões pedagógicas...");
                 for (const player of playersToSave) {
+                    // Persiste a progressão do grafo no perfil local (sobrevive ao
+                    // fechar/reabrir) e enfileira o sync para a nuvem.
+                    updateProfile(player.id, { nodeMastery: player.nodeMastery || {} });
                     await SessionService.saveSession(player);
                 }
                 console.log("✅ Sessões salvas com sucesso.");
@@ -170,6 +187,7 @@ export const useGameStore = create<GameStoreState>((set, get) => {
 
         set({ xpNotification: { amount: xpGained } });
         if (newLevel > oldLevel) {
+            playSfx('levelup');
             set({ levelUpData: { playerName: player.name, oldLevel, newLevel } });
             
             // Check for Mascot Evolutions on Level Up
@@ -207,7 +225,7 @@ export const useGameStore = create<GameStoreState>((set, get) => {
             if (isCorrect) player.sessionStats.skillsPracticed[skillId].successes += 1;
 
             skillEngine.updateMastery(player, skillId, isCorrect);
-            
+
             // SRS Queueing
             if (!player.srsReviews) player.srsReviews = [];
             const turnDelay = isCorrect ? 15 : 5;
@@ -223,6 +241,32 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                 });
             }
         }
+
+        // ── Progressão no GRAFO CURRICULAR (a espinha evolutiva) ──
+        // Antes esta chamada não existia: nodeMastery nunca era escrito, então o
+        // aluno ficava eternamente preso na fronteira raiz. Agora cada resposta
+        // atualiza o domínio do nó e pode desbloquear os próximos.
+        const activeNodeId = gs.activeQuestion?.nodeId;
+        if (activeNodeId) {
+            const result = CurriculumEngine.updateNodeMastery(
+                player, activeNodeId, isCorrect, lastSelectedOption ?? undefined, lastAnswerTooFast
+            );
+            player.nodeMastery = result.nodeMastery;
+
+            if (result.promoted) {
+                playSfx('levelup');
+                set({
+                    nodeUnlockData: {
+                        playerName: player.name,
+                        nodeName: result.masteredNode?.name || 'Habilidade',
+                        nodeIcon: result.masteredNode?.icon || '⭐',
+                        nextNodeName: result.newNode?.name
+                    }
+                });
+            }
+        }
+        lastSelectedOption = null;
+        lastAnswerTooFast = false;
 
         if (gs.status === 'battle') {
             const { currentEnemy } = get();
@@ -256,6 +300,7 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                         const nextQ = subjectService.getQuestion(get().currentSubjectId, get().selectedGrade, activeTileType as TileType, player);
                         cleared = GameEngine.setQuestion(cleared, nextQ);
                         updateGame(cleared);
+                        questionShownAt = Date.now();
                     }
                 } else {
                     const damagedPlayer = BattleEngine.applyDamageToPlayer(player);
@@ -271,6 +316,7 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                         const nextQ = subjectService.getQuestion(get().currentSubjectId, get().selectedGrade, activeTileType as TileType, player);
                         cleared = GameEngine.setQuestion(cleared, nextQ);
                         updateGame(cleared);
+                        questionShownAt = Date.now();
                     }
                 }
             }
@@ -325,6 +371,7 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                             const { state: movedState, reachedEnd, tileType } = GameEngine.moveOneStep(currentState);
                             currentState = movedState;
                             updateGame(currentState);
+                            playSfx('step');
                             if (reachedEnd) break;
                             if (i === value - 1) {
                                 currentState = GameEngine.finalizeMovement(currentState, tileType || 'Normal');
@@ -357,13 +404,19 @@ export const useGameStore = create<GameStoreState>((set, get) => {
             const gs = get().gameState;
             if (!gs.activeQuestion) return;
             const isCorrect = answer === gs.activeQuestion.answer;
+            // Guarda o que foi escolhido para o registro de distrator no advanceTurn.
+            lastSelectedOption = isCorrect ? null : answer;
+            // Acerto rápido demais para ter lido → baixa confiança (anti-chute).
+            lastAnswerTooFast = isCorrect && (Date.now() - questionShownAt) < MIN_READ_MS;
             let newState = GameEngine.resolveAnswer(gs, isCorrect);
             updateGame(newState);
             
             if (isCorrect) {
+                playSfx('correct');
                 triggerConfetti();
                 setTimeout(() => advanceTurn(true), 1500);
             } else {
+                playSfx('wrong');
                 newState = GameEngine.setWaitingFeedback(newState, true);
                 updateGame(newState);
             }
@@ -400,11 +453,13 @@ export const useGameStore = create<GameStoreState>((set, get) => {
             let newState = GameEngine.setWaitingFeedback(gs, false);
             newState = { ...newState, answerFeedback: null, activeQuestion: reinforcementQ };
             updateGame(newState);
+            questionShownAt = Date.now();
         },
         generateQuestion: (type: TileType) => {
             const gs = get().gameState;
             const player = gs.players[gs.currentPlayerIndex];
             const config = get().classConfig;
+            questionShownAt = Date.now(); // início da contagem para o anti-chute por tempo
             
             // 1. Tentar injetar questão customizada do professor (30% de chance)
             if (config?.customQuestions && config.customQuestions.length > 0 && Math.random() < 0.3) {
@@ -490,6 +545,7 @@ export const useGameStore = create<GameStoreState>((set, get) => {
         currentEnemy: null,
         levelUpData: null,
         xpNotification: null,
+        nodeUnlockData: null,
         isSavingSessions: false,
 
         // Setters
@@ -498,6 +554,7 @@ export const useGameStore = create<GameStoreState>((set, get) => {
         setCurrentUser: (user) => set({ currentUser: user }),
         clearLevelUp: () => set({ levelUpData: null }),
         clearXpNotification: () => set({ xpNotification: null }),
+        clearNodeUnlock: () => set({ nodeUnlockData: null }),
 
         refreshPlayers: async () => {
             const { currentUser } = get();
@@ -522,7 +579,8 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                             class_id: cloudP.class_id as string,
                             user_id: cloudP.user_id as string,
                             skillsMastery: cloudP.skills_mastery as any[],
-                            srsReviews: cloudP.srs_reviews as any[]
+                            srsReviews: cloudP.srs_reviews as any[],
+                            nodeMastery: (cloudP.node_mastery as Record<string, any>) || {}
                         };
                         if (idx !== -1) {
                             profiles[idx] = mapped;
@@ -545,7 +603,9 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                         score: profile.totalScore,
                         level: profile.stars > 100 ? Math.floor(profile.stars / 100) + 1 : 1,
                         skillsMastery: profile.skillsMastery || [],
-                        srsReviews: profile.srsReviews || []
+                        srsReviews: profile.srsReviews || [],
+                        nodeMastery: profile.nodeMastery || {},
+                        tabuadaMastery: profile.tabuadaMastery || {}
                     };
                 })
             }));
@@ -572,9 +632,11 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                 id: profile.id, name: profile.name, color, avatar: profile.equippedAvatar,
                 mascot: profile.equippedMascot, streak: profile.streak || 1, class_id: profile.class_id || classId,
                 user_id: profile.user_id || currentUser?.id, currentPosition: 0, inventoryProtectionCount: 0,
-                score: 0, level: 1, xp: 0, achievements: [], hp: 100, maxHp: 100, mascots: [], 
+                score: 0, level: 1, xp: 0, achievements: [], hp: 100, maxHp: 100, mascots: [],
                 skillsMastery: profile.skillsMastery || [],
                 srsReviews: profile.srsReviews || [],
+                nodeMastery: profile.nodeMastery || {},
+                tabuadaMastery: profile.tabuadaMastery || {},
                 sessionStats: { totalQuestions: 0, correctAnswers: 0, skillsPracticed: {} }
             };
             set({ players: [...players, newPlayer] });

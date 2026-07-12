@@ -38,14 +38,21 @@ export default function CardModal() {
         }
         if (window.speechSynthesis) {
             window.speechSynthesis.cancel(); // Para áudio anterior
-            
-            // Corrige a pronúncia de sinais matemáticos em português
-            let spokenText = text
-                .replace(/-/g, ' menos ')
-                .replace(/\+/g, ' mais ')
-                .replace(/x/i, ' vezes ')
-                .replace(/÷/g, ' dividido por ')
-                .replace(/=/g, ' igual a ');
+
+            // Prepara o texto para leitura em português:
+            const spokenText = text
+                // 1. Remove emojis (o TTS lia "🍎" como "maçã vermelha" e embolava a frase)
+                .replace(/\p{Extended_Pictographic}/gu, ' ')
+                // 2. Sinais matemáticos como operadores (só entre números, para não
+                //    quebrar palavras como "próximo" ou "explique")
+                .replace(/(\d)\s*[x×]\s*(\d)/gi, '$1 vezes $2')
+                .replace(/(\d)\s*÷\s*(\d)/g, '$1 dividido por $2')
+                .replace(/(\d)\s*[-−]\s*(\d)/g, '$1 menos $2')
+                .replace(/(\d)\s*\+\s*(\d)/g, '$1 mais $2')
+                .replace(/=/g, ' igual a ')
+                // 3. Limpa espaços sobrando
+                .replace(/\s+/g, ' ')
+                .trim();
 
             const utterance = new SpeechSynthesisUtterance(spokenText);
             utterance.lang = 'pt-BR';
@@ -77,15 +84,12 @@ export default function CardModal() {
                     Vez de: <strong style={{ color: currentPlayer.color }}>{currentPlayer.name}</strong>
                 </div>
 
+                {/* O código BNCC é informação para o professor, não para a criança —
+                    exibido no relatório/diagnóstico, nunca no card do aluno. */}
                 <div style={{ position: 'absolute', top: '16px', right: '16px', display: 'flex', gap: '8px' }}>
                     {activeQuestion.isReview && (
                         <span style={{ background: 'var(--color-yellow)', color: '#333', padding: '4px 8px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 'bold' }}>
                             🔄 Revisão
-                        </span>
-                    )}
-                    {activeQuestion.bnccCode && (
-                        <span style={{ background: '#eee', color: '#666', padding: '4px 8px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 'bold', border: '1px solid #ccc' }}>
-                            {activeQuestion.bnccCode}
                         </span>
                     )}
                 </div>

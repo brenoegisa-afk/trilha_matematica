@@ -14,6 +14,10 @@ type NodeGenerator = (node: CurriculumNode) => Question;
 const randomInt = (min: number, max: number) =>
     Math.floor(Math.random() * (max - min + 1)) + min;
 
+// Concordância de número: "1 maçã" vs "2 maçãs".
+const plural = (n: number, singular: string, plural: string) =>
+    `${n} ${n === 1 ? singular : plural}`;
+
 /**
  * Gera opções plausíveis para uma resposta numérica.
  * As alternativas erradas mapeiam erros reais e comuns (distratores diagnósticos).
@@ -54,6 +58,30 @@ function makeNumericOptions(answer: number, type: 'add' | 'sub' | 'mult' | 'div'
     return arr.sort((a, b) => a - b).map(String);
 }
 
+// Embaralha um array (Fisher-Yates) — para variar a posição da resposta certa.
+function shuffle<T>(arr: T[]): T[] {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+// Garante 4 opções de fração únicas (incluindo a correta), embaralhadas.
+function makeFractionOptions(answer: string, distractors: string[]): string[] {
+    const set = new Set<string>([answer, ...distractors]);
+    const [num, den] = answer.split('/').map(Number);
+    let guard = 0;
+    while (set.size < 4 && guard < 30) {
+        const dn = Math.max(2, den + randomInt(-1, 2));
+        const nn = Math.max(1, Math.min(dn, num + randomInt(-2, 2)));
+        set.add(`${nn}/${dn}`);
+        guard++;
+    }
+    return shuffle(Array.from(set).slice(0, 4));
+}
+
 // ═══════════════════════════════════════════════════════════
 // GERADORES POR NÓ
 // ═══════════════════════════════════════════════════════════
@@ -63,11 +91,11 @@ const NODE_GENERATORS: Record<string, NodeGenerator> = {
     add_simple: (node) => {
         const a = randomInt(1, 5), b = randomInt(1, 5);
         return {
-            question: `🍎 Ana tem ${a} maçãs e ganhou mais ${b}. Com quantas ficou?`,
+            question: `🍎 Ana tem ${plural(a, 'maçã', 'maçãs')} e ganhou mais ${b}. Com quantas ficou?`,
             answer: String(a + b),
             options: makeNumericOptions(a + b, 'add'),
             skillId: node.skillId, bnccCode: node.bnccCode,
-            explanation: { title: `Vamos contar juntos!`, steps: [`Você tinha ${a} maçãs.`, `Ganhou mais ${b}.`, `${a} + ${b} = ${a + b} maçãs no total!`] }
+            explanation: { title: `Vamos contar juntos!`, steps: [`Você tinha ${plural(a, 'maçã', 'maçãs')}.`, `Ganhou mais ${b}.`, `${a} + ${b} = ${a + b} maçãs no total!`] }
         };
     },
     add_two_digits: (node) => {
@@ -129,11 +157,11 @@ const NODE_GENERATORS: Record<string, NodeGenerator> = {
     sub_simple: (node) => {
         const a = randomInt(4, 10), b = randomInt(1, a - 1);
         return {
-            question: `🐦 Havia ${a} pássaros no galho. ${b} voaram. Quantos ficaram?`,
+            question: `🐦 Havia ${a} pássaros no galho. ${b === 1 ? '1 voou' : b + ' voaram'}. Quantos ficaram?`,
             answer: String(a - b),
             options: makeNumericOptions(a - b, 'sub'),
             skillId: node.skillId, bnccCode: node.bnccCode,
-            explanation: { title: `Tirando da conta`, steps: [`Começamos com ${a} pássaros.`, `${b} foram embora.`, `${a} - ${b} = ${a - b} pássaros restantes.`] }
+            explanation: { title: `Tirando da conta`, steps: [`Começamos com ${a} pássaros.`, `${b === 1 ? '1 foi embora' : b + ' foram embora'}.`, `${a} - ${b} = ${a - b} pássaros restantes.`] }
         };
     },
     sub_two_digits: (node) => {
@@ -200,7 +228,7 @@ const NODE_GENERATORS: Record<string, NodeGenerator> = {
         };
     },
     mult_two_digit: (node) => {
-        const a = randomInt(11, 25), b = randomInt(11, 15);
+        const a = randomInt(11, 25), b = randomInt(11, 19);
         return {
             question: `${a} × ${b} = ?`,
             answer: String(a * b),
@@ -261,45 +289,68 @@ const NODE_GENERATORS: Record<string, NodeGenerator> = {
         };
     },
     decimal_ordering: (node) => {
-        const nums = [randomInt(10, 50) / 10, randomInt(10, 50) / 10, randomInt(10, 50) / 10]
-            .map(n => parseFloat(n.toFixed(1)));
-        const sorted = [...nums].sort((a, b) => a - b);
-        const answer = sorted[0].toFixed(1);
+        // 4 decimais DISTINTOS (evita empate no "menor" e garante 4 alternativas).
+        const set = new Set<number>();
+        while (set.size < 4) set.add(parseFloat((randomInt(10, 59) / 10).toFixed(1)));
+        const nums = Array.from(set);
+        const answer = Math.min(...nums).toFixed(1);
         return {
             question: `📊 Qual é o menor número? ${nums.map(n => n.toFixed(1)).join('  |  ')}`,
             answer,
-            options: nums.map(n => n.toFixed(1)).sort(),
+            // Embaralha para a resposta certa não cair sempre na mesma posição.
+            options: shuffle(nums.map(n => n.toFixed(1))),
             skillId: node.skillId, bnccCode: node.bnccCode,
             explanation: { title: `Comparando decimais`, steps: [`Compare a parte inteira primeiro.`, `Se iguais, compare as casas decimais.`, `O menor é ${answer}.`] }
         };
     },
 
-    // ─── FRAÇÕES ───
+    // ─── FRAÇÕES (procedurais: variam a cada questão) ───
     frac_intro: (node) => {
+        const foods = [
+            { emoji: '🍕', item: 'Uma pizza', verb: 'foi cortada' },
+            { emoji: '🍫', item: 'Uma barra de chocolate', verb: 'foi dividida' },
+            { emoji: '🎂', item: 'Um bolo', verb: 'foi cortado' },
+            { emoji: '🍉', item: 'Uma melancia', verb: 'foi cortada' },
+        ];
+        const f = foods[randomInt(0, foods.length - 1)];
+        const den = randomInt(3, 8);
+        const num = randomInt(1, den - 1);
+        const answer = `${num}/${den}`;
+        const options = makeFractionOptions(answer, [`${den}/${num}`, `${num}/${den + 1}`, `${num + 1}/${den}`]);
         return {
-            question: `🍕 Uma pizza foi cortada em 4 partes iguais. João comeu 1 parte. Que fração ele comeu?`,
-            answer: '1/4',
-            options: ['1/4', '1/2', '1/3', '2/4'],
+            question: `${f.emoji} ${f.item} ${f.verb} em ${den} partes iguais. Alguém comeu ${plural(num, 'parte', 'partes')}. Que fração foi comida?`,
+            answer,
+            options,
             skillId: node.skillId, bnccCode: node.bnccCode,
-            explanation: { title: `Entendendo frações`, steps: [`A pizza tem 4 partes iguais (denominador = 4).`, `João comeu 1 parte (numerador = 1).`, `A fração é 1/4.`] }
+            explanation: { title: `Entendendo frações`, steps: [`São ${den} partes iguais (denominador = ${den}).`, `Foram comidas ${num} (numerador = ${num}).`, `A fração é ${num}/${den}.`] }
         };
     },
     frac_equiv: (node) => {
+        const den = randomInt(2, 5);
+        const factor = randomInt(2, 4);
+        const answer = `${factor}/${den * factor}`;
+        const options = makeFractionOptions(answer, [`1/${den + 1}`, `${factor}/${den * factor + 1}`, `${factor + 1}/${den * factor}`]);
         return {
-            question: `⚖️ Qual fração é equivalente a 1/2?`,
-            answer: '2/4',
-            options: ['2/4', '1/3', '3/5', '2/3'],
+            question: `⚖️ Qual fração é equivalente a 1/${den}?`,
+            answer,
+            options,
             skillId: node.skillId, bnccCode: node.bnccCode,
-            explanation: { title: `Frações equivalentes`, steps: [`1/2 = quantos quartos?`, `Multiplique numerador e denominador por 2: 1×2 / 2×2 = 2/4`, `Portanto 1/2 = 2/4 ✅`] }
+            explanation: { title: `Frações equivalentes`, steps: [`Multiplique numerador e denominador por ${factor}.`, `1 × ${factor} / ${den} × ${factor} = ${factor}/${den * factor}`, `Portanto 1/${den} = ${factor}/${den * factor} ✅`] }
         };
     },
     frac_operations: (node) => {
+        // Mesma "quantia de partes" (mesmo denominador): soma só os numeradores.
+        const den = randomInt(4, 9);
+        const a = randomInt(1, den - 2);
+        const b = randomInt(1, den - 1 - a);
+        const answer = `${a + b}/${den}`;
+        const options = makeFractionOptions(answer, [`${a + b}/${den + den}`, `${a + b + 1}/${den}`, `${a + b}/${den + 1}`]);
         return {
-            question: `🔢 Quanto é 1/2 + 1/4?`,
-            answer: '3/4',
-            options: ['3/4', '2/6', '1/2', '2/4'],
+            question: `🔢 Quanto é ${a}/${den} + ${b}/${den}?`,
+            answer,
+            options,
             skillId: node.skillId, bnccCode: node.bnccCode,
-            explanation: { title: `Somando frações`, steps: [`Iguale os denominadores: 1/2 = 2/4`, `Agora some: 2/4 + 1/4 = 3/4`, `Nunca some os denominadores!`] }
+            explanation: { title: `Somando frações`, steps: [`Os denominadores são iguais (${den}).`, `Some só os numeradores: ${a} + ${b} = ${a + b}.`, `Resultado: ${a + b}/${den}. Nunca some os denominadores!`] }
         };
     },
 };
@@ -329,10 +380,9 @@ export class MathEngine {
      */
     static generateFromNode(node: CurriculumNode): Question {
         const generator = NODE_GENERATORS[node.id];
-        if (generator) {
-            return generator(node);
-        }
-        return generateFallback(node);
+        const q = generator ? generator(node) : generateFallback(node);
+        // Carimba o nó de origem para que o loop de jogo saiba qual maestria atualizar.
+        return { ...q, nodeId: node.id };
     }
 
     /**

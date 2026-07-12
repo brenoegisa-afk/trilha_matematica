@@ -11,6 +11,7 @@ import Login from './pages/Login'
 import TeacherDashboard from './pages/TeacherDashboard'
 import Hub from './pages/Hub'
 import Arena from './pages/Arena'
+import Tabuada from './pages/Tabuada'
 import Battle from './pages/Battle'
 import ParentDashboard from './pages/ParentDashboard'
 import Inventory from './pages/Inventory'
@@ -42,6 +43,7 @@ const router = createBrowserRouter([
       { path: '/teacher/login', element: <Navigate to="/login" replace /> },
       { path: '/hub', element: <Hub /> },
       { path: '/arena', element: <Arena /> },
+      { path: '/tabuada', element: <Tabuada /> },
       { path: '/setup', element: <Setup /> },
       { path: '/game', element: <Game /> },
       { path: '/shop', element: <Shop /> },

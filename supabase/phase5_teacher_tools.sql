@@ -35,11 +35,13 @@ USING (
     )
 );
 
--- Alunos podem ler as questões customizadas se estiverem vinculados à turma
+-- Alunos podem ler as questões customizadas da sua turma.
+-- ❌ Removido: OR auth.uid() IS NULL (liberava leitura a qualquer anônimo).
+-- O aluno lê via user_id = auth.uid() (após student_login reivindicar o perfil).
 CREATE POLICY "Alunos podem ler questões da sua turma"
 ON public.custom_questions FOR SELECT
 USING (
     class_id IN (
-        SELECT (class_id::uuid) FROM public.profiles WHERE user_id = auth.uid() OR auth.uid() IS NULL
+        SELECT (class_id::uuid) FROM public.profiles WHERE user_id = auth.uid()
     )
 );

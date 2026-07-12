@@ -31,6 +31,19 @@ export interface NodeMastery {
     attempts: number;
     successes: number;
     mastered: boolean;
+    // Distratores escolhidos quando o aluno erra: { "resposta errada": vezes }.
+    // Sinal diagnóstico bruto para o professor ("confunde × com +").
+    misconceptions?: Record<string, number>;
+}
+
+// Fluência da tabuada: um registro por fato (ex.: "7x8").
+export interface TabuadaFact {
+    a: number;
+    b: number;
+    score: number;     // progresso rumo ao domínio (acerto rápido vale mais)
+    attempts: number;
+    correct: number;
+    mastered: boolean;
 }
 
 export interface Player {
@@ -56,6 +69,7 @@ export interface Player {
     mascots: Mascot[];
     skillsMastery: SkillMastery[];
     nodeMastery?: Record<string, NodeMastery>;
+    tabuadaMastery?: Record<string, TabuadaFact>;
     srsReviews: SrsReview[];
     sessionStats: SessionStats;
 }
@@ -109,6 +123,7 @@ export interface Question {
     question: string;
     answer: string;
     options: string[];
+    nodeId?: string; // Nó do grafo curricular que gerou a questão (matemática)
     skillId?: string;
     difficulty?: 'easy' | 'medium' | 'hard';
     explanation?: string | StructuredExplanation;

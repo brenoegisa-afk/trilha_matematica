@@ -47,11 +47,27 @@ export class CurriculumEngine {
      * 4. Prioriza nós com mais tentativas sem maestria (onde ele está "travado")
      * 5. Se não há fronteira, retorna nós raiz
      */
-    static pickNode(player: Player, subjectId: string, forcedSkillId?: string): CurriculumNode {
+    static pickNode(player: Player, subjectId: string, forcedSkillId?: string, grade?: string): CurriculumNode {
         const mastered = this.getMasteredNodes(player);
         const nodeMastery = this.getNodeMasteryMap(player);
 
         let frontier = CurriculumGraph.getFrontierNodes(mastered, subjectId);
+
+        // Ciência da SÉRIE: sem isto, todo aluno novo começa na raiz do grafo
+        // ("Soma até 10"), mesmo um 5º ano. Restringimos a fronteira à série
+        // escolhida; se a fronteira (respeitando pré-requisitos) ainda não tem
+        // nada da série, entramos direto pelos nós daquela série (por profundidade).
+        if (grade) {
+            const inGrade = frontier.filter(n => n.grade === grade);
+            if (inGrade.length > 0) {
+                frontier = inGrade;
+            } else {
+                const gradeNodes = CurriculumGraph.getNodesBySubject(subjectId)
+                    .filter(n => n.grade === grade && !mastered.has(n.id))
+                    .sort((a, b) => a.depth - b.depth);
+                if (gradeNodes.length > 0) frontier = gradeNodes;
+            }
+        }
 
         // Se um skillId é forçado (ex: questão customizada do professor com skill específico)
         if (forcedSkillId) {
@@ -106,11 +122,21 @@ export class CurriculumEngine {
      * Atualiza a maestria do aluno em um nó após responder uma questão.
      * Retorna o nodeMastery atualizado e se houve promoção (nó dominado).
      */
+    // Anti-chute: um acerto suspeito de rápido demais (tap na sorte / sem ler)
+    // vale menos pontos de maestria — assim não dá para "dominar" tapeando rápido.
+    private static readonly POINTS_CORRECT = 60;
+    private static readonly POINTS_CORRECT_LOW_CONFIDENCE = 20;
+    private static readonly POINTS_WRONG = 25;
+    // Nunca considerar dominado com pouquíssima evidência, mesmo se o threshold for baixo.
+    private static readonly MIN_ATTEMPTS_TO_MASTER = 3;
+
     static updateNodeMastery(
         player: Player,
         nodeId: string,
-        isCorrect: boolean
-    ): { nodeMastery: Record<string, NodeMastery>; promoted: boolean; newNode?: CurriculumNode } {
+        isCorrect: boolean,
+        selectedOption?: string,
+        lowConfidence: boolean = false
+    ): { nodeMastery: Record<string, NodeMastery>; promoted: boolean; masteredNode?: CurriculumNode; newNode?: CurriculumNode } {
         const nodeMasteryMap = { ...this.getNodeMasteryMap(player) };
         const node = CurriculumGraph.getNode(nodeId);
 
@@ -123,18 +149,26 @@ export class CurriculumEngine {
 
         if (isCorrect) {
             nm.successes += 1;
-            nm.points = Math.min(1000, nm.points + 60);
+            const gain = lowConfidence ? this.POINTS_CORRECT_LOW_CONFIDENCE : this.POINTS_CORRECT;
+            nm.points = Math.min(1000, nm.points + gain);
         } else {
-            nm.points = Math.max(0, nm.points - 25);
+            nm.points = Math.max(0, nm.points - this.POINTS_WRONG);
+            // Registra o distrator escolhido (sinal diagnóstico para o professor).
+            if (selectedOption) {
+                if (!nm.misconceptions) nm.misconceptions = {};
+                nm.misconceptions[selectedOption] = (nm.misconceptions[selectedOption] || 0) + 1;
+            }
         }
 
         // Verificar promoção
         let promoted = false;
+        let masteredNode: CurriculumNode | undefined;
         let newNode: CurriculumNode | undefined;
 
-        if (node && nm.points >= node.masteryThreshold && !nm.mastered) {
+        if (node && nm.points >= node.masteryThreshold && nm.attempts >= this.MIN_ATTEMPTS_TO_MASTER && !nm.mastered) {
             nm.mastered = true;
             promoted = true;
+            masteredNode = node;
 
             // Descobrir qual nó foi desbloqueado
             const newMastered = new Set<string>();
@@ -147,6 +181,6 @@ export class CurriculumEngine {
             }
         }
 
-        return { nodeMastery: nodeMasteryMap, promoted, newNode };
+        return { nodeMastery: nodeMasteryMap, promoted, masteredNode, newNode };
     }
 }

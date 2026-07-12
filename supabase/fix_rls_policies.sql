@@ -38,20 +38,25 @@ DROP POLICY IF EXISTS "Schools insert blocked via RLS"          ON schools;
 -- O aluno usará anon-auth do Supabase (signInAnonymously na Fase 1).
 -- Até lá, permitimos anon insert para não quebrar o fluxo atual,
 -- mas COM restrição: o perfil criado DEVE ter um class_id válido.
+-- INSERT: exige sessão (professor autenticado cria alunos; aluno anônimo
+-- com sessão sincroniza o próprio perfil). Bloqueia inserção sem login.
 CREATE POLICY "Authenticated or anon can insert profiles"
 ON profiles FOR INSERT
 WITH CHECK (
-    class_id IS NOT NULL
-    OR auth.uid() IS NOT NULL
+    auth.uid() IS NOT NULL
 );
 
 -- SELECT: Somente o próprio dono, o professor da turma, ou pai vinculado.
 -- ❌ Removido: OR user_id IS NULL (lia perfis de qualquer anônimo)
 -- ❌ Removido: OR auth.uid() IS NULL (qualquer request sem auth lia tudo)
+-- ❌ Removido: ramo anônimo por class_id (lia toda a turma sem login).
+--    O roster "escolha seu nome" agora vem da RPC get_class_roster
+--    (phase8_frente1_security.sql), que devolve só id + name.
 CREATE POLICY "Restricted profile read"
 ON profiles FOR SELECT
 USING (
-    -- O próprio usuário autenticado
+    -- O próprio usuário autenticado (inclui aluno anônimo que já reivindicou
+    -- o perfil via student_login → user_id = auth.uid())
     (user_id IS NOT NULL AND user_id = auth.uid())
     -- Professor vê alunos da sua turma
     OR class_id IN (
@@ -62,33 +67,25 @@ USING (
         SELECT student_id FROM parent_student
         WHERE parent_id = auth.uid()
     )
-    -- Aluno anônimo pode ler SEU PRÓPRIO perfil via class_id + session
-    -- (Fase 1 adicionará signInAnonymously; por ora, aluno com class_id
-    --  pode ler perfis da mesma turma para o fluxo de "escolher nome")
-    OR (
-        class_id IS NOT NULL
-        AND class_id IN (
-            SELECT id FROM classes WHERE access_code IS NOT NULL
-        )
-    )
 );
 
--- UPDATE: Somente o próprio usuário pode atualizar.
--- Permitimos temporariamente que perfis sem user_id sejam atualizados
--- para que o aluno possa salvar suas estrelas e session_stats ao fim do jogo.
+-- UPDATE: Somente o dono (aluno que reivindicou o perfil via student_login,
+-- ou professor/pai autenticado) pode atualizar.
+-- ❌ Removido: OR user_id IS NULL (permitia qualquer anônimo sobrescrever
+--    o perfil de qualquer aluno). Agora o aluno tem user_id = auth.uid().
 CREATE POLICY "Owner can update own profile"
 ON profiles FOR UPDATE
 USING (
     (user_id IS NOT NULL AND user_id = auth.uid())
-    OR user_id IS NULL
-)
-WITH CHECK (
-    class_id IS NULL
     OR class_id IN (
         SELECT id FROM classes WHERE teacher_id = auth.uid()
     )
-    OR (user_id IS NOT NULL AND user_id = auth.uid())
-    OR user_id IS NULL
+)
+WITH CHECK (
+    (user_id IS NOT NULL AND user_id = auth.uid())
+    OR class_id IN (
+        SELECT id FROM classes WHERE teacher_id = auth.uid()
+    )
 );
 
 -- DELETE: Somente professor da turma pode remover perfil de aluno.

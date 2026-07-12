@@ -69,6 +69,7 @@ export class SessionService {
                     session_stats: stats.skillsPracticed, // latest session snapshot
                     skills_mastery: player.skillsMastery || [],
                     srs_reviews: player.srsReviews || [],
+                    node_mastery: player.nodeMastery || {},
                     last_sync: new Date().toISOString()
                 })
                 .eq('id', player.id);

@@ -2,6 +2,7 @@ import { useGame } from '../context/GameContext';
 import styles from './VictoryModal.module.css';
 import { useEffect } from 'react';
 import { triggerConfetti } from '../utils/confetti';
+import { playSfx } from '../utils/sfx';
 import { MascotEngine } from '../core/game/MascotEngine';
 
 const mascotEngine = new MascotEngine();
@@ -11,6 +12,7 @@ export default function VictoryModal() {
 
     useEffect(() => {
         if (waitingVictory) {
+            playSfx('victory');
             triggerConfetti();
         }
     }, [waitingVictory]);

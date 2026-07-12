@@ -46,7 +46,7 @@ export class SubjectService {
             }
 
             if (player) {
-                const node = CurriculumEngine.pickNode(player, subjectId, potentialSkillId);
+                const node = CurriculumEngine.pickNode(player, subjectId, potentialSkillId, grade);
                 return MathEngine.generateFromNode(node);
             } else {
                 return MathEngine.generate(grade, tileType, player, potentialSkillId);

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { DiagnosticService } from '../core/learning/DiagnosticService';
 import { hashPin } from '../utils/saveSystem';
+import type { NodeMastery } from '../core/types';
+import StudentGraphModal from '../components/StudentGraphModal';
 import styles from './StudentManager.module.css';
 
 interface StudentProfile {
@@ -13,6 +15,8 @@ interface StudentProfile {
     last_played: string;
     hasAlert: boolean;
     bestSkill?: string;
+    nodeMastery: Record<string, NodeMastery>;
+    masteredCount: number;
 }
 
 interface StudentManagerProps {
@@ -31,6 +35,7 @@ export const StudentManager: React.FC<StudentManagerProps> = ({ classId, classNa
     const [batchNames, setBatchNames] = useState('');
     const [isCreating, setIsCreating] = useState(false);
     const [createdPins, setCreatedPins] = useState<{name: string, pin: string}[]>([]);
+    const [selectedStudent, setSelectedStudent] = useState<StudentProfile | null>(null);
 
     useEffect(() => {
         if (activeTab === 'report' || students.length === 0) {
@@ -43,17 +48,19 @@ export const StudentManager: React.FC<StudentManagerProps> = ({ classId, classNa
         try {
             const { data, error } = await supabase
                 .from('profiles')
-                .select('id, name, total_score, stars, streak, last_sync, session_stats')
+                .select('id, name, total_score, stars, streak, last_sync, session_stats, node_mastery')
                 .eq('class_id', classId)
                 .order('name', { ascending: true });
 
             if (error) throw error;
 
             const mapped: StudentProfile[] = (data || []).map(p => {
-                const mockPlayer = { sessionStats: p.session_stats, skillsMastery: [] } as any;
+                const nodeMastery: Record<string, NodeMastery> = p.node_mastery || {};
+                const mockPlayer = { sessionStats: p.session_stats, skillsMastery: [], nodeMastery } as any;
                 const insights = DiagnosticService.generateReport(mockPlayer);
                 const hasAlert = insights.some((i: any) => i.status === 'needs_help');
                 const bestSkill = insights.find((i: any) => i.status === 'mastered')?.skillName;
+                const masteredCount = Object.values(nodeMastery).filter(nm => nm.mastered).length;
 
                 return {
                     id: p.id,
@@ -63,7 +70,9 @@ export const StudentManager: React.FC<StudentManagerProps> = ({ classId, classNa
                     streak: p.streak || 0,
                     last_played: p.last_sync || new Date().toISOString(),
                     hasAlert,
-                    bestSkill
+                    bestSkill,
+                    nodeMastery,
+                    masteredCount
                 };
             });
 
@@ -219,10 +228,14 @@ export const StudentManager: React.FC<StudentManagerProps> = ({ classId, classNa
                                     ) : (
                                         <>
                                             <h3 className={styles.sectionTitle}>Ranking de Performance</h3>
+                                            <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 10px' }}>
+                                                👉 Clique num aluno para ver a progressão dele na trilha.
+                                            </p>
                                             <table className={styles.studentTable}>
                                                 <thead>
                                                     <tr>
                                                         <th>Nome do Aluno</th>
+                                                        <th>Trilha</th>
                                                         <th>Pontos</th>
                                                         <th>Estrelas</th>
                                                         <th>Foco (🔥)</th>
@@ -231,10 +244,19 @@ export const StudentManager: React.FC<StudentManagerProps> = ({ classId, classNa
                                                 </thead>
                                                 <tbody>
                                                     {students.map((student, idx) => (
-                                                        <tr key={student.id} className={idx === 0 ? styles.topStudent : ''}>
+                                                        <tr
+                                                            key={student.id}
+                                                            className={idx === 0 ? styles.topStudent : ''}
+                                                            style={{ cursor: 'pointer' }}
+                                                            onClick={() => setSelectedStudent(student)}
+                                                            title="Ver progressão na trilha"
+                                                        >
                                                             <td className={styles.nameCell}>
                                                                 {idx === 0 && <span className={styles.crown}>👑</span>}
                                                                 {student.name}
+                                                            </td>
+                                                            <td title="Habilidades dominadas no grafo curricular">
+                                                                🧩 {student.masteredCount}
                                                             </td>
                                                             <td className={styles.scoreCell}>{student.score.toLocaleString()}</td>
                                                             <td>⭐ {student.stars}</td>
@@ -351,6 +373,14 @@ export const StudentManager: React.FC<StudentManagerProps> = ({ classId, classNa
                     <p>{students.length} campeões mapeados nesta turma.</p>
                 </div>
             </div>
+
+            {selectedStudent && (
+                <StudentGraphModal
+                    studentName={selectedStudent.name}
+                    nodeMastery={selectedStudent.nodeMastery}
+                    onClose={() => setSelectedStudent(null)}
+                />
+            )}
         </div>
     );
 };

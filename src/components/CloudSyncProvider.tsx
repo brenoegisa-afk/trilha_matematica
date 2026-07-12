@@ -15,7 +15,9 @@ export function CloudSyncProvider() {
             const { error } = await supabase.from('profiles').upsert({
                 id: profile.id,
                 name: profile.name,
-                secret_code: profile.secretCode,
+                // secret_code NÃO é escrito pelo cliente: o PIN é criado e
+                // guardado (hasheado) apenas pelo professor no StudentManager.
+                // Enviá-lo daqui arriscaria sobrescrever o hash com lixo.
                 stars: profile.stars,
                 equipped_avatar: profile.equippedAvatar,
                 unlocked_avatars: profile.unlockedAvatars,
@@ -29,6 +31,7 @@ export function CloudSyncProvider() {
                 session_stats: (profile as any).session_stats || null,
                 skills_mastery: profile.skillsMastery || [],
                 srs_reviews: profile.srsReviews || [],
+                node_mastery: profile.nodeMastery || {},
                 last_sync: new Date().toISOString()
             });
 

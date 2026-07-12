@@ -51,6 +51,7 @@ export class ParentService {
             mascots: dbProfile.mascots || [],
             skillsMastery: dbProfile.skills_mastery || [],
             srsReviews: dbProfile.srs_reviews || [],
+            nodeMastery: dbProfile.node_mastery || {},
             sessionStats: dbProfile.session_stats || {
                 totalQuestions: 0,
                 correctAnswers: 0,
