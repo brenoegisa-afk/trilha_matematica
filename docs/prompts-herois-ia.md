@@ -93,6 +93,34 @@ Mesma roupa (do estágio atual), só muda a pose. Úteis no gameplay:
 
 ---
 
+## ⚔️ DAVI — 5 estágios de evolução (pronto pra colar)
+
+Mesmas regras da Ester: mesma pose/rosto/cores nos 5, só muda a roupa; gere um
+primeiro (ex.: estágio 1) e use como referência pros outros ("same character,
+same face, skin and hair — only the clothing changes"). Tom gentil: coragem, não
+violência (funda de pastor é ferramenta; espada aparece embainhada como símbolo).
+
+**Bloco fixo (repita idêntico nos 5):**
+> A full-body flat vector cartoon illustration of Davi (David), a brave and kind
+> 10-year-old shepherd boy, warm olive skin, curly reddish-brown hair, warm brown
+> eyes, rosy cheeks and a friendly smile. He is standing in a friendly, brave
+> front pose, facing forward, smiling warmly, centered with a safety margin. Pure
+> plain white background, single character, no scenery, no text, no book. Thick
+> uniform dark outlines, bright saturated pastel colors, soft cel shading, mobile
+> game mascot style, wholesome, educational, 2d game asset.
+
+**Roupa por estágio (encaixe antes de "He is standing…"):**
+
+| Arquivo | Título | Roupa |
+|---------|--------|-------|
+| `davi-1` | Pastor | a simple humble beige shepherd tunic with a rope belt and worn leather sandals, gently holding a small shepherd's sling in one hand |
+| `davi-2` | Corajoso | a beige tunic with a sturdy brown leather belt and a small pouch of stones, holding a shepherd's sling, a bit more confident |
+| `davi-3` | Escudeiro | a tunic with a leather belt and sturdy sandals, a small round wooden shield on one arm and a sling in the other hand |
+| `davi-4` | Guerreiro | light bronze chest armor over his tunic, a small round shield on one arm and a short sword sheathed at his side, brave and kind |
+| `davi-5` | Rei | a jeweled golden crown, a flowing purple-and-gold royal cape over shining golden armor, holding an ornate golden sling (a callback to the courage that made him king); noble, confident and kind |
+
+---
+
 ## Os outros 5 heróis (identidade + arco de evolução)
 
 Use a mesma lógica: identidade fixa + roupa que evolui do estágio 1 (humilde) ao 5 (herói pleno).

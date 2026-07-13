@@ -66,14 +66,20 @@ export default function HeroSelect() {
 
             {/* Grade de heróis */}
             <div className={styles.grid}>
-                {heroes.map(hero => (
+                {heroes.map(hero => {
+                    const released = HeroesMap.isReleased(hero.id);
+                    return (
                     <div
                         key={hero.id}
                         className={`${styles.card} ${focusedId === hero.id ? styles.cardSelected : ''}`}
                         onClick={() => { setFocusedId(hero.id); playSfx('step'); }}
+                        style={!released ? { opacity: 0.6 } : undefined}
                     >
                         {selectedHeroId === hero.id && (
                             <span className={styles.equippedTag}>MEU HERÓI</span>
+                        )}
+                        {!released && (
+                            <span className={styles.equippedTag} style={{ background: '#94a3b8' }}>🔒 EM BREVE</span>
                         )}
                         <span className={styles.cardIcon}>
                             <HeroAvatar heroId={hero.id} stage={5} size={72} />
@@ -82,7 +88,8 @@ export default function HeroSelect() {
                         <span className={styles.cardTagline}>{hero.tagline}</span>
                         <span className={styles.mechanicBadge}>{MECHANIC_LABEL[hero.mechanic]}</span>
                     </div>
-                ))}
+                    );
+                })}
             </div>
 
             {/* Painel de detalhe do herói em foco */}
@@ -119,7 +126,11 @@ export default function HeroSelect() {
                         <button className={styles.backBtn} onClick={() => navigate('/')}>
                             🔙 Voltar
                         </button>
-                        {selectedHeroId === focused.id ? (
+                        {!HeroesMap.isReleased(focused.id) ? (
+                            <button className={styles.confirmBtn} disabled style={{ background: '#94a3b8', cursor: 'default' }}>
+                                🔒 Em breve
+                            </button>
+                        ) : selectedHeroId === focused.id ? (
                             <button
                                 className={styles.confirmBtn}
                                 onClick={() => navigate('/customizar')}

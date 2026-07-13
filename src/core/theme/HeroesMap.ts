@@ -208,6 +208,13 @@ const REALMS: Realm[] = [
 ];
 
 // ═══════════════════════════════════════════════════════════
+// HERÓIS LIBERADOS (com arte pronta). Os demais aparecem como
+// "🔒 Em breve" na seleção. Basta adicionar o id aqui quando a arte chegar.
+// ═══════════════════════════════════════════════════════════
+
+const RELEASED_HERO_IDS = new Set<string>(['ester', 'davi']);
+
+// ═══════════════════════════════════════════════════════════
 // API PÚBLICA
 // ═══════════════════════════════════════════════════════════
 
@@ -215,6 +222,11 @@ export class HeroesMap {
     /** Todos os heróis jogáveis. */
     static getAllHeroes(): Hero[] {
         return HEROES;
+    }
+
+    /** Este herói já tem arte e pode ser escolhido? */
+    static isReleased(heroId: string): boolean {
+        return RELEASED_HERO_IDS.has(heroId);
     }
 
     /** Um herói pelo id (ex.: 'davi'). */

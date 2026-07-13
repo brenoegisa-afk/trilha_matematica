@@ -39,8 +39,17 @@ export function CloudSyncProvider() {
             if (error) {
                 // If the session is locked, React Query will gracefully retry due to backoff.
                 if (error.message?.includes('Lock')) {
-                    throw new Error("Lock"); 
+                    throw new Error("Lock");
                 }
+                // Loga o detalhe COMPLETO do erro (PostgREST) para diagnóstico —
+                // ex.: coluna inexistente (PGRST204), violação de RLS, etc.
+                console.error(
+                    '❌ SYNC PERFIL falhou:',
+                    'message=', error.message,
+                    '| details=', (error as any).details,
+                    '| hint=', (error as any).hint,
+                    '| code=', (error as any).code
+                );
                 throw error;
             }
             return profile.id;
