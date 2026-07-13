@@ -17,10 +17,11 @@ export default function Login() {
     const [mode, setMode] = useState<Mode>('login');
     const [step, setStep] = useState<Step>('form');
 
-    // Já logado? Vai direto pro painel.
+    // Já logado com conta REAL? Vai direto pro painel. Sessão anônima (aluno)
+    // NÃO conta — senão entra em loop com a trava do /teacher.
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => {
-            if (session) navigate('/teacher');
+            if (session && !session.user.is_anonymous) navigate('/teacher');
         });
     }, [navigate]);
 
