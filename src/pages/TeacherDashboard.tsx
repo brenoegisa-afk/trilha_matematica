@@ -203,6 +203,14 @@ export default function TeacherDashboard() {
                 <div className={styles.welcomeSection}>
                     <h1>Bem-vindo, Professor!</h1>
                     <p>Gerencie suas turmas e acompanhe o aprendizado dos seus pequenos campeões.</p>
+                    <div style={{
+                        display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '12px',
+                        fontSize: '0.9rem', color: 'var(--color-ink)'
+                    }}>
+                        <span style={{ background: '#eff6ff', padding: '6px 12px', borderRadius: '20px', fontWeight: 700 }}>1️⃣ Crie uma turma</span>
+                        <span style={{ background: '#eff6ff', padding: '6px 12px', borderRadius: '20px', fontWeight: 700 }}>2️⃣ Adicione os alunos (gera os PINs)</span>
+                        <span style={{ background: '#eff6ff', padding: '6px 12px', borderRadius: '20px', fontWeight: 700 }}>3️⃣ Entregue o código da turma + o PIN pra cada um</span>
+                    </div>
                 </div>
 
                 {/* V2: Summary Stats Row */}
@@ -354,6 +362,7 @@ export default function TeacherDashboard() {
                 <StudentManager
                     classId={activeStudentClass.id}
                     className={activeStudentClass.name}
+                    accessCode={activeStudentClass.access_code}
                     onClose={() => setActiveStudentClass(null)}
                 />
             )}

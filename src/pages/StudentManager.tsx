@@ -23,10 +23,11 @@ interface StudentProfile {
 interface StudentManagerProps {
     classId: string;
     className: string;
+    accessCode?: string;
     onClose: () => void;
 }
 
-export const StudentManager: React.FC<StudentManagerProps> = ({ classId, className, onClose }) => {
+export const StudentManager: React.FC<StudentManagerProps> = ({ classId, className, accessCode, onClose }) => {
     const [students, setStudents] = useState<StudentProfile[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'report' | 'manage'>('report');
@@ -131,6 +132,49 @@ export const StudentManager: React.FC<StudentManagerProps> = ({ classId, classNa
         } finally {
             setIsCreating(false);
         }
+    };
+
+    // Copia a lista de acesso (código da turma + PINs) para a área de transferência.
+    const copyPins = async () => {
+        const linhas = createdPins.map(cp => `${cp.name}: PIN ${cp.pin}`).join('\n');
+        const texto = `Turma: ${className}\nCódigo de acesso: ${accessCode || '(veja no painel)'}\n\n${linhas}`;
+        try {
+            await navigator.clipboard.writeText(texto);
+            alert('Lista copiada! Cole onde quiser (WhatsApp, e-mail, etc.).');
+        } catch {
+            alert('Não foi possível copiar automaticamente.');
+        }
+    };
+
+    // Abre uma folha imprimível com um cartão de acesso por aluno.
+    const printPins = () => {
+        const cards = createdPins.map(cp => `
+            <div class="card">
+                <div class="name">${cp.name}</div>
+                <div class="row"><span>Código da turma</span><b>${accessCode || '—'}</b></div>
+                <div class="row"><span>Meu PIN</span><b>${cp.pin}</b></div>
+            </div>
+        `).join('');
+        const html = `
+            <html><head><title>Acessos — ${className}</title>
+            <style>
+                body { font-family: system-ui, sans-serif; padding: 20px; }
+                h1 { text-align: center; }
+                .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+                .card { border: 2px dashed #333; border-radius: 12px; padding: 14px; }
+                .name { font-size: 1.2rem; font-weight: 800; margin-bottom: 8px; }
+                .row { display: flex; justify-content: space-between; font-size: 0.95rem; margin: 4px 0; }
+                .row b { font-size: 1.1rem; letter-spacing: 1px; }
+                @media print { .card { break-inside: avoid; } }
+            </style></head>
+            <body>
+                <h1>Trilha dos Campeões — ${className}</h1>
+                <p style="text-align:center">Entregue um cartão para cada aluno. Ele entra com o código da turma + o PIN dele.</p>
+                <div class="grid">${cards}</div>
+                <script>window.onload = () => window.print();</script>
+            </body></html>`;
+        const win = window.open('', '_blank');
+        if (win) { win.document.write(html); win.document.close(); }
     };
 
     // --- Analytics Calculations ---
@@ -328,18 +372,29 @@ export const StudentManager: React.FC<StudentManagerProps> = ({ classId, classNa
 
                                         {createdPins.length > 0 && (
                                             <div style={{ marginTop: '20px', padding: '15px', background: '#fff', border: '2px solid #10b981', borderRadius: '8px' }}>
-                                                <h4 style={{ color: '#10b981', marginTop: 0 }}>✅ Alunos Criados! Anote os PINs:</h4>
+                                                <h4 style={{ color: '#10b981', marginTop: 0 }}>✅ Alunos criados! Guarde os acessos:</h4>
+                                                <div style={{ background: '#f0fdf4', padding: '8px 12px', borderRadius: '6px', marginBottom: '10px', fontSize: '0.9rem' }}>
+                                                    Código da turma: <code style={{ fontWeight: 800, letterSpacing: '1px' }}>{accessCode || '(veja no card da turma)'}</code>
+                                                </div>
                                                 <ul style={{ margin: 0, paddingLeft: '20px', maxHeight: '150px', overflowY: 'auto' }}>
                                                     {createdPins.map((cp, i) => (
-                                                        <li key={i}><strong>{cp.name}</strong>: <code>{cp.pin}</code></li>
+                                                        <li key={i}><strong>{cp.name}</strong>: PIN <code>{cp.pin}</code></li>
                                                     ))}
                                                 </ul>
-                                                <button 
-                                                    onClick={() => setCreatedPins([])}
-                                                    style={{ marginTop: '10px', padding: '5px 10px', fontSize: '0.8rem', cursor: 'pointer' }}
-                                                >
-                                                    Limpar aviso
-                                                </button>
+                                                <p style={{ fontSize: '0.78rem', color: '#64748b', margin: '8px 0 10px' }}>
+                                                    ⚠️ Os PINs não podem ser vistos depois (ficam protegidos). Copie ou imprima agora.
+                                                </p>
+                                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                                    <button onClick={copyPins} style={{ padding: '8px 14px', fontSize: '0.85rem', cursor: 'pointer', background: 'var(--color-blue)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 700 }}>
+                                                        📋 Copiar lista
+                                                    </button>
+                                                    <button onClick={printPins} style={{ padding: '8px 14px', fontSize: '0.85rem', cursor: 'pointer', background: '#10b981', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 700 }}>
+                                                        🖨️ Imprimir cartões
+                                                    </button>
+                                                    <button onClick={() => setCreatedPins([])} style={{ padding: '8px 14px', fontSize: '0.85rem', cursor: 'pointer', background: '#f1f5f9', border: 'none', borderRadius: '8px' }}>
+                                                        Limpar
+                                                    </button>
+                                                </div>
                                             </div>
                                         )}
                                     </div>

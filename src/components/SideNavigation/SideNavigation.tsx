@@ -11,6 +11,9 @@ export default function SideNavigation({ isOpen, onClose }: SideNavigationProps)
     const navigate = useNavigate();
     const location = useLocation();
     const { currentUser, logout } = useGame();
+    // Sessão anônima (aluno em tablet compartilhado) NÃO conta como "logado":
+    // ela é recriada automaticamente após o signOut. Só conta conta de verdade.
+    const isRealUser = !!currentUser && !currentUser.is_anonymous;
 
     const menuItems = [
         { id: 'home', label: 'Início', icon: '🏠', path: '/' },
@@ -57,11 +60,11 @@ export default function SideNavigation({ isOpen, onClose }: SideNavigationProps)
                 </div>
 
                 <div className={styles.footer}>
-                    {currentUser ? (
+                    {isRealUser ? (
                         <div className={styles.userSection}>
                             <div className={styles.userInfo}>
-                                <div className={styles.userEmail}>{currentUser.email}</div>
-                                <button className={styles.logoutBtn} onClick={() => { logout(); if(onClose) onClose(); }}>Sair</button>
+                                <div className={styles.userEmail}>{currentUser!.email}</div>
+                                <button className={styles.logoutBtn} onClick={() => { logout(); navigate('/'); if(onClose) onClose(); }}>Sair</button>
                             </div>
                         </div>
                     ) : (

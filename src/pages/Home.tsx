@@ -6,11 +6,11 @@ import { ParentGate } from '../components/ParentGate';
 
 export default function Home() {
     const navigate = useNavigate();
-    const [showGateFor, setShowGateFor] = useState<'teacher' | 'parent' | null>(null);
+    const [showGateFor, setShowGateFor] = useState<'teacher' | null>(null);
+    const [comingSoon, setComingSoon] = useState(false);
 
     const handleGateSuccess = () => {
         if (showGateFor === 'teacher') navigate('/teacher');
-        if (showGateFor === 'parent') navigate('/parent');
         setShowGateFor(null);
     };
 
@@ -125,7 +125,8 @@ export default function Home() {
                     </button>
                     <button
                         className={styles.parentButton}
-                        onClick={() => setShowGateFor('parent')}
+                        onClick={() => setComingSoon(true)}
+                        title="Em breve"
                         style={{
                             padding: '10px 20px',
                             fontSize: '1.2rem',
@@ -135,19 +136,56 @@ export default function Home() {
                             borderRadius: '12px',
                             fontWeight: '800',
                             cursor: 'pointer',
-                            boxShadow: '4px 4px 0px rgba(0,0,0,0.1)'
+                            boxShadow: '4px 4px 0px rgba(0,0,0,0.1)',
+                            opacity: 0.7
                         }}
                     >
-                        👨‍👩‍👧 PAIS
+                        👨‍👩‍👧 PAIS <span style={{ fontSize: '0.7rem', verticalAlign: 'middle' }}>(em breve)</span>
                     </button>
                 </div>
             </div>
 
             {showGateFor && (
-                <ParentGate 
+                <ParentGate
                     onSuccess={handleGateSuccess}
                     onCancel={() => setShowGateFor(null)}
                 />
+            )}
+
+            {comingSoon && (
+                <div
+                    onClick={() => setComingSoon(false)}
+                    style={{
+                        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5000, padding: '20px'
+                    }}
+                >
+                    <div
+                        onClick={e => e.stopPropagation()}
+                        style={{
+                            background: 'white', color: 'var(--color-ink)', borderRadius: '16px',
+                            border: '4px solid var(--color-ink)', padding: '2rem', maxWidth: '380px',
+                            textAlign: 'center', boxShadow: '0 10px 0 rgba(0,0,0,0.2)'
+                        }}
+                    >
+                        <div style={{ fontSize: '3rem', marginBottom: '10px' }}>👨‍👩‍👧</div>
+                        <h2 style={{ marginBottom: '8px' }}>Painel da Família — em breve!</h2>
+                        <p style={{ opacity: 0.8, marginBottom: '20px' }}>
+                            Logo os pais poderão acompanhar o progresso do filho por aqui.
+                            Por enquanto, o acompanhamento é pelo <strong>Painel do Professor</strong>.
+                        </p>
+                        <button
+                            onClick={() => setComingSoon(false)}
+                            style={{
+                                padding: '12px 28px', fontSize: '1.1rem', fontWeight: 800,
+                                background: 'var(--color-blue)', color: 'white', border: '3px solid var(--color-ink)',
+                                borderRadius: '12px', cursor: 'pointer', boxShadow: '0 4px 0 rgba(0,0,0,0.2)'
+                            }}
+                        >
+                            Entendi!
+                        </button>
+                    </div>
+                </div>
             )}
 
 
