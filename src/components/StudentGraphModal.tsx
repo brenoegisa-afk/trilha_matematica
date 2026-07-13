@@ -1,11 +1,13 @@
-import { useMemo } from 'react';
+import { useMemo, Fragment } from 'react';
 import type { NodeMastery } from '../core/types';
 import { DiagnosticService } from '../core/learning/DiagnosticService';
+import { TAB_MIN, TAB_MAX, factKey, masteredCount, totalFacts } from '../core/learning/TabuadaEngine';
 import styles from './StudentGraphModal.module.css';
 
 interface StudentGraphModalProps {
     studentName: string;
     nodeMastery: Record<string, NodeMastery>;
+    tabuadaMastery?: Record<string, any>;
     onClose: () => void;
 }
 
@@ -19,13 +21,23 @@ const YEAR_LABEL: Record<number, string> = {
  * os equívocos capturados (distratores escolhidos). Essa é a visão que
  * transforma o "node_mastery" bruto em ação pedagógica.
  */
-export default function StudentGraphModal({ studentName, nodeMastery, onClose }: StudentGraphModalProps) {
+export default function StudentGraphModal({ studentName, nodeMastery, tabuadaMastery, onClose }: StudentGraphModalProps) {
     const progress = useMemo(
         () => DiagnosticService.generateGraphProgress(nodeMastery || {}),
         [nodeMastery]
     );
 
+    const tab = tabuadaMastery || {};
+    const tabMastered = masteredCount(tab);
+    const tabAttempted = Object.keys(tab).length;
+    const tabRows = useMemo(() => {
+        const r: number[] = [];
+        for (let i = TAB_MIN; i <= TAB_MAX; i++) r.push(i);
+        return r;
+    }, []);
+
     const hasData = progress.mastered.length + progress.inProgress.length + progress.struggling.length > 0;
+    const tabuadaHasData = tabAttempted > 0;
     const pct = (a: number) => `${Math.round(a * 100)}%`;
 
     return (
@@ -39,12 +51,13 @@ export default function StudentGraphModal({ studentName, nodeMastery, onClose }:
                     <button className={styles.closeBtn} onClick={onClose}>&times;</button>
                 </div>
 
-                {!hasData ? (
+                {!hasData && !tabuadaHasData ? (
                     <div className={styles.empty}>
                         Este aluno ainda não jogou o suficiente para gerar dados de progressão.
                     </div>
                 ) : (
                     <div className={styles.content}>
+                        {hasData && (<>
                         <div className={styles.statRow}>
                             <div className={styles.stat}>
                                 <div className={styles.statVal}>{progress.masteredCount}</div>
@@ -120,6 +133,30 @@ export default function StudentGraphModal({ studentName, nodeMastery, onClose }:
                                         <span>Em <strong>{m.nodeName}</strong>, escolheu <code>{m.wrongAnswer}</code></span>
                                     </div>
                                 ))}
+                            </section>
+                        )}
+                        </>)}
+
+                        {tabuadaHasData && (
+                            <section className={styles.section}>
+                                <h3 className={styles.sectionTitle}>✖️ Tabuada — {tabMastered}/{totalFacts()} de cor</h3>
+                                <p className={styles.hint}>Verde = já sabe de cor. Amarelo = está treinando. Vazio = ainda não praticou.</p>
+                                <div className={styles.tabGrid} style={{ gridTemplateColumns: `repeat(${tabRows.length + 1}, auto)` }}>
+                                    <div className={`${styles.tabCell} ${styles.tabHead}`}>×</div>
+                                    {tabRows.map(b => <div key={`h${b}`} className={`${styles.tabCell} ${styles.tabHead}`}>{b}</div>)}
+                                    {tabRows.map(a => (
+                                        <Fragment key={`r${a}`}>
+                                            <div className={`${styles.tabCell} ${styles.tabHead}`}>{a}</div>
+                                            {tabRows.map(b => {
+                                                const f = tab[factKey(a, b)];
+                                                let cls = styles.tabCell;
+                                                if (f?.mastered) cls += ` ${styles.tabMastered}`;
+                                                else if (f && f.score > 0) cls += ` ${styles.tabProgress}`;
+                                                return <div key={`${a}x${b}`} className={cls} title={`${a} × ${b}`} />;
+                                            })}
+                                        </Fragment>
+                                    ))}
+                                </div>
                             </section>
                         )}
                     </div>

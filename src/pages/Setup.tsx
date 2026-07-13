@@ -131,7 +131,8 @@ export default function Setup() {
                 class_id: student.class_id,
                 skillsMastery: student.skills_mastery || [],
                 srsReviews: student.srs_reviews || [],
-                nodeMastery: student.node_mastery || {}
+                nodeMastery: student.node_mastery || {},
+                tabuadaMastery: student.tabuada_mastery || {}
             });
 
             setSecretCode('');

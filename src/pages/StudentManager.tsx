@@ -16,6 +16,7 @@ interface StudentProfile {
     hasAlert: boolean;
     bestSkill?: string;
     nodeMastery: Record<string, NodeMastery>;
+    tabuadaMastery: Record<string, any>;
     masteredCount: number;
 }
 
@@ -48,7 +49,7 @@ export const StudentManager: React.FC<StudentManagerProps> = ({ classId, classNa
         try {
             const { data, error } = await supabase
                 .from('profiles')
-                .select('id, name, total_score, stars, streak, last_sync, session_stats, node_mastery')
+                .select('id, name, total_score, stars, streak, last_sync, session_stats, node_mastery, tabuada_mastery')
                 .eq('class_id', classId)
                 .order('name', { ascending: true });
 
@@ -72,6 +73,7 @@ export const StudentManager: React.FC<StudentManagerProps> = ({ classId, classNa
                     hasAlert,
                     bestSkill,
                     nodeMastery,
+                    tabuadaMastery: p.tabuada_mastery || {},
                     masteredCount
                 };
             });
@@ -378,6 +380,7 @@ export const StudentManager: React.FC<StudentManagerProps> = ({ classId, classNa
                 <StudentGraphModal
                     studentName={selectedStudent.name}
                     nodeMastery={selectedStudent.nodeMastery}
+                    tabuadaMastery={selectedStudent.tabuadaMastery}
                     onClose={() => setSelectedStudent(null)}
                 />
             )}

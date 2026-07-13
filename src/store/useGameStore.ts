@@ -580,7 +580,8 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                             user_id: cloudP.user_id as string,
                             skillsMastery: cloudP.skills_mastery as any[],
                             srsReviews: cloudP.srs_reviews as any[],
-                            nodeMastery: (cloudP.node_mastery as Record<string, any>) || {}
+                            nodeMastery: (cloudP.node_mastery as Record<string, any>) || {},
+                            tabuadaMastery: (cloudP.tabuada_mastery as Record<string, any>) || {}
                         };
                         if (idx !== -1) {
                             profiles[idx] = mapped;

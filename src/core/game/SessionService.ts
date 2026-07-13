@@ -70,6 +70,7 @@ export class SessionService {
                     skills_mastery: player.skillsMastery || [],
                     srs_reviews: player.srsReviews || [],
                     node_mastery: player.nodeMastery || {},
+                    tabuada_mastery: player.tabuadaMastery || {},
                     last_sync: new Date().toISOString()
                 })
                 .eq('id', player.id);

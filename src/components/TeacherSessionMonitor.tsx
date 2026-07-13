@@ -3,6 +3,7 @@ import { supabase } from '../utils/supabaseClient';
 import { BnccMap } from '../core/learning/BnccMap';
 import styles from './TeacherSessionMonitor.module.css';
 import { BatchImporter } from '../pages/BatchImporter';
+import StudentGraphModal from './StudentGraphModal';
 
 interface Session {
     id: string;
@@ -21,6 +22,8 @@ interface PlayerProfile {
     total_score: number;
     stars: number;
     session_stats: Record<string, { attempts: number; successes: number }> | null;
+    node_mastery?: Record<string, any>;
+    tabuada_mastery?: Record<string, any>;
 }
 
 const SKILL_NAMES: Record<string, string> = {
@@ -75,6 +78,7 @@ export default function TeacherSessionMonitor({ classId, className, onClose }: {
     const [playerMap, setPlayerMap] = useState<Record<string, string>>({});
     const [view, setView] = useState<'live' | 'students' | 'manage'>('live');
     const [liveIndicator, setLiveIndicator] = useState(false);
+    const [selectedStudent, setSelectedStudent] = useState<PlayerProfile | null>(null);
 
     // --- Manage state ---
     const [activeFocus, setActiveFocus] = useState<string | null>(null);
@@ -104,7 +108,7 @@ Use um dos seguintes skill_id: math_basic, math_logic, math_expressions, math_fr
     const fetchProfiles = useCallback(async () => {
         const { data } = await supabase
             .from('profiles')
-            .select('id, name, total_score, stars, session_stats')
+            .select('id, name, total_score, stars, session_stats, node_mastery, tabuada_mastery')
             .eq('class_id', classId)
             .order('total_score', { ascending: false });
 
@@ -398,6 +402,9 @@ Use um dos seguintes skill_id: math_basic, math_logic, math_expressions, math_fr
                             </div>
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                <p style={{ margin: '0 0 4px', fontSize: '0.85rem', color: '#64748b' }}>
+                                    👆 Clique num aluno para ver a <b>trilha do grafo</b> e a <b>grade da tabuada</b> dele.
+                                </p>
                                 {profiles.map(p => {
                                     const needsHelp = p.session_stats
                                         ? Object.values(p.session_stats).some(
@@ -411,11 +418,12 @@ Use um dos seguintes skill_id: math_basic, math_logic, math_expressions, math_fr
                                         : false;
 
                                     return (
-                                        <div key={p.id} style={{
+                                        <div key={p.id} onClick={() => setSelectedStudent(p)} title="Ver trilha e tabuada" style={{
                                             background: needsHelp ? '#fff5f5' : '#fafafa',
                                             border: needsHelp ? '2px solid #fca5a5' : '1.5px solid #e2e8f0',
                                             borderRadius: 14, padding: '14px 18px',
-                                            display: 'flex', flexDirection: 'column', gap: 10
+                                            display: 'flex', flexDirection: 'column', gap: 10,
+                                            cursor: 'pointer'
                                         }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -574,6 +582,15 @@ Use um dos seguintes skill_id: math_basic, math_logic, math_expressions, math_fr
                     )}
                 </div>
             </div>
+
+            {selectedStudent && (
+                <StudentGraphModal
+                    studentName={selectedStudent.name}
+                    nodeMastery={(selectedStudent.node_mastery || {}) as any}
+                    tabuadaMastery={selectedStudent.tabuada_mastery || {}}
+                    onClose={() => setSelectedStudent(null)}
+                />
+            )}
         </div>
     );
 }

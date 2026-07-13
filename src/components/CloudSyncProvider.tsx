@@ -32,6 +32,7 @@ export function CloudSyncProvider() {
                 skills_mastery: profile.skillsMastery || [],
                 srs_reviews: profile.srsReviews || [],
                 node_mastery: profile.nodeMastery || {},
+                tabuada_mastery: profile.tabuadaMastery || {},
                 last_sync: new Date().toISOString()
             });
 
