@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useGame } from '../context/GameContext';
 import Dice from './Dice';
+import { CustomizableHero } from './CustomizableHero';
+import { getPlayerHeroStage } from '../core/theme/heroProgress';
 import styles from './Board.module.css';
 
 /* =========================================================
@@ -176,18 +178,26 @@ export default function Board() {
                 {/* ♟️ Heroes Pawns */}
                 {players.map(p => {
                     const pos = POINTS[p.currentPosition] || POINTS[0];
+                    const hasHero = !!p.hero;
                     return (
                         <div
                             key={p.id}
                             className={styles.heroPawn}
-                            style={{ 
-                                left: `${pos.x}px`, 
+                            style={{
+                                left: `${pos.x}px`,
                                 top: `${pos.y}px`,
-                                '--hero-accent': p.color 
+                                '--hero-accent': p.color
                             } as React.CSSProperties}
                         >
-                            <div className={styles.pawnBody}>
-                                {p.avatar || '🐰'}
+                            {/* Com herói: mostra o personagem (sem a caixinha colorida).
+                                Sem herói: mantém o peão-emoji clássico. */}
+                            <div
+                                className={styles.pawnBody}
+                                style={hasHero ? { background: 'transparent', border: 'none', boxShadow: 'none' } : undefined}
+                            >
+                                {hasHero
+                                    ? <CustomizableHero heroId={p.hero!} stage={getPlayerHeroStage(p)} config={p.heroConfig} size={92} />
+                                    : (p.avatar || '🐰')}
                                 <div className={styles.playerNameTag}>{p.name}</div>
                             </div>
                         </div>

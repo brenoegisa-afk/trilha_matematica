@@ -51,6 +51,42 @@ export default function Home() {
                     COMEÇAR JORNADA!
                 </button>
 
+                <button
+                    onClick={() => navigate('/heroes')}
+                    style={{
+                        marginTop: '12px',
+                        padding: '12px 26px',
+                        fontSize: '1.3rem',
+                        backgroundColor: 'var(--color-yellow)',
+                        color: 'var(--color-ink)',
+                        border: '3px solid var(--color-ink)',
+                        borderRadius: '12px',
+                        fontWeight: '900',
+                        cursor: 'pointer',
+                        boxShadow: '4px 4px 0px rgba(0,0,0,0.15)'
+                    }}
+                >
+                    ⚔️ ESCOLHER MEU HERÓI
+                </button>
+
+                <button
+                    onClick={() => navigate('/customizar')}
+                    style={{
+                        marginTop: '8px',
+                        padding: '8px 20px',
+                        fontSize: '1.05rem',
+                        backgroundColor: 'white',
+                        color: 'var(--color-ink)',
+                        border: '3px solid var(--color-ink)',
+                        borderRadius: '12px',
+                        fontWeight: '800',
+                        cursor: 'pointer',
+                        boxShadow: '4px 4px 0px rgba(0,0,0,0.15)'
+                    }}
+                >
+                    🎨 Personalizar
+                </button>
+
 
                 <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
                     <button

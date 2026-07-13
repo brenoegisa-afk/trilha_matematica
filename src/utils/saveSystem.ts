@@ -6,6 +6,9 @@ export interface SaveProfile {
     secretCode: string; // 4-digit code for remote sync
     stars: number;
     equippedAvatar: string;
+    equippedHero?: string; // id do herói bíblico escolhido (ver HeroesMap). Local por ora;
+                           // vira cross-device quando a coluna equipped_hero existir no Supabase.
+    heroConfig?: Record<string, string>; // customização livre (companheiro, aura). Local por ora.
     unlockedAvatars: string[];
     gamesPlayed: number;
     totalScore: number;
@@ -68,6 +71,8 @@ export function getOrCreateProfile(name: string, code: string = '0000'): SavePro
         secretCode: code,
         stars: 0,
         equippedAvatar: '',
+        equippedHero: '',
+        heroConfig: {},
         unlockedAvatars: [],
         gamesPlayed: 0,
         totalScore: 0,

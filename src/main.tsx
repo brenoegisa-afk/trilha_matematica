@@ -10,6 +10,8 @@ import Ranking from './pages/Ranking'
 import Login from './pages/Login'
 import TeacherDashboard from './pages/TeacherDashboard'
 import Hub from './pages/Hub'
+import HeroSelect from './pages/HeroSelect'
+import CharacterCustomizer from './pages/CharacterCustomizer'
 import Arena from './pages/Arena'
 import Tabuada from './pages/Tabuada'
 import Battle from './pages/Battle'
@@ -42,6 +44,8 @@ const router = createBrowserRouter([
       { path: '/login', element: <Login /> },
       { path: '/teacher/login', element: <Navigate to="/login" replace /> },
       { path: '/hub', element: <Hub /> },
+      { path: '/heroes', element: <HeroSelect /> },
+      { path: '/customizar', element: <CharacterCustomizer /> },
       { path: '/arena', element: <Arena /> },
       { path: '/tabuada', element: <Tabuada /> },
       { path: '/setup', element: <Setup /> },

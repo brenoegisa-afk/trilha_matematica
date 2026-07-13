@@ -30,6 +30,26 @@ const streakEngine = new StreakEngine();
 const achievementEngine = new AchievementEngine();
 const mascotEngine = new MascotEngine();
 
+const SELECTED_HERO_KEY = '@TrilhaCampeoes:SelectedHero';
+const HERO_CONFIG_KEY = '@TrilhaCampeoes:HeroConfig';
+
+function readSelectedHero(): string | null {
+    try {
+        return localStorage.getItem(SELECTED_HERO_KEY);
+    } catch {
+        return null;
+    }
+}
+
+function readHeroConfig(): Record<string, string> {
+    try {
+        const raw = localStorage.getItem(HERO_CONFIG_KEY);
+        return raw ? JSON.parse(raw) : {};
+    } catch {
+        return {};
+    }
+}
+
 const AVAILABLE_SUBJECTS: Subject[] = [
     { id: 'math', name: 'Matemática', icon: '🔢', description: 'Desafios de números e lógica' },
     { id: 'portuguese', name: 'Português', icon: '📚', description: 'Rimas, letras e histórias' },
@@ -56,6 +76,8 @@ interface GameStoreState {
     selectedGrade: string;
     currentSubjectId: string;
     availableSubjects: Subject[];
+    selectedHeroId: string | null; // herói escolhido na tela de identidade (HeroesMap)
+    selectedHeroConfig: Record<string, string>; // customização livre (companheiro, aura)
     
     // --- Game State (single source of truth) ---
     gameState: GameState;
@@ -82,6 +104,8 @@ interface GameStoreState {
     // --- Actions ---
     setGrade: (grade: string) => void;
     setSubject: (id: string) => void;
+    selectHero: (heroId: string) => void;
+    setHeroConfig: (config: Record<string, string>) => void;
     setCurrentUser: (user: User | null) => void;
     refreshPlayers: () => void;
     addPlayer: (name: string, color: string, code?: string, classId?: string) => SaveProfile;
@@ -533,6 +557,8 @@ export const useGameStore = create<GameStoreState>((set, get) => {
         selectedGrade: '1-2',
         currentSubjectId: 'math',
         availableSubjects: AVAILABLE_SUBJECTS,
+        selectedHeroId: readSelectedHero(),
+        selectedHeroConfig: readHeroConfig(),
         gameState: { ...EMPTY_GAME_STATE },
         currentPlayerIndex: 0,
         tiles: [],
@@ -552,6 +578,38 @@ export const useGameStore = create<GameStoreState>((set, get) => {
         setGrade: (grade) => set({ selectedGrade: grade }),
         setSubject: (id) => set({ currentSubjectId: id }),
         setCurrentUser: (user) => set({ currentUser: user }),
+
+        // Escolha do herói (camada de identidade). Persiste localmente e, se já há
+        // jogadores na fila, grava no perfil de cada um (equippedHero) + no Player.
+        selectHero: (heroId) => {
+            try {
+                localStorage.setItem(SELECTED_HERO_KEY, heroId);
+            } catch (e) {
+                console.warn('Não foi possível persistir o herói escolhido:', e);
+            }
+            const { players } = get();
+            players.forEach(p => updateProfile(p.id, { equippedHero: heroId }));
+            set({
+                selectedHeroId: heroId,
+                players: players.map(p => ({ ...p, hero: heroId }))
+            });
+        },
+
+        // Customização livre (companheiro, aura). Mesmo padrão: localStorage +
+        // perfil de cada jogador na fila + estado.
+        setHeroConfig: (config) => {
+            try {
+                localStorage.setItem(HERO_CONFIG_KEY, JSON.stringify(config));
+            } catch (e) {
+                console.warn('Não foi possível persistir a customização:', e);
+            }
+            const { players } = get();
+            players.forEach(p => updateProfile(p.id, { heroConfig: config }));
+            set({
+                selectedHeroConfig: config,
+                players: players.map(p => ({ ...p, heroConfig: config }))
+            });
+        },
         clearLevelUp: () => set({ levelUpData: null }),
         clearXpNotification: () => set({ xpNotification: null }),
         clearNodeUnlock: () => set({ nodeUnlockData: null }),
@@ -596,10 +654,12 @@ export const useGameStore = create<GameStoreState>((set, get) => {
             set((state) => ({
                 players: state.players.map((p: Player) => {
                     const profile = getOrCreateProfile(p.name, p.id ? undefined : '0000');
-                    return { 
-                        ...p, 
-                        avatar: profile.equippedAvatar, 
-                        mascot: profile.equippedMascot, 
+                    return {
+                        ...p,
+                        avatar: profile.equippedAvatar,
+                        hero: profile.equippedHero || get().selectedHeroId || undefined,
+                        heroConfig: profile.heroConfig || get().selectedHeroConfig || {},
+                        mascot: profile.equippedMascot,
                         streak: profile.streak || 0,
                         score: profile.totalScore,
                         level: profile.stars > 100 ? Math.floor(profile.stars / 100) + 1 : 1,
@@ -631,6 +691,8 @@ export const useGameStore = create<GameStoreState>((set, get) => {
             
             const newPlayer: Player = {
                 id: profile.id, name: profile.name, color, avatar: profile.equippedAvatar,
+                hero: profile.equippedHero || get().selectedHeroId || undefined,
+                heroConfig: profile.heroConfig || get().selectedHeroConfig || {},
                 mascot: profile.equippedMascot, streak: profile.streak || 1, class_id: profile.class_id || classId,
                 user_id: profile.user_id || currentUser?.id, currentPosition: 0, inventoryProtectionCount: 0,
                 score: 0, level: 1, xp: 0, achievements: [], hp: 100, maxHp: 100, mascots: [],

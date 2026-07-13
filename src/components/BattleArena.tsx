@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useGame } from '../context/GameContext';
+import { CustomizableHero } from './CustomizableHero';
+import { getPlayerHeroStage } from '../core/theme/heroProgress';
 import styles from './BattleArena.module.css';
 
 export default function BattleArena() {
@@ -76,7 +78,11 @@ export default function BattleArena() {
 
                     {/* PLAYER */}
                     <div className={styles.entity}>
-                        <div className={styles.playerIcon}>{player.avatar}</div>
+                        <div className={styles.playerIcon}>
+                            {player.hero
+                                ? <CustomizableHero heroId={player.hero} stage={getPlayerHeroStage(player)} config={player.heroConfig} size={120} />
+                                : player.avatar}
+                        </div>
                         <div className={styles.hpBarContainer}>
                             <div className={styles.hpBarLabel}>{player.name}</div>
                             <div className={styles.hpBar}>
