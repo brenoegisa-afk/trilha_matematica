@@ -4,6 +4,25 @@ import styles from './Home.module.css';
 import '../App.css';
 import { ParentGate } from '../components/ParentGate';
 
+// Pilares de valor (falam com o adulto: professor/pai).
+const PILLARS = [
+    {
+        icon: '🧠',
+        title: 'Aprende de verdade',
+        text: 'Currículo do 1º ao 5º ano (BNCC), tabuada e um mapa que respeita os pré-requisitos. O sistema detecta onde a criança trava.',
+    },
+    {
+        icon: '⚔️',
+        title: 'Herói que evolui',
+        text: 'A criança escolhe um herói da Bíblia e o vê ficar mais forte a cada habilidade dominada. Diversão de verdade, não estrelinha.',
+    },
+    {
+        icon: '📊',
+        title: 'Painel do Professor',
+        text: 'Crie turmas, gere os PINs e acompanhe cada aluno com relatório pedagógico e diagnóstico automático.',
+    },
+];
+
 export default function Home() {
     const navigate = useNavigate();
     const [showGateFor, setShowGateFor] = useState<'teacher' | null>(null);
@@ -14,8 +33,20 @@ export default function Home() {
         setShowGateFor(null);
     };
 
-    // A mix of symbols from Math, Portuguese, and Science for the dynamic background
     const symbols = ['+', '-', '×', '÷', '=', 'A', 'B', 'C', '!', '?', '📖', '✨', '🪐', '🔬', '🌱'];
+
+    // Estilo base dos botões secundários (chunky).
+    const chip = (bg: string, color: string): React.CSSProperties => ({
+        padding: '10px 20px',
+        fontSize: '1.1rem',
+        backgroundColor: bg,
+        color,
+        border: '3px solid var(--color-ink)',
+        borderRadius: '12px',
+        fontWeight: 800,
+        cursor: 'pointer',
+        boxShadow: '4px 4px 0px rgba(0,0,0,0.15)',
+    });
 
     return (
         <div className={styles.homeContainer}>
@@ -30,7 +61,7 @@ export default function Home() {
                             animationDuration: `${12 + Math.random() * 25}s`,
                             animationDelay: `-${Math.random() * 20}s`,
                             fontSize: `${2 + Math.random() * 4}rem`,
-                            opacity: 0.1 + Math.random() * 0.3
+                            opacity: 0.1 + Math.random() * 0.3,
                         }}
                     >
                         {symbols[Math.floor(Math.random() * symbols.length)]}
@@ -38,118 +69,60 @@ export default function Home() {
                 ))}
             </div>
 
-            {/* Hero Section */}
+            {/* Hero Section — valor primeiro, mas com JOGAR grande pra criança */}
             <div className={styles.heroSection}>
                 <div className={styles.titleContainer}>
                     <h1 className={styles.mainTitle}>Trilha dos Campeões</h1>
                 </div>
 
-                <button
-                    className={styles.playButton}
-                    onClick={() => navigate('/hub')}
-                >
-                    COMEÇAR JORNADA!
-                </button>
+                <p className={styles.subTitle}>Matemática do 1º ao 5º ano que vira videogame 🎮</p>
 
-                <button
-                    onClick={() => navigate('/heroes')}
+                <img
+                    src="/heroes/ester-5.png"
+                    alt="Ester, uma das heroínas da Trilha"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
                     style={{
-                        marginTop: '12px',
-                        padding: '12px 26px',
-                        fontSize: '1.3rem',
-                        backgroundColor: 'var(--color-yellow)',
-                        color: 'var(--color-ink)',
-                        border: '3px solid var(--color-ink)',
-                        borderRadius: '12px',
-                        fontWeight: '900',
-                        cursor: 'pointer',
-                        boxShadow: '4px 4px 0px rgba(0,0,0,0.15)'
+                        height: 230, width: 'auto', marginTop: 24,
+                        filter: 'drop-shadow(0 10px 12px rgba(0,0,0,0.25))',
                     }}
-                >
-                    ⚔️ ESCOLHER MEU HERÓI
+                />
+
+                <p style={{
+                    maxWidth: 580, textAlign: 'center', fontWeight: 700, fontSize: '1.15rem',
+                    color: 'var(--color-ink)', marginTop: 14, background: 'rgba(255,255,255,0.85)',
+                    padding: '10px 18px', borderRadius: 14, lineHeight: 1.4,
+                }}>
+                    Heróis da Bíblia que crescem conforme a criança domina a matemática.
+                    Coragem, fluência e diversão de verdade — para casa e escola.
+                </p>
+
+                <button className={styles.playButton} style={{ marginTop: 28 }} onClick={() => navigate('/hub')}>
+                    ▶ JOGAR
                 </button>
 
-                <button
-                    onClick={() => navigate('/customizar')}
-                    style={{
-                        marginTop: '8px',
-                        padding: '8px 20px',
-                        fontSize: '1.05rem',
-                        backgroundColor: 'white',
-                        color: 'var(--color-ink)',
-                        border: '3px solid var(--color-ink)',
-                        borderRadius: '12px',
-                        fontWeight: '800',
-                        cursor: 'pointer',
-                        boxShadow: '4px 4px 0px rgba(0,0,0,0.15)'
-                    }}
-                >
-                    🎨 Personalizar
-                </button>
-
-
-                <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
-                    <button
-                        className={styles.rankingButton}
-                        onClick={() => navigate('/ranking')}
-                        style={{
-                            padding: '10px 20px',
-                            fontSize: '1.2rem',
-                            backgroundColor: 'white',
-                            color: 'var(--color-ink)',
-                            border: '3px solid var(--color-ink)',
-                            borderRadius: '12px',
-                            fontWeight: '800',
-                            cursor: 'pointer',
-                            boxShadow: '4px 4px 0px rgba(0,0,0,0.1)'
-                        }}
-                    >
-                        🏆 RANKING
+                {/* Atalhos da criança */}
+                <div style={{ display: 'flex', gap: 10, marginTop: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
+                    <button style={chip('var(--color-yellow)', 'var(--color-ink)')} onClick={() => navigate('/heroes')}>
+                        ⚔️ Meu Herói
                     </button>
-                    <button
-                        className={styles.teacherButton}
-                        onClick={() => setShowGateFor('teacher')}
-                        style={{
-                            padding: '10px 20px',
-                            fontSize: '1.2rem',
-                            backgroundColor: 'var(--color-blue)',
-                            color: 'white',
-                            border: '3px solid var(--color-ink)',
-                            borderRadius: '12px',
-                            fontWeight: '800',
-                            cursor: 'pointer',
-                            boxShadow: '4px 4px 0px rgba(0,0,0,0.1)'
-                        }}
-                    >
-                        👨‍🏫 PROFESSOR
+                    <button style={chip('white', 'var(--color-ink)')} onClick={() => navigate('/customizar')}>
+                        🎨 Personalizar
                     </button>
-                    <button
-                        className={styles.parentButton}
-                        onClick={() => setComingSoon(true)}
-                        title="Em breve"
-                        style={{
-                            padding: '10px 20px',
-                            fontSize: '1.2rem',
-                            backgroundColor: 'white',
-                            color: 'var(--color-ink)',
-                            border: '3px solid var(--color-ink)',
-                            borderRadius: '12px',
-                            fontWeight: '800',
-                            cursor: 'pointer',
-                            boxShadow: '4px 4px 0px rgba(0,0,0,0.1)',
-                            opacity: 0.7
-                        }}
-                    >
-                        👨‍👩‍👧 PAIS <span style={{ fontSize: '0.7rem', verticalAlign: 'middle' }}>(em breve)</span>
+                </div>
+
+                {/* Entrada de adulto */}
+                <div style={{ display: 'flex', gap: 10, marginTop: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
+                    <button style={chip('var(--color-blue)', 'white')} onClick={() => setShowGateFor('teacher')}>
+                        👨‍🏫 Sou Professor
+                    </button>
+                    <button style={{ ...chip('white', 'var(--color-ink)'), opacity: 0.7 }} title="Em breve" onClick={() => setComingSoon(true)}>
+                        👨‍👩‍👧 Pais <span style={{ fontSize: '0.7rem' }}>(em breve)</span>
                     </button>
                 </div>
             </div>
 
             {showGateFor && (
-                <ParentGate
-                    onSuccess={handleGateSuccess}
-                    onCancel={() => setShowGateFor(null)}
-                />
+                <ParentGate onSuccess={handleGateSuccess} onCancel={() => setShowGateFor(null)} />
             )}
 
             {comingSoon && (
@@ -157,15 +130,15 @@ export default function Home() {
                     onClick={() => setComingSoon(false)}
                     style={{
                         position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5000, padding: '20px'
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5000, padding: '20px',
                     }}
                 >
                     <div
-                        onClick={e => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
                         style={{
                             background: 'white', color: 'var(--color-ink)', borderRadius: '16px',
                             border: '4px solid var(--color-ink)', padding: '2rem', maxWidth: '380px',
-                            textAlign: 'center', boxShadow: '0 10px 0 rgba(0,0,0,0.2)'
+                            textAlign: 'center', boxShadow: '0 10px 0 rgba(0,0,0,0.2)',
                         }}
                     >
                         <div style={{ fontSize: '3rem', marginBottom: '10px' }}>👨‍👩‍👧</div>
@@ -179,7 +152,7 @@ export default function Home() {
                             style={{
                                 padding: '12px 28px', fontSize: '1.1rem', fontWeight: 800,
                                 background: 'var(--color-blue)', color: 'white', border: '3px solid var(--color-ink)',
-                                borderRadius: '12px', cursor: 'pointer', boxShadow: '0 4px 0 rgba(0,0,0,0.2)'
+                                borderRadius: '12px', cursor: 'pointer', boxShadow: '0 4px 0 rgba(0,0,0,0.2)',
                             }}
                         >
                             Entendi!
@@ -188,70 +161,39 @@ export default function Home() {
                 </div>
             )}
 
-
-            {/* Interactive Rules Section */}
+            {/* Pilares de valor (no lugar do antigo "Como Jogar") */}
             <div className={styles.rulesSection}>
-                <h3 className={styles.rulesHeader}>Como Jogar?</h3>
-                <p className={styles.rulesSub}>Role o dado, ande pelo tabuleiro e resolva os desafios para ganhar pontos e avançar! Conheça as casas marcadas:</p>
+                <h3 className={styles.rulesHeader}>Por que a Trilha?</h3>
+                <p className={styles.rulesSub}>
+                    Um videogame que ensina de verdade — e dá ao professor o raio-x de cada aluno.
+                </p>
 
                 <div className={styles.cardsContainer}>
-                    {/* Green Card */}
-                    <div className={styles.flipCard}>
-                        <div className={`${styles.flipCardInner} ${styles.greenCard}`}>
-                            <div className={styles.flipCardFront}>
-                                <div className={styles.cardIcon}>✨</div>
-                                <h4>Acerto Seguro</h4>
-                            </div>
-                            <div className={styles.flipCardBack}>
-                                <p><strong>Acertando:</strong> Você avança 1 casa extra e ganha mais 50 pontos!</p>
-                                <p className={styles.cardHint}>Caminho tranquilo.</p>
-                            </div>
+                    {PILLARS.map((p) => (
+                        <div
+                            key={p.title}
+                            style={{
+                                background: 'white', border: '4px solid var(--color-ink)', borderRadius: 20,
+                                padding: '28px 22px', boxShadow: '8px 8px 0 rgba(0,0,0,0.15)', textAlign: 'center',
+                            }}
+                        >
+                            <div style={{ fontSize: '3.5rem', marginBottom: 12 }}>{p.icon}</div>
+                            <h4 style={{ fontSize: '1.5rem', fontWeight: 900, margin: '0 0 10px', textTransform: 'uppercase' }}>{p.title}</h4>
+                            <p style={{ fontSize: '1.05rem', fontWeight: 600, lineHeight: 1.4, color: '#444', margin: 0 }}>{p.text}</p>
                         </div>
-                    </div>
-
-                    {/* Red Card */}
-                    <div className={styles.flipCard}>
-                        <div className={`${styles.flipCardInner} ${styles.redCard}`}>
-                            <div className={styles.flipCardFront}>
-                                <div className={styles.cardIcon}>🔥</div>
-                                <h4>Desafio Épico</h4>
-                            </div>
-                            <div className={styles.flipCardBack}>
-                                <p><strong>Acertou:</strong> Avance +2 casas e ganhe 100 pontos!</p>
-                                <p><strong>Errou:</strong> Volte 1 ou 2 casas (dependendo da sua armadura)!</p>
-                                <p className={styles.cardHint}>Risco e Recompensa.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Yellow Card */}
-                    <div className={styles.flipCard}>
-                        <div className={`${styles.flipCardInner} ${styles.yellowCard}`}>
-                            <div className={styles.flipCardFront}>
-                                <div className={styles.cardIcon}>🧠</div>
-                                <h4>Enigma Rápido</h4>
-                            </div>
-                            <div className={styles.flipCardBack}>
-                                <p>Perguntas que vão testar o seu raciocínio lógico e conhecimentos gerais.</p>
-                                <p className={styles.cardHint}>Surpresas garantidas.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Blue Card */}
-                    <div className={styles.flipCard}>
-                        <div className={`${styles.flipCardInner} ${styles.blueCard}`}>
-                            <div className={styles.flipCardFront}>
-                                <div className={styles.cardIcon}>🛡️</div>
-                                <h4>Item Mágico</h4>
-                            </div>
-                            <div className={styles.flipCardBack}>
-                                <p>Ganhe um <strong>Escudo Protetor</strong> valendo 20 pontos.</p>
-                                <span>Use-o automaticamente para se salvar de uma penalidade Vermelha!</span>
-                            </div>
-                        </div>
-                    </div>
+                    ))}
                 </div>
+
+                <button
+                    onClick={() => setShowGateFor('teacher')}
+                    style={{
+                        marginTop: 40, padding: '18px 40px', fontSize: '1.4rem', fontWeight: 900,
+                        background: 'var(--color-blue)', color: 'white', border: '4px solid var(--color-ink)',
+                        borderRadius: 20, cursor: 'pointer', boxShadow: '0 8px 0 var(--color-ink)',
+                    }}
+                >
+                    👩‍🏫 Crie sua turma grátis
+                </button>
             </div>
         </div>
     );
