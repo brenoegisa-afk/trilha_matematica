@@ -85,7 +85,7 @@ export default function Home() {
                         src="/heroes/davi-5.png"
                         alt="Davi, um dos heróis da Trilha"
                         onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                        style={{ height: 210, width: 'auto', filter: 'drop-shadow(0 10px 12px rgba(0,0,0,0.25))' }}
+                        style={{ height: 230, width: 'auto', filter: 'drop-shadow(0 10px 12px rgba(0,0,0,0.25))' }}
                     />
                     <img
                         src="/heroes/ester-5.png"
