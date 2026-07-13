@@ -77,15 +77,23 @@ export default function Home() {
 
                 <p className={styles.subTitle}>Matemática do 1º ao 5º ano que vira videogame 🎮</p>
 
-                <img
-                    src="/heroes/ester-5.png"
-                    alt="Ester, uma das heroínas da Trilha"
-                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                    style={{
-                        height: 230, width: 'auto', marginTop: 24,
-                        filter: 'drop-shadow(0 10px 12px rgba(0,0,0,0.25))',
-                    }}
-                />
+                <div style={{
+                    display: 'flex', gap: 12, marginTop: 24, alignItems: 'flex-end',
+                    justifyContent: 'center', flexWrap: 'wrap',
+                }}>
+                    <img
+                        src="/heroes/davi-5.png"
+                        alt="Davi, um dos heróis da Trilha"
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                        style={{ height: 210, width: 'auto', filter: 'drop-shadow(0 10px 12px rgba(0,0,0,0.25))' }}
+                    />
+                    <img
+                        src="/heroes/ester-5.png"
+                        alt="Ester, uma das heroínas da Trilha"
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                        style={{ height: 230, width: 'auto', filter: 'drop-shadow(0 10px 12px rgba(0,0,0,0.25))' }}
+                    />
+                </div>
 
                 <p style={{
                     maxWidth: 580, textAlign: 'center', fontWeight: 700, fontSize: '1.15rem',
