@@ -19,7 +19,8 @@ export default function ParentDashboard() {
         setLoading(true);
         try {
             const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
+            // Sessão anônima (aluno) NÃO é pai — exige conta de verdade.
+            if (!user || user.is_anonymous) {
                 navigate('/login');
                 return;
             }

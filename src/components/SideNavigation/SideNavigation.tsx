@@ -15,14 +15,14 @@ export default function SideNavigation({ isOpen, onClose }: SideNavigationProps)
     // ela é recriada automaticamente após o signOut. Só conta conta de verdade.
     const isRealUser = !!currentUser && !currentUser.is_anonymous;
 
+    // Menu do JOGO (criança). Área de adulto (professor/pais) fica na Home, atrás
+    // da trava — não deve aparecer aqui pra criança tocar.
     const menuItems = [
         { id: 'home', label: 'Início', icon: '🏠', path: '/' },
         { id: 'game', label: 'Jogar', icon: '🎮', path: '/setup' },
         { id: 'inventory', label: 'Mochila', icon: '🎒', path: '/inventory' },
         { id: 'ranking', label: 'Ranking', icon: '🏆', path: '/ranking' },
         { id: 'shop', label: 'Lojinha', icon: '🛒', path: '/shop' },
-        { id: 'parent', label: 'Pais', icon: '👪', path: '/parent' },
-        { id: 'admin', label: 'Admin', icon: '⚙️', path: '/admin/import' },
     ];
 
     const handleNavigation = (path: string) => {

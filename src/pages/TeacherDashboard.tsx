@@ -34,7 +34,8 @@ export default function TeacherDashboard() {
     useEffect(() => {
         const checkUser = async () => {
             const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
+            // Sessão anônima (aluno) NÃO é professor — exige conta de verdade.
+            if (!session || session.user.is_anonymous) {
                 navigate('/login');
                 return;
             }
