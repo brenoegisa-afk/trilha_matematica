@@ -98,9 +98,20 @@ export function getOrCreateProfile(name: string, code: string = '0000'): SavePro
 
 import { useSyncStore } from '../store/useSyncStore';
 
+// A coluna profiles.id é UUID. Perfis legados com id antigo (timestamp) não podem
+// ir pro banco — geram erro 22P02 e ficam em loop de retry. Este guard os barra.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export function isValidUuid(id: string | undefined | null): boolean {
+    return !!id && UUID_RE.test(id);
+}
+
 // The cloud sync is now handled by React Query (CloudSyncProvider.tsx)
 // and queued reliably via Zustand to avoid race conditions and dataloss.
 export async function syncProfileToCloud(profile: SaveProfile) {
+    if (!isValidUuid(profile.id)) {
+        console.warn('Sync ignorado: perfil com id inválido (não-UUID):', profile.id);
+        return;
+    }
     useSyncStore.getState().addToQueue(profile);
 }
 

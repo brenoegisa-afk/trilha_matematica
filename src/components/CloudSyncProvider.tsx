@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { supabase } from '../utils/supabaseClient';
 import { useSyncStore } from '../store/useSyncStore';
+import { isValidUuid } from '../utils/saveSystem';
 import type { SaveProfile } from '../utils/saveSystem';
 
 export function CloudSyncProvider() {
@@ -9,6 +10,14 @@ export function CloudSyncProvider() {
 
     const { mutate, isPending } = useMutation({
         mutationFn: async (profile: SaveProfile) => {
+            // Perfil legado com id não-UUID: não pode ir pro banco (erro 22P02).
+            // Descarta da fila (retornando o id, onSuccess remove) em vez de
+            // ficar em loop infinito de retry.
+            if (!isValidUuid(profile.id)) {
+                console.warn('Sync descartado (id não-UUID):', profile.id);
+                return profile.id;
+            }
+
             const { data: { session } } = await supabase.auth.getSession();
             const currentUserId = session?.user?.id;
             
