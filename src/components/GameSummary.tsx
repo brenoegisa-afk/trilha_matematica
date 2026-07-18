@@ -39,6 +39,7 @@ const SKILL_NAMES: Record<string, string> = {
     'math_basic': 'Operações Básicas',
     'math_expressions': 'Expressões Numéricas',
     'math_logic': 'Raciocínio Lógico',
+    'math_fractions': 'Frações',
     'port_grammar': 'Gramática e Escrita',
     'sci_nature': 'Ciências e Natureza'
 };

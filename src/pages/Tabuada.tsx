@@ -9,6 +9,7 @@ import {
     masteredCount, type TabuadaMap
 } from '../core/learning/TabuadaEngine';
 import styles from './Tabuada.module.css';
+import { LearningAttemptService } from '../core/services/LearningAttemptService';
 
 export default function Tabuada() {
     const navigate = useNavigate();
@@ -24,6 +25,7 @@ export default function Tabuada() {
     const [toast, setToast] = useState<string | null>(null);
     const shownAt = useRef(Date.now());
     const locked = useRef(false);
+    const learningSessionId = useRef(crypto.randomUUID());
 
     // Sem aluno logado → volta ao setup (login por turma/PIN).
     useEffect(() => {
@@ -52,6 +54,17 @@ export default function Tabuada() {
         locked.current = true;
 
         const isCorrect = parseInt(input, 10) === current.a * current.b;
+        if (player) {
+            void LearningAttemptService.record({
+                attemptId: crypto.randomUUID(), sessionId: learningSessionId.current,
+                studentId: player.id, classId: player.class_id, gameMode: 'tabuada',
+                factId: factKey(current.a, current.b), questionRef: factKey(current.a, current.b),
+                generatorVersion: 'tabuada-v1', itemFormat: 'multiple_choice', selectedResponse: input,
+                isCorrect, responseLatencyMs: Date.now() - shownAt.current,
+                attemptNumber: (mastery[factKey(current.a, current.b)]?.attempts || 0) + 1,
+                hintCount: 0, supportLevel: 'none', occurredAt: new Date().toISOString()
+            });
+        }
         const fast = Date.now() - shownAt.current < FAST_MS;
         const { mastery: nextMastery, justMastered } = registerAnswer(
             mastery, current.a, current.b, isCorrect, fast

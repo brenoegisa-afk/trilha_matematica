@@ -66,17 +66,18 @@ describe('CurriculumEngine.pickNode', () => {
         expect(node.id).toBe('add_two_digits');
     });
 
-    it('recua de verdade quando o pré-requisito ainda não está dominado', () => {
-        // Cenário só alcançável via fallback de série (grade bypassa pré-requisitos,
-        // ver teste "BUG CONHECIDO" abaixo): seq_mult (prereq: seq_pattern, mult_tables)
-        // entrou em prática sem ter os dois pré-requisitos batidos. seq_pattern está OK,
-        // mult_tables nunca foi treinado (0 pontos) — é ele que deve ser recomendado.
+    it('não seleciona um nó legado em progresso quando ele tem pré-requisito pendente', () => {
+        // Um perfil pode ter recebido seq_mult antes da correção do fallback por série.
+        // O motor deve voltar a uma fronteira elegível, e não continuar o nó inválido.
         const player = makePlayer({
             seq_pattern: mastered('seq_pattern'),
             seq_mult: { nodeId: 'seq_mult', points: 50, attempts: 6, successes: 1, mastered: false }
         });
         const node = CurriculumEngine.pickNode(player, 'math', undefined, '3-4');
-        expect(node.id).toBe('mult_tables');
+        expect(node.id).not.toBe('seq_mult');
+        expect(node.prerequisites.every(prerequisite =>
+            CurriculumEngine.getMasteredNodes(player).has(prerequisite)
+        )).toBe(true);
     });
 
     it('forcedSkillId filtra a fronteira quando há opções compatíveis', () => {
@@ -93,17 +94,46 @@ describe('CurriculumEngine.pickNode', () => {
         expect(node.skillId).not.toBe('math_expressions');
     });
 
-    it('BUG CONHECIDO: série sem nó correspondente na fronteira pula pré-requisitos', () => {
-        // Aluno começando do zero, mas com a série "5" selecionada: todos os nós
-        // de grade "5" são depth 5, então o motor entrega um nó de profundidade
-        // máxima sem o aluno ter passado por nada antes. Documentado no ROADMAP.md
-        // (§2 "Outros gaps") como causa raiz do salto de estágio do herói.
+    it('não pula pré-requisitos quando a série não possui nó na fronteira', () => {
+        // Aluno começando do zero com a série "5": nenhum nó do 5º ano está
+        // desbloqueado. A seleção deve manter a fronteira curricular elegível.
         const player = makePlayer();
         const node = CurriculumEngine.pickNode(player, 'math', undefined, '5');
-        expect(node.grade).toBe('5');
-        expect(node.depth).toBe(5);
-        expect(node.prerequisites.length).toBeGreaterThan(0); // pré-requisitos existem...
-        // ...mas nenhum foi dominado — a seleção ignorou isso de propósito (fallback por série).
+        expect(node.grade).not.toBe('5');
+        expect(node.prerequisites).toEqual([]);
+    });
+
+    it('prioriza a série escolhida quando ela já possui nó elegível', () => {
+        const player = makePlayer({ mult_intro: mastered('mult_intro') });
+        const node = CurriculumEngine.pickNode(player, 'math', undefined, '3-4');
+        expect(node.grade).toBe('3-4');
+    });
+
+    it('após posicionamento diagnóstico, não retorna a um ramo elementar em progresso', () => {
+        const placement = (nodeId: string): NodeMastery => ({
+            nodeId, points: 0, attempts: 0, successes: 0, mastered: false, placementPassed: true
+        });
+        const player = makePlayer({
+            add_simple: placement('add_simple'),
+            add_two_digits: placement('add_two_digits'),
+            add_regroup: placement('add_regroup'),
+            sub_simple: { nodeId: 'sub_simple', points: 120, attempts: 2, successes: 2, mastered: false }
+        });
+        const node = CurriculumEngine.pickNode(player, 'math', 'math_basic', '5');
+        expect(node.id).toBe('add_three_digit');
+    });
+});
+
+describe('CurriculumEngine.getLearningState', () => {
+    it('deriva os estados pedagógicos sem migrar perfis existentes', () => {
+        expect(CurriculumEngine.getLearningState(undefined)).toBe('discovering');
+        expect(CurriculumEngine.getLearningState({ nodeId: 'add_simple', points: 60, attempts: 1, successes: 1, mastered: false })).toBe('practicing');
+        expect(CurriculumEngine.getLearningState({ nodeId: 'add_simple', points: 180, attempts: 3, successes: 3, mastered: false })).toBe('consolidating');
+        expect(CurriculumEngine.getLearningState({ nodeId: 'add_simple', points: 250, attempts: 5, successes: 5, mastered: true })).toBe('mastered');
+    });
+
+    it('prioriza revisão quando a data já venceu', () => {
+        expect(CurriculumEngine.getLearningState({ nodeId: 'add_simple', points: 250, attempts: 5, successes: 5, mastered: true, reviewDueAt: '2020-01-01T00:00:00.000Z' })).toBe('reviewing');
     });
 });
 
@@ -144,6 +174,8 @@ describe('CurriculumEngine.updateNodeMastery', () => {
             result = CurriculumEngine.updateNodeMastery(player, 'add_simple', true);
             player = makePlayer(result.nodeMastery);
         }
+        player.nodeMastery!.add_simple.reviewDueAt = '2020-01-01T00:00:00.000Z';
+        result = CurriculumEngine.updateNodeMastery(player, 'add_simple', true);
         expect(result!.promoted).toBe(true);
         expect(result!.masteredNode?.id).toBe('add_simple');
         expect(result!.nodeMastery.add_simple.mastered).toBe(true);
@@ -160,7 +192,7 @@ describe('CurriculumEngine.updateNodeMastery', () => {
 
     it('ao promover, reporta um vizinho desbloqueado quando existe', () => {
         const player = makePlayer({
-            add_simple: { nodeId: 'add_simple', points: 240, attempts: 4, successes: 4, mastered: false }
+            add_simple: { nodeId: 'add_simple', points: 240, attempts: 5, successes: 5, mastered: false, reviewDueAt: '2020-01-01T00:00:00.000Z' }
         });
         const result = CurriculumEngine.updateNodeMastery(player, 'add_simple', true);
         expect(result.promoted).toBe(true);

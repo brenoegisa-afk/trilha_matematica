@@ -8,12 +8,14 @@
  * "O currículo é um grafo, não uma lista — modele as dependências."
  */
 
+import type { Grade } from './Grade';
+
 export interface CurriculumNode {
     id: string;                // Ex: "add_simple"
     name: string;              // Ex: "Soma até 10"
     skillId: string;           // Skill pai (ex: "math_basic")
     subjectId: string;         // Ex: "math"
-    grade: string;             // Série alvo: "1-2", "3-4", "5"
+    grade: string;             // Pool legado: "1-2", "3-4", "5" (ver getNodeGrade)
     bnccCode: string;          // Código BNCC oficial
     depth: number;             // 1 = mais fácil → 5 = mais difícil
     prerequisites: string[];   // IDs dos nós que devem estar dominados
@@ -623,6 +625,15 @@ const scienceNodes: CurriculumNode[] = [
 const ALL_NODES: CurriculumNode[] = [...mathNodes, ...portugueseNodes, ...scienceNodes];
 
 export class CurriculumGraph {
+    /**
+     * Converte o agrupamento legado do grafo para a série individual atual.
+     * Enquanto os pools ainda são agrupados, a profundidade já distingue os
+     * anos: 1→1º, 2→2º, 3→3º, 4→4º e 5→5º.
+     */
+    static getNodeGrade(node: CurriculumNode): Grade {
+        return String(Math.min(5, Math.max(1, node.depth))) as Grade;
+    }
+
     /**
      * Retorna todos os nós do grafo.
      */

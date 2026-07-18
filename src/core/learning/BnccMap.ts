@@ -5,6 +5,8 @@
  * Referência: http://basenacionalcomum.mec.gov.br/
  */
 
+import { getLegacyContentGrade } from './Grade';
+
 interface BnccEntry {
     code: string;        // Ex: EF01MA06
     description: string; // Descrição da habilidade oficial
@@ -123,7 +125,7 @@ export class BnccMap {
     static getHabilidade(skillId: string, grade: string): BnccEntry | null {
         const skillMap = bnccMapping[skillId];
         if (!skillMap) return null;
-        return skillMap[grade] || null;
+        return skillMap[getLegacyContentGrade(grade)] || null;
     }
 
     /**

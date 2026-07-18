@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
+import { getLegacyContentGrade } from '../core/learning/Grade';
+import { SubjectService } from '../core/game/SubjectService';
+import { CurriculumEngine } from '../core/learning/CurriculumEngine';
+import { updateProfile } from '../utils/saveSystem';
+import type { Question } from '../core/types';
 import styles from './Battle.module.css';
 import { triggerConfetti } from '../utils/confetti';
 import questionsData from '../data/questions.json';
@@ -54,9 +59,10 @@ export default function Battle() {
         streak: 0
     });
 
-    const [currentQuestion, setCurrentQuestion] = useState<{ question: string, options: string[], answer: string } | null>(null);
+    const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
     const [feedback, setFeedback] = useState<string | null>(null);
     const [isProcessingTerm, setIsProcessingTerm] = useState(false);
+    const subjectService = new SubjectService();
 
     // Sound Helper
     const playSound = (type: 'hit' | 'damage' | 'victory') => {
@@ -111,6 +117,10 @@ export default function Battle() {
     }, []);
 
     const loadNextQuestion = async () => {
+        if (currentSubjectId === 'math' && players[0]) {
+            setCurrentQuestion(subjectService.getQuestion('math', selectedGrade, 'Red', players[0]));
+            return;
+        }
         // Try Custom DB Questions first
         if (player.class_id) {
             try {
@@ -136,7 +146,8 @@ export default function Battle() {
 
         // Fallback to local questions
         const subjectPool = (questionsData.subjects as any)[currentSubjectId || 'math'];
-        let gradePool = subjectPool?.grades[selectedGrade] || subjectPool?.grades['1-2'];
+        const legacyGrade = getLegacyContentGrade(selectedGrade);
+        let gradePool = subjectPool?.grades[legacyGrade] || subjectPool?.grades['1-2'];
 
         if (!gradePool) return;
 
@@ -159,6 +170,11 @@ export default function Battle() {
         setIsProcessingTerm(true);
 
         const isCorrect = selectedAns === currentQuestion.answer;
+        if (currentQuestion.nodeId && players[0]) {
+            const result = CurriculumEngine.updateNodeMastery(players[0], currentQuestion.nodeId, isCorrect, isCorrect ? undefined : selectedAns);
+            players[0].nodeMastery = result.nodeMastery;
+            updateProfile(players[0].id, { nodeMastery: result.nodeMastery });
+        }
 
         // Analyze question type for elemental skills
         const isMultiplication = currentQuestion.question.includes('x') || currentQuestion.question.includes('vezes');

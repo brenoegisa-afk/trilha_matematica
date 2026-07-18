@@ -89,6 +89,7 @@ function ChildCard({ child, insights }: { child: Player, insights: DiagnosticIns
         'math_basic': 'Op. Básicas',
         'math_expressions': 'Expressões',
         'math_logic': 'Raciocínio Lógico',
+        'math_fractions': 'Frações',
         'port_grammar': 'Gramática',
         'sci_nature': 'Ciências'
     };

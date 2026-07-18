@@ -62,4 +62,21 @@ describe('MathEngine.generateFromNode — anti-repetição', () => {
         expect(q.question).toBeTruthy();
         expect(q.nodeId).toBe('add_two_digits');
     });
+
+    it('atribui uma referência diferente para itens diferentes do mesmo nó', () => {
+        const first = MathEngine.generateFromNode(node);
+        let different: typeof first | undefined;
+
+        for (let i = 0; i < 30; i++) {
+            const next = MathEngine.generateFromNode(node, [first.question]);
+            if (next.question !== first.question) {
+                different = next;
+                break;
+            }
+        }
+
+        expect(first.questionRef).toMatch(/^add_two_digits:/);
+        expect(different?.questionRef).toBeTruthy();
+        expect(different?.questionRef).not.toBe(first.questionRef);
+    });
 });

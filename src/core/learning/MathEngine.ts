@@ -8,6 +8,7 @@
 
 import type { Question, Player } from '../types';
 import type { CurriculumNode } from './CurriculumGraph';
+import { getLegacyContentGrade } from './Grade';
 
 type NodeGenerator = (node: CurriculumNode) => Question;
 
@@ -374,6 +375,18 @@ function generateFallback(node: CurriculumNode): Question {
 // ═══════════════════════════════════════════════════════════
 
 export class MathEngine {
+    private static buildQuestionRef(nodeId: string, question: Pick<Question, 'question' | 'answer'>): string {
+        // Determinístico e sem dados da criança: permite distinguir, no histórico,
+        // "2 + 3" de "4 + 5" mesmo quando ambos pertencem ao mesmo nó.
+        const value = `${nodeId}|${question.question}|${question.answer}`;
+        let hash = 2166136261;
+        for (let index = 0; index < value.length; index++) {
+            hash ^= value.charCodeAt(index);
+            hash = Math.imul(hash, 16777619);
+        }
+        return `${nodeId}:${(hash >>> 0).toString(36)}`;
+    }
+
     /**
      * Gera uma questão baseada no nó curricular ativo do aluno.
      * Esta é a nova API principal — usa o grafo de progressão.
@@ -395,7 +408,7 @@ export class MathEngine {
             attempt++;
         } while (avoid.includes(q.question) && attempt < MAX_ATTEMPTS);
         // Carimba o nó de origem para que o loop de jogo saiba qual maestria atualizar.
-        return { ...q, nodeId: node.id };
+        return { ...q, nodeId: node.id, questionRef: this.buildQuestionRef(node.id, q) };
     }
 
     /**
@@ -405,10 +418,11 @@ export class MathEngine {
      */
     static generate(grade: string, tileType: string, player?: Player, forcedSkillId?: string): Question {
         const randomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
+        const legacyGrade = getLegacyContentGrade(grade);
 
         let maxNumber = 10;
-        if (grade === '3-4') maxNumber = 50;
-        if (grade === '5') maxNumber = 100;
+        if (legacyGrade === '3-4') maxNumber = 50;
+        if (legacyGrade === '5') maxNumber = 100;
 
         let potentialSkillId = forcedSkillId || 'math_basic';
         if (!forcedSkillId && tileType === 'Yellow') potentialSkillId = 'math_logic';
@@ -432,7 +446,7 @@ export class MathEngine {
             questionText = `Qual é o próximo número da sequência: ${seq.join(', ')}?`;
         } else if (potentialSkillId === 'math_expressions') {
             skillId = 'math_expressions';
-            if (grade === '1-2') {
+            if (legacyGrade === '1-2') {
                 const a = randomInt(5, 15), b = randomInt(5, 15);
                 answer = a + b;
                 questionText = `Desafio Rápido: Somando ${a} + ${b} dá quanto?`;

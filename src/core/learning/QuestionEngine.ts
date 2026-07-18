@@ -1,4 +1,5 @@
 import type { Question, Player, TileType } from '../types';
+import { getLegacyContentGrade } from './Grade';
 
 export class QuestionEngine {
     private usedQuestionIds: Set<string> = new Set();
@@ -16,8 +17,8 @@ export class QuestionEngine {
         const leaderPosition = Math.max(...players.map(p => p.currentPosition));
         const isLaggingBehind = (leaderPosition - currentPlayer.currentPosition) > 6;
 
-        let gradeToUse = selectedGrade;
-        if (isLaggingBehind && selectedGrade !== '1-2') {
+        let gradeToUse = getLegacyContentGrade(selectedGrade);
+        if (isLaggingBehind && gradeToUse !== '1-2') {
             gradeToUse = '1-2';
         }
 
