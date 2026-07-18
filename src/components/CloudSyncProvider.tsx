@@ -34,6 +34,8 @@ export function CloudSyncProvider() {
                 total_score: profile.totalScore,
                 equipped_mascot: profile.equippedMascot || '',
                 unlocked_mascots: profile.unlockedMascots || [],
+                equipped_hero: profile.equippedHero || null,
+                hero_config: profile.heroConfig || {},
                 streak: profile.streak || 1,
                 class_id: profile.class_id || null,
                 user_id: profile.user_id || currentUserId || null,

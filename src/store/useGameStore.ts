@@ -19,6 +19,7 @@ import { SessionService } from '../core/game/SessionService';
 import { ReinforcementEngine } from '../core/learning/ReinforcementEngine';
 import { CurriculumEngine } from '../core/learning/CurriculumEngine';
 import { BnccMap } from '../core/learning/BnccMap';
+import { pickRandomLockedOption, cosmeticKey } from '../core/theme/customization';
 
 import type { Player, Tile, TileType, GameStatus, Question, Enemy, Subject, GameState, Mascot } from '../core/types';
 
@@ -100,6 +101,7 @@ interface GameStoreState {
     levelUpData: { playerName: string, oldLevel: number, newLevel: number } | null;
     xpNotification: { amount: number } | null;
     nodeUnlockData: { playerName: string, nodeName: string, nodeIcon: string, nextNodeName?: string } | null;
+    cosmeticUnlockData: { playerName: string, slotLabel: string, optionLabel: string, emoji: string } | null;
 
     // --- Actions ---
     setGrade: (grade: string) => void;
@@ -118,6 +120,7 @@ interface GameStoreState {
     clearLevelUp: () => void;
     clearXpNotification: () => void;
     clearNodeUnlock: () => void;
+    clearCosmeticUnlock: () => void;
     logout: () => void;
     setClassConfig: (activeFocusSkill: string | null, customQuestions: any[]) => void;
     actions: {
@@ -239,7 +242,31 @@ export const useGameStore = create<GameStoreState>((set, get) => {
         // Update Session Stats
         player.sessionStats.totalQuestions += 1;
         if (isCorrect) player.sessionStats.correctAnswers += 1;
-        
+
+        // ── Recompensa concreta no meio da partida ──
+        // A cada 5 acertos, desbloqueia um item de customização (companheiro/
+        // aura) — recomendação da squad de game design (ROADMAP §11.3) contra
+        // a partida só recompensar no fim. Reaproveita o sistema de
+        // customização já existente em vez de criar moeda/inventário novo.
+        const COSMETIC_UNLOCK_EVERY = 5;
+        if (isCorrect && player.sessionStats.correctAnswers % COSMETIC_UNLOCK_EVERY === 0) {
+            const unlock = pickRandomLockedOption(player.unlockedCosmetics || []);
+            if (unlock) {
+                const key = cosmeticKey(unlock.slot.id, unlock.option.id);
+                player.unlockedCosmetics = [...(player.unlockedCosmetics || []), key];
+                updateProfile(player.id, { unlockedCosmetics: player.unlockedCosmetics });
+                playSfx('levelup');
+                set({
+                    cosmeticUnlockData: {
+                        playerName: player.name,
+                        slotLabel: unlock.slot.label,
+                        optionLabel: unlock.option.label,
+                        emoji: unlock.option.emoji
+                    }
+                });
+            }
+        }
+
         if (gs.activeQuestion?.skillId) {
             const skillId = gs.activeQuestion.skillId;
             if (!player.sessionStats.skillsPracticed[skillId]) {
@@ -572,6 +599,7 @@ export const useGameStore = create<GameStoreState>((set, get) => {
         levelUpData: null,
         xpNotification: null,
         nodeUnlockData: null,
+        cosmeticUnlockData: null,
         isSavingSessions: false,
 
         // Setters
@@ -613,6 +641,7 @@ export const useGameStore = create<GameStoreState>((set, get) => {
         clearLevelUp: () => set({ levelUpData: null }),
         clearXpNotification: () => set({ xpNotification: null }),
         clearNodeUnlock: () => set({ nodeUnlockData: null }),
+        clearCosmeticUnlock: () => set({ cosmeticUnlockData: null }),
 
         refreshPlayers: async () => {
             const { currentUser } = get();
@@ -633,6 +662,8 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                             totalScore: cloudP.total_score as number,
                             equippedMascot: cloudP.equipped_mascot as string,
                             unlockedMascots: cloudP.unlocked_mascots as string[],
+                            equippedHero: (cloudP.equipped_hero as string) || undefined,
+                            heroConfig: (cloudP.hero_config as Record<string, string>) || {},
                             streak: cloudP.streak as number,
                             class_id: cloudP.class_id as string,
                             user_id: cloudP.user_id as string,
@@ -666,7 +697,8 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                         skillsMastery: profile.skillsMastery || [],
                         srsReviews: profile.srsReviews || [],
                         nodeMastery: profile.nodeMastery || {},
-                        tabuadaMastery: profile.tabuadaMastery || {}
+                        tabuadaMastery: profile.tabuadaMastery || {},
+                        unlockedCosmetics: profile.unlockedCosmetics || []
                     };
                 })
             }));
@@ -693,6 +725,7 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                 id: profile.id, name: profile.name, color, avatar: profile.equippedAvatar,
                 hero: profile.equippedHero || get().selectedHeroId || undefined,
                 heroConfig: profile.heroConfig || get().selectedHeroConfig || {},
+                unlockedCosmetics: profile.unlockedCosmetics || [],
                 mascot: profile.equippedMascot, streak: profile.streak || 1, class_id: profile.class_id || classId,
                 user_id: profile.user_id || currentUser?.id, currentPosition: 0, inventoryProtectionCount: 0,
                 score: 0, level: 1, xp: 0, achievements: [], hp: 100, maxHp: 100, mascots: [],

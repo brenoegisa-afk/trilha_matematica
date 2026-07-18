@@ -1,4 +1,6 @@
 import { useGame } from '../context/GameContext';
+import { CustomizableHero } from './CustomizableHero';
+import { getPlayerHeroStage } from '../core/theme/heroProgress';
 import styles from './HUD.module.css';
 
 export default function HUD() {
@@ -18,11 +20,13 @@ export default function HUD() {
                         className={`${styles.playerCard} ${isCurrent ? styles.activeCard : ''}`}
                     >
                         {/* Avatar Column */}
-                        <div 
+                        <div
                             className={styles.avatarBubble}
-                            style={{ backgroundColor: player.color }}
+                            style={player.hero ? { background: 'transparent' } : { backgroundColor: player.color }}
                         >
-                            {player.avatar}
+                            {player.hero
+                                ? <CustomizableHero heroId={player.hero} stage={getPlayerHeroStage(player)} config={player.heroConfig} size={40} />
+                                : (player.avatar || '🐰')}
                         </div>
 
                         {/* Content Column */}

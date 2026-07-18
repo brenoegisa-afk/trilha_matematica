@@ -2,6 +2,8 @@ import { useGame } from '../context/GameContext';
 import styles from './GameSummary.module.css';
 import type { Player } from '../core/types';
 import { DiagnosticService } from '../core/learning/DiagnosticService';
+import { CustomizableHero } from './CustomizableHero';
+import { getPlayerHeroStage } from '../core/theme/heroProgress';
 
 export default function GameSummary() {
     const { gameState, players } = useGame();
@@ -49,8 +51,13 @@ function PlayerStatsCard({ player }: { player: Player }) {
     return (
         <div className={styles.playerCard} style={{ borderColor: player.color }}>
             <div className={styles.playerHeader}>
-                <div className={styles.avatar} style={{ backgroundColor: player.color }}>
-                    {player.avatar || '👤'}
+                <div
+                    className={styles.avatar}
+                    style={player.hero ? { background: 'transparent' } : { backgroundColor: player.color }}
+                >
+                    {player.hero
+                        ? <CustomizableHero heroId={player.hero} stage={getPlayerHeroStage(player)} config={player.heroConfig} size={48} />
+                        : (player.avatar || '👤')}
                 </div>
                 <div className={styles.nameArea}>
                     <h2 className={styles.playerName}>{player.name}</h2>

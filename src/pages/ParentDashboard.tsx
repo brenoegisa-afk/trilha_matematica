@@ -3,6 +3,8 @@ import { supabase } from '../utils/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import { ParentService } from '../core/services/ParentService';
 import type { Player, DiagnosticInsight } from '../core/types';
+import { CustomizableHero } from '../components/CustomizableHero';
+import { getPlayerHeroStage } from '../core/theme/heroProgress';
 import styles from './ParentDashboard.module.css';
 
 export default function ParentDashboard() {
@@ -94,7 +96,11 @@ function ChildCard({ child, insights }: { child: Player, insights: DiagnosticIns
     return (
         <div className={styles.childCard} style={{ borderColor: child.color }}>
             <div className={styles.cardHeader} style={{ backgroundColor: child.color }}>
-                <span className={styles.avatar}>{child.avatar}</span>
+                <span className={styles.avatar}>
+                    {child.hero
+                        ? <CustomizableHero heroId={child.hero} stage={getPlayerHeroStage(child)} config={child.heroConfig} size={40} />
+                        : (child.avatar || '👦')}
+                </span>
                 <div className={styles.headerInfo}>
                     <h2>{child.name}</h2>
                     <span className={styles.levelBadge}>Nível {child.level}</span>

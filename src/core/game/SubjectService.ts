@@ -4,6 +4,11 @@ import { ExplanationEngine } from './ExplanationEngine';
 import { MathEngine } from '../learning/MathEngine';
 import { CurriculumEngine } from '../learning/CurriculumEngine';
 
+// Quantas perguntas recentes lembramos por jogador para evitar repetição
+// (ver MathEngine.generateFromNode). Não precisa ser grande: o objetivo é só
+// não repetir a MESMA pergunta duas ou três vezes seguidas.
+const RECENT_QUESTIONS_WINDOW = 6;
+
 // Extension of the current data structure to support subjects and skills
 // In a real scenario, this would come from an API
 export class SubjectService {
@@ -47,7 +52,11 @@ export class SubjectService {
 
             if (player) {
                 const node = CurriculumEngine.pickNode(player, subjectId, potentialSkillId, grade);
-                return MathEngine.generateFromNode(node);
+                const q = MathEngine.generateFromNode(node, player.recentQuestions || []);
+                // Guarda as últimas perguntas DESSE jogador pra não repetir de novo
+                // logo em seguida (ver MathEngine.generateFromNode).
+                player.recentQuestions = [...(player.recentQuestions || []), q.question].slice(-RECENT_QUESTIONS_WINDOW);
+                return q;
             } else {
                 return MathEngine.generate(grade, tileType, player, potentialSkillId);
             }

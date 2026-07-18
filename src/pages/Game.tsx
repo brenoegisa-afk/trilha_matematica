@@ -10,6 +10,7 @@ import LevelUpModal from '../components/LevelUpModal';
 import FloatingXP from '../components/FloatingXP';
 import VictoryModal from '../components/VictoryModal';
 import NodeUnlockModal from '../components/NodeUnlockModal';
+import CosmeticUnlockModal from '../components/CosmeticUnlockModal';
 import GameSummary from '../components/GameSummary';
 import '../App.css';
 
@@ -47,6 +48,7 @@ export default function Game() {
             <GameOverScreen />
             <VictoryModal />
             <NodeUnlockModal />
+            <CosmeticUnlockModal />
             <GameSummary />
 
             {/* Cinematic Level Up */}

@@ -1,14 +1,20 @@
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
 import { HeroesMap } from '../core/theme/HeroesMap';
-import { CUSTOMIZATION_SLOTS, defaultConfig } from '../core/theme/customization';
+import { CUSTOMIZATION_SLOTS, defaultConfig, cosmeticKey } from '../core/theme/customization';
 import { CustomizableHero } from '../components/CustomizableHero';
 import { playSfx } from '../utils/sfx';
 import styles from './CharacterCustomizer.module.css';
 
 export default function CharacterCustomizer() {
     const navigate = useNavigate();
-    const { selectedHeroId, selectedHeroConfig, setHeroConfig } = useGame();
+    const { selectedHeroId, selectedHeroConfig, setHeroConfig, players } = useGame();
+
+    // União do que qualquer jogador da fila já desbloqueou jogando (ver
+    // ROADMAP §11.3). Sem fila ativa (tela aberta avulsa), não há como saber
+    // o que foi conquistado — nesse caso libera tudo (degrada com graça).
+    const unlockedSet = new Set(players.flatMap(p => p.unlockedCosmetics || []));
+    const hasActivePlayers = players.length > 0;
 
     // Sem herói escolhido ainda → manda escolher primeiro.
     if (!selectedHeroId) {
@@ -56,16 +62,23 @@ export default function CharacterCustomizer() {
                     <div key={slot.id} className={styles.slot}>
                         <div className={styles.slotLabel}>{slot.label}</div>
                         <div className={styles.options}>
-                            {slot.options.map(opt => (
-                                <button
-                                    key={opt.id}
-                                    className={`${styles.option} ${config[slot.id] === opt.id ? styles.optionActive : ''}`}
-                                    onClick={() => pick(slot.id, opt.id)}
-                                >
-                                    <span className={styles.optionEmoji}>{opt.emoji || '🚫'}</span>
-                                    <span className={styles.optionLabel}>{opt.label}</span>
-                                </button>
-                            ))}
+                            {slot.options.map((opt, idx) => {
+                                // A opção "Nenhum" (idx 0) sempre disponível — não é prêmio.
+                                const isLocked = idx !== 0 && hasActivePlayers && !unlockedSet.has(cosmeticKey(slot.id, opt.id));
+                                return (
+                                    <button
+                                        key={opt.id}
+                                        className={`${styles.option} ${config[slot.id] === opt.id ? styles.optionActive : ''}`}
+                                        onClick={() => !isLocked && pick(slot.id, opt.id)}
+                                        disabled={isLocked}
+                                        title={isLocked ? 'Jogue uma partida para desbloquear!' : undefined}
+                                        style={isLocked ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
+                                    >
+                                        <span className={styles.optionEmoji}>{isLocked ? '🔒' : (opt.emoji || '🚫')}</span>
+                                        <span className={styles.optionLabel}>{isLocked ? '???' : opt.label}</span>
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
                 ))}

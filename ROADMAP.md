@@ -59,8 +59,24 @@ Rastreamento do fluxo pergunta → resposta → progressão:
 - ~~`pickNode` ignora a série~~ → **corrigido (jul/2026):** `pickNode` recebe `grade` e restringe
   a fronteira à série escolhida (um 5º ano entra em conteúdo de 5º, não em "Soma até 10").
 - O **distrator escolhido** pelo aluno não é registrado (sinal diagnóstico desperdiçado).
+- ~~Perguntas podem repetir seguidas pro mesmo jogador~~ → **corrigido (jul/2026):**
+  nós com poucos números possíveis (ex.: soma até 10 no 1º ano) podiam sortear a
+  mesma pergunta de novo rapidinho. `MathEngine.generateFromNode` agora recebe as
+  últimas perguntas que aquele jogador viu (`SubjectService.getQuestion` rastreia
+  por `player.recentQuestions`, janela de 6) e tenta sortear de novo até sair algo
+  diferente (até 6 tentativas, pra não girar pra sempre em nós com range pequeno).
 - Persistência fragmentada (localStorage + Supabase, `(player as any).nodeMastery`).
 - Sem testes no núcleo de progressão.
+- 🆕 **`pickNode` ignora pré-requisitos quando a série escolhida não bate com a fronteira
+  natural do grafo** (`CurriculumEngine.ts:56-70`) — afeta principalmente séries "3-4" e "5",
+  que hoje têm poucos nós e concentrados numa única profundidade (ex.: série "5" só tem nós de
+  `depth: 5`). Efeito colateral encontrado (jul/2026): permitia a um aluno "dominar" um nó de
+  profundidade 5 como a primeira coisa que faz no jogo, sem nunca ter passado pelos fundamentos
+  — o que fazia o **estágio visual do herói pular direto de Pastor para Rei numa única partida**.
+  ✅ *Mitigado* mudando `getPlayerHeroStage` para refletir o **volume** de nós de matemática
+  dominados (não a maior profundidade de um único nó — `src/core/theme/heroProgress.ts`, jul/2026).
+  A causa raiz (grafo raso por série) continua e só se resolve de fato com a expansão do
+  grafo (P2, §5).
 
 ---
 
@@ -146,8 +162,11 @@ Sem isto, nada "evolui". É a maior alavanca de valor.
       (localStorage); carregar no `refreshPlayers`/`getOrCreateProfile`/`Setup`/`ParentService`.
 - [x] Tipar `nodeMastery` no `Player` (campo já tipado; leituras via `CurriculumEngine`).
 - [x] Celebrar desbloqueio de nó com modal dedicado (`NodeUnlockModal`) + som de level-up.
-- [ ] Testes: promoção de nó, desbloqueio de vizinhos, `findWeakPrerequisite`, regressão
-      de pontos ao errar. *(pendente — recomendado antes de expandir o grafo no P2)*
+- [x] Testes: promoção de nó, desbloqueio de vizinhos, `findWeakPrerequisite`, regressão
+      de pontos ao errar. ✅ `src/core/learning/CurriculumEngine.test.ts` (9 casos) +
+      `src/core/theme/heroProgress.test.ts` (5 casos, trava a regressão do bug do herói
+      Pastor→Rei). Inclui um teste que **documenta o bug conhecido** do fallback de série
+      (§2 "Outros gaps") em vez de escondê-lo. jul/2026.
 
 > ⚙️ **Ação de deploy:** rodar `supabase/phase7_curriculum_graph.sql` no banco (coluna
 > `node_mastery`). Sem ela, a progressão persiste em localStorage (mesmo aparelho), mas
@@ -211,6 +230,102 @@ travou e *o que* revisar — sem interpretar números soltos. ✅ (via `StudentG
       um nó; o sistema de pontos já torna o chute aleatório de saldo negativo.
 - [ ] Anti-chute (resta): itens de **resposta construída** (digitar o número) além de múltipla
       escolha, ao menos nos nós-chave (reduz o chute de 25% na raiz).
+
+---
+
+### 🎨 Identidade visual — fusão avatar↔herói (jul/2026)
+
+Achado da squad: existiam **dois sistemas de "personagem" desencontrados** — o avatar
+genérico antigo (🚀🤖👑👽, `Shop.tsx`) e o herói bíblico novo (`HeroesMap`/`CustomizableHero`).
+Isso causava uma inconsistência visual real (fila do Setup mostrava avatar antigo, tabuleiro/
+batalha mostrava o herói) e vilões de batalha 100% genéricos (goblin, dragão, **alienígena**)
+sem nenhuma relação com o tema.
+
+**Feito:**
+- [x] Todos os componentes que exibiam `player.avatar` sem checar `player.hero` agora seguem
+      o padrão `hero ?? avatar` (já usado em `Board.tsx`/`BattleArena.tsx`): `Setup.tsx` (fila),
+      `HUD.tsx`, `Dice.tsx`, `GameSummary.tsx`, `Inventory.tsx`, `ParentDashboard.tsx`.
+- [x] Corrigido de passagem: `ParentService.mapProfileToPlayer` lia a coluna errada
+      (`dbProfile.avatar`, inexistente) em vez de `equipped_avatar` — o avatar do painel dos
+      pais sempre caía no fallback fixo `'👦'`. Agora também propaga `hero`/`heroConfig`.
+- [x] **Vilões da Batalha retemados**: `src/core/theme/VillainsMap.ts` (novo, mesmo padrão do
+      `HeroesMap`) substitui o pool de matemática do `BattleEngine.generateEnemy` — Muralhas de
+      Jericó, Exército do Faraó, Tempestade no Mar, Golias — mesmo HP/balanceamento de antes,
+      só a pele muda. Vencer continua sendo **responder certo**, não violência.
+
+**Decisões maiores ainda pendentes (não tocadas — precisam de confirmação, afetam o piloto ao vivo):**
+- [ ] **Aposentar de vez a `Shop.tsx` ("Lojinha")** — hoje ainda é o único lugar onde a
+      criança gasta as estrelas que ganha jogando. Antes de tirar do menu (`SideNavigation.tsx`),
+      precisa de um substituto (ex.: os slots de customização do herói — capa, escudo, cor —
+      já cogitados numa conversa anterior) comprável com as mesmas estrelas, senão a criança
+      perde uma recompensa que já usa, no meio do piloto.
+- [ ] **`src/pages/Battle.tsx` (rota `/battle`) é um motor de batalha legado e duplicado**,
+      paralelo ao `BattleEngine.ts`/`BattleArena.tsx` novo — ainda usa `player.avatar`/`mascot`
+      diretamente e tem seu próprio gerador de monstros genérico (nunca retemado). Candidato a
+      aposentar junto, mas primeiro confirmar se esse modo (`gameMode === 'battle'` no Setup)
+      ainda está em uso.
+- [ ] **Vilões de Português/Ciências não foram retemados** (só o pool de Matemática) — são
+      menos urgentes por serem "extras" (§3), mas ficam com a mesma inconsistência de tema.
+- [ ] **`MascotEngine`/`player.mascots`** (mochila/Inventory) é gameplay real (bônus de XP,
+      dano, proteção na batalha — não só cosmético) com arquétipos genéricos (robô, coruja,
+      átomo). Retematizar isso é maior: precisa de novos arquétipos bíblicos com os mesmos
+      stats, não só trocar ícone. Fora de escopo por ora.
+- [x] **Coluna `equipped_hero`/`hero_config` cross-device** — ✅ jul/2026,
+      `supabase/phase11_hero_columns.sql` (rodada no Supabase: colunas adicionadas +
+      `student_login` atualizado para devolver o herói no login). App atualizado para
+      ler/escrever: `CloudSyncProvider.tsx` (upsert), `useGameStore.refreshPlayers`
+      (hidrata do banco), `Setup.tsx` (login cross-device aplica o herói vindo da nuvem
+      e recarrega a fila na hora). A escolha de herói agora sobrevive à troca de
+      aparelho, igual ao avatar antigo já sobrevivia.
+
+---
+
+### 🟪 Futuro — Candidatos pós-piloto (backlog, não priorizado)
+
+Itens avaliados pela squad mas propositalmente adiados até o piloto validar o núcleo
+de matemática. Registrados aqui para não perder o contexto da decisão.
+
+- **Educação financeira infantil.** Avaliação da squad (jul/2026):
+  - *Produto:* tema altamente "gamificável" (moedas, loja, poupança/gasto) — encaixa
+    direto na visão de "videogame que ensina" (§12).
+  - *Pedagogia:* não precisa virar matéria nova — é matemática aplicada (contagem,
+    troco/subtração, porcentagem no 5º, frações/divisão). Reaproveitar o
+    `CurriculumEngine`/`MathEngine` existentes em vez de um domínio paralelo. O
+    mapa-mestre (§5) já reserva um nó **"Dinheiro (moedas)"** em Grandezas e Medidas
+    do 2º ano — ponto de partida natural.
+  - *Tema (heróis bíblicos):* diferencial forte e sem concorrência direta — mordomia,
+    generosidade, parábola dos talentos. Encaixaria no roster (`HeroesMap`) como um
+    novo reino/herói, no mesmo padrão dos 4 reinos atuais.
+  - *Risco:* dispersar foco do piloto em andamento (P0 concluído, testes de progressão
+    ainda pendentes) e da decisão de escopo "matemática a fundo" (§3).
+  - **Decisão:** não priorizar agora. Candidato forte para depois do piloto — desenhar
+    como reino/skin sobre nós de matemática já existentes, não como sistema paralelo.
+
+- **Acessibilidade e inclusão de crianças autistas.** Avaliação da squad (jul/2026),
+  motivada pelo pedido do usuário de o jogo "realmente ensinar" para todas as crianças:
+  - *Achado central:* boa parte do que ajudaria crianças autistas **também corrige os
+    gaps pedagógicos já mapeados em §10.1** (falta momento instrucional, só múltipla
+    escolha, feedback pouco previsível) — não são agendas concorrentes.
+  - **Previsibilidade:** interface e regras estáveis entre sessões; evitar variações
+    "surpresa" de feedback só pelo bem do "juice" (tensiona com o item 11.3 "feedback
+    de acerto variado" — resolver com uma opção de modo previsível, não eliminando um
+    ou outro).
+  - **Controle sensorial:** modo "calmo" configurável por perfil — desliga confete/som/
+    animações de tela cheia, mantém só o essencial (feedback textual + progresso).
+  - **Tempo sem pressão punitiva:** o anti-chute (P4, feito) já penaliza acerto rápido
+    demais — certo. Falta garantir que tempo de processamento **mais longo** (comum em
+    crianças autistas) não seja penalizado; oferecer modo sem cronômetro visível.
+  - **Linguagem literal:** revisar enunciados/narrativas dos heróis contra ambiguidade,
+    sarcasmo ou expressão idiomática.
+  - **Intensidade narrativa ajustável:** temas de "batalha"/"gigante" (Davi e Golias)
+    podem ser muito estimulantes para algumas crianças — toggle de intensidade beneficia
+    esse público sem tirar o tema de quem gosta da emoção.
+  - **Menor carga social:** reforça o modo solo como cidadão de primeira classe (o
+    hotseat multiplayer já tinha sido apontado fraco por outro motivo em §11.2/ociosidade).
+  - **Decisão:** registrar como eixo transversal de acessibilidade, não como fase isolada.
+    Ao implementar P1 (resposta construída, feedback variado) e o "momento instrucional"
+    de §10.1, desenhar já com a opção de modo previsível/calmo — mais barato que adicionar
+    depois. Priorização plena fica para pós-piloto, junto do item acima.
 
 ---
 
@@ -363,10 +478,16 @@ Reforçam ou complementam as fases existentes:
 - **[P1] Interação além de múltipla escolha:** contar/arrastar objetos para *montar* o
   número no 1º–2º; teclado numérico no 3º–5º (princípio DragonBox; reduz o chute de 25%).
   Conecta com a "resposta construída" do P4. *Esforço: M por tipo.*
-- **[P1] Feedback de acerto variado** + explicações mais curtas e ilustradas nas séries
-  iniciais. *Esforço: P.*
-- **[P1] Recompensa concreta no meio da partida** (colecionáveis a cada X acertos) e
-  traduzir buffs de mascote em algo tangível ("seu mascote come o monstro!"). *Esforço: P-M.*
+- ✅ **[P1] Feedback de acerto variado** — jul/2026: `CardModal.tsx` sorteia entre 6
+  reações de acerto e 4 de erro (antes sempre "🌟 Excelente!"/"💡 Puxa, quase lá!"
+  fixos), sorteado uma vez por pergunta. Falta a parte de "explicações mais curtas e
+  ilustradas nas séries iniciais".
+- ✅ **[P1] Recompensa concreta no meio da partida** — jul/2026: a cada 5 acertos, a
+  criança desbloqueia um item de customização (companheiro/aura) na hora, com
+  celebração (`CosmeticUnlockModal.tsx`, confete + som). Reaproveita o sistema de
+  customização já existente (`customization.ts`) em vez de moeda/inventário novo;
+  itens ainda não desbloqueados aparecem trancados (🔒) no `CharacterCustomizer.tsx`.
+  Falta traduzir buffs de mascote em algo tangível ("seu mascote come o monstro!").
 - **[P2] Personagem-guia / narrativa:** expandir a moldura do "Guardião"
   (`BattleArena.tsx`) para um mascote-mentor que dá missões e reage. *Esforço: M.*
 - **[P2] Streak diário / missões diárias / recompensa de login** (hoje o streak só existe

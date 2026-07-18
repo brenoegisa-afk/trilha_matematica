@@ -53,6 +53,8 @@ export interface Player {
     avatar: string;
     hero?: string;      // id do herói bíblico escolhido (ver HeroesMap) — camada de identidade
     heroConfig?: Record<string, string>; // customização livre (companheiro, aura) — ver customization.ts
+    unlockedCosmetics?: string[]; // "slotId:optionId" desbloqueados jogando (ver customization.ts)
+    recentQuestions?: string[]; // texto das últimas perguntas vistas (evita repetição, ver SubjectService)
     mascot?: string;
     currentPosition: number;
     inventoryProtectionCount: number;

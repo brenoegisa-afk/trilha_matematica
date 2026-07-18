@@ -1,6 +1,27 @@
+import { useMemo } from 'react';
 import { useGame } from '../context/GameContext';
 import type { TileType } from '../core/types';
 import styles from './CardModal.module.css';
+
+// Reações variadas de acerto/erro — antes era sempre a mesma ("🌟 Excelente!"
+// / "💡 Puxa, quase lá!"), e repetição idêntica cansa rápido numa criança
+// pequena (achado da squad de game design, ROADMAP §11.2). Erro continua
+// gentil, sem punição pesada — só varia o tom.
+const CORRECT_REACTIONS = [
+    { icon: '🌟', title: 'Excelente!' },
+    { icon: '🎉', title: 'Mandou bem!' },
+    { icon: '🚀', title: 'Isso aí!' },
+    { icon: '🏆', title: 'Show de bola!' },
+    { icon: '💪', title: 'Você é fera nisso!' },
+    { icon: '🔥', title: 'Pegando fogo!' },
+];
+
+const WRONG_REACTIONS = [
+    { icon: '💡', title: 'Puxa, quase lá!' },
+    { icon: '🤔', title: 'Quase isso!' },
+    { icon: '📚', title: 'Vamos aprender juntos!' },
+    { icon: '✨', title: 'Essa foi difícil, hein?' },
+];
 
 export default function CardModal() {
     const {
@@ -17,6 +38,14 @@ export default function CardModal() {
         answerFeedback,
         waitingFeedback
     } = gameState;
+
+    // Sorteado uma vez por pergunta (não a cada re-render), para não trocar de
+    // reação no meio da exibição do feedback. Hook precisa vir antes de
+    // qualquer `return` condicional (Rules of Hooks).
+    const reaction = useMemo(() => {
+        const pool = answerFeedback === 'correct' ? CORRECT_REACTIONS : WRONG_REACTIONS;
+        return pool[Math.floor(Math.random() * pool.length)];
+    }, [activeQuestion?.question, answerFeedback]);
 
     if (gameStatus !== 'card_event' || !activeCardType || !activeQuestion) return null;
 
@@ -105,16 +134,16 @@ export default function CardModal() {
                             <div className={styles.educationalFeedback}>
                                 {answerFeedback === 'correct' ? (
                                     <>
-                                        <div className={styles.feedbackIcon}>🌟</div>
-                                        <h3 className={styles.feedbackTitleSuccess}>Excelente!</h3>
+                                        <div className={styles.feedbackIcon}>{reaction.icon}</div>
+                                        <h3 className={styles.feedbackTitleSuccess}>{reaction.title}</h3>
                                         <p className={styles.feedbackMessage}>
                                             Você acertou! A resposta é mesmo <strong>{activeQuestion.answer}</strong>.
                                         </p>
                                     </>
                                 ) : (
                                     <>
-                                        <div className={styles.feedbackIcon}>💡</div>
-                                        <h3 className={styles.feedbackTitleError}>Puxa, quase lá!</h3>
+                                        <div className={styles.feedbackIcon}>{reaction.icon}</div>
+                                        <h3 className={styles.feedbackTitleError}>{reaction.title}</h3>
                                         <p className={styles.feedbackMessage}>
                                             A resposta correta era: <span className={styles.correctAnswerHighlight}>{activeQuestion.answer}</span>
                                         </p>

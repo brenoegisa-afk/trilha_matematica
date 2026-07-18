@@ -38,6 +38,8 @@ export const StudentManager: React.FC<StudentManagerProps> = ({ classId, classNa
     const [isCreating, setIsCreating] = useState(false);
     const [createdPins, setCreatedPins] = useState<{name: string, pin: string}[]>([]);
     const [selectedStudent, setSelectedStudent] = useState<StudentProfile | null>(null);
+    const [resettingPinId, setResettingPinId] = useState<string | null>(null);
+    const [resetPinResult, setResetPinResult] = useState<{name: string, pin: string} | null>(null);
 
     useEffect(() => {
         if (activeTab === 'report' || students.length === 0) {
@@ -95,16 +97,30 @@ export const StudentManager: React.FC<StudentManagerProps> = ({ classId, classNa
         if (namesList.length === 0) return;
         setIsCreating(true);
         try {
+            // Nomes já cadastrados nesta turma (evita duplicar aluno e fragmentar o progresso dele).
+            // Consulta o banco na hora — não confia no estado `students` da tela, que pode
+            // estar desatualizado (corrida entre o fetch inicial e o clique em "Adicionar").
+            const { data: currentStudents } = await supabase
+                .from('profiles')
+                .select('name')
+                .eq('class_id', classId);
+            const existingNames = new Set((currentStudents || []).map(s => s.name.trim().toLowerCase()));
             const newProfiles = [];
             const results = [];
+            const skipped: string[] = [];
             for (const name of namesList) {
                 const cleanName = name.trim();
                 if (!cleanName) continue;
-                
+                if (existingNames.has(cleanName.toLowerCase())) {
+                    skipped.push(cleanName);
+                    continue;
+                }
+                existingNames.add(cleanName.toLowerCase());
+
                 const pin = Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit PIN
                 const hashedPin = await hashPin(pin);
                 const id = crypto.randomUUID();
-                
+
                 newProfiles.push({
                     id,
                     name: cleanName,
@@ -121,16 +137,48 @@ export const StudentManager: React.FC<StudentManagerProps> = ({ classId, classNa
             if (newProfiles.length > 0) {
                 const { error } = await supabase.from('profiles').insert(newProfiles);
                 if (error) throw error;
-                
+
                 setCreatedPins(results);
                 setNewStudentName('');
                 setBatchNames('');
                 fetchStudents();
             }
+            if (skipped.length > 0) {
+                alert(`Já existe(m) aluno(s) com esse nome nesta turma (não foram duplicados): ${skipped.join(', ')}`);
+            }
         } catch (e: any) {
-            alert('Erro ao criar alunos: ' + e.message);
+            if (e.code === '23505') {
+                // Trava de segurança do banco (unique constraint) pegou uma corrida que a
+                // checagem acima não viu — mensagem amigável em vez do erro cru do Postgres.
+                alert('Já existe um aluno com esse nome nesta turma. Nada foi duplicado.');
+                fetchStudents();
+            } else {
+                alert('Erro ao criar alunos: ' + e.message);
+            }
         } finally {
             setIsCreating(false);
+        }
+    };
+
+    // Gera um PIN novo para um aluno já cadastrado (professora perdeu/esqueceu
+    // o cartão). O PIN é hasheado igual na criação — não existe "recuperar" o
+    // PIN antigo, só substituir por um novo.
+    const handleResetPin = async (studentId: string, studentName: string) => {
+        if (!confirm(`Gerar um novo PIN para ${studentName}? O PIN antigo dele(a) para de funcionar.`)) return;
+        setResettingPinId(studentId);
+        try {
+            const pin = Math.floor(1000 + Math.random() * 9000).toString();
+            const hashedPin = await hashPin(pin);
+            const { error } = await supabase
+                .from('profiles')
+                .update({ secret_code: hashedPin })
+                .eq('id', studentId);
+            if (error) throw error;
+            setResetPinResult({ name: studentName, pin });
+        } catch (e: any) {
+            alert('Erro ao gerar novo PIN: ' + e.message);
+        } finally {
+            setResettingPinId(null);
         }
     };
 
@@ -401,16 +449,37 @@ export const StudentManager: React.FC<StudentManagerProps> = ({ classId, classNa
 
                                     <div style={{ padding: '20px', background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                                         <h3>Roster da Turma ({students.length})</h3>
+
+                                        {resetPinResult && (
+                                            <div style={{ marginBottom: '15px', padding: '12px', background: '#f0fdf4', border: '2px solid #10b981', borderRadius: '8px' }}>
+                                                <p style={{ margin: 0, fontSize: '0.9rem' }}>
+                                                    Novo PIN de <strong>{resetPinResult.name}</strong>: <code style={{ fontWeight: 800, letterSpacing: '1px' }}>{resetPinResult.pin}</code>
+                                                </p>
+                                                <p style={{ fontSize: '0.78rem', color: '#64748b', margin: '6px 0 8px' }}>
+                                                    ⚠️ Não aparece de novo — anote ou entregue agora.
+                                                </p>
+                                                <button onClick={() => setResetPinResult(null)} style={{ padding: '6px 12px', fontSize: '0.8rem', cursor: 'pointer', background: '#f1f5f9', border: 'none', borderRadius: '6px' }}>
+                                                    Ok, entendi
+                                                </button>
+                                            </div>
+                                        )}
+
                                         <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
                                             {students.length === 0 ? (
                                                 <p style={{ color: '#94a3b8' }}>Nenhum aluno na turma.</p>
                                             ) : (
                                                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                                                     {students.map(s => (
-                                                        <li key={s.id} style={{ padding: '10px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between' }}>
+                                                        <li key={s.id} style={{ padding: '10px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                             <span>{s.name}</span>
-                                                            {/* We can't show the PIN here because it's hashed in the DB, which is exactly what we want for security */}
-                                                            <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Cadastrado</span>
+                                                            <button
+                                                                onClick={() => handleResetPin(s.id, s.name)}
+                                                                disabled={resettingPinId === s.id}
+                                                                title="Gerar um PIN novo para este aluno (o antigo para de funcionar)"
+                                                                style={{ padding: '6px 12px', fontSize: '0.8rem', cursor: 'pointer', background: '#fff7ed', color: '#c2410c', border: '1px solid #fdba74', borderRadius: '6px', fontWeight: 700 }}
+                                                            >
+                                                                {resettingPinId === s.id ? '...' : '🔑 Resetar PIN'}
+                                                            </button>
                                                         </li>
                                                     ))}
                                                 </ul>

@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
 import { supabase } from '../utils/supabaseClient';
 import { updateProfile } from '../utils/saveSystem';
+import { CustomizableHero } from '../components/CustomizableHero';
+import { getPlayerHeroStage } from '../core/theme/heroProgress';
 import styles from './Setup.module.css';
 
 const AVAILABLE_COLORS = [
@@ -132,8 +134,14 @@ export default function Setup() {
                 skillsMastery: student.skills_mastery || [],
                 srsReviews: student.srs_reviews || [],
                 nodeMastery: student.node_mastery || {},
-                tabuadaMastery: student.tabuada_mastery || {}
+                tabuadaMastery: student.tabuada_mastery || {},
+                equippedHero: student.equipped_hero || undefined,
+                heroConfig: student.hero_config || {}
             });
+
+            // Recarrega a fila para o herói vindo da nuvem (login em outro aparelho)
+            // aparecer na hora, sem esperar o refresh do próximo mount.
+            refreshPlayers();
 
             setSecretCode('');
             setSelectedStudentId('');
@@ -372,8 +380,13 @@ export default function Setup() {
                         {players.map(p => (
                             <li key={p.id} className={styles.queueItem}>
                                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                                    <div className={styles.avatarBadge} style={{ backgroundColor: p.color }}>
-                                        {p.avatar}
+                                    <div
+                                        className={styles.avatarBadge}
+                                        style={p.hero ? { background: 'transparent' } : { backgroundColor: p.color }}
+                                    >
+                                        {p.hero
+                                            ? <CustomizableHero heroId={p.hero} stage={getPlayerHeroStage(p)} config={p.heroConfig} size={40} />
+                                            : (p.avatar || '🐰')}
                                     </div>
                                     <strong style={{ fontSize: '1.2rem' }}>{p.name}</strong>
                                 </div>

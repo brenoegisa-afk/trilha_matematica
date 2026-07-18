@@ -9,6 +9,7 @@ export interface SaveProfile {
     equippedHero?: string; // id do herói bíblico escolhido (ver HeroesMap). Local por ora;
                            // vira cross-device quando a coluna equipped_hero existir no Supabase.
     heroConfig?: Record<string, string>; // customização livre (companheiro, aura). Local por ora.
+    unlockedCosmetics?: string[]; // "slotId:optionId" desbloqueados jogando (ver customization.ts). Local por ora.
     unlockedAvatars: string[];
     gamesPlayed: number;
     totalScore: number;
@@ -73,6 +74,7 @@ export function getOrCreateProfile(name: string, code: string = '0000'): SavePro
         equippedAvatar: '',
         equippedHero: '',
         heroConfig: {},
+        unlockedCosmetics: [],
         unlockedAvatars: [],
         gamesPlayed: 0,
         totalScore: 0,

@@ -64,3 +64,31 @@ export function getOption(slotId: string, optionId?: string): CustomizationOptio
     if (!slot) return undefined;
     return slot.options.find(o => o.id === optionId) || slot.options[0];
 }
+
+/** Chave estável "slotId:optionId" usada para marcar um item como desbloqueado. */
+export function cosmeticKey(slotId: string, optionId: string): string {
+    return `${slotId}:${optionId}`;
+}
+
+/**
+ * Sorteia um item de customização AINDA NÃO desbloqueado (recompensa concreta
+ * de jogar — ver ROADMAP §11.3). A primeira opção de cada slot ("Nenhum") não
+ * conta: já vem disponível, não é prêmio.
+ */
+export function pickRandomLockedOption(
+    unlocked: string[]
+): { slot: CustomizationSlot; option: CustomizationOption } | null {
+    const unlockedSet = new Set(unlocked);
+    const locked: { slot: CustomizationSlot; option: CustomizationOption }[] = [];
+
+    for (const slot of CUSTOMIZATION_SLOTS) {
+        for (const option of slot.options.slice(1)) { // pula "Nenhum"
+            if (!unlockedSet.has(cosmeticKey(slot.id, option.id))) {
+                locked.push({ slot, option });
+            }
+        }
+    }
+
+    if (locked.length === 0) return null;
+    return locked[Math.floor(Math.random() * locked.length)];
+}

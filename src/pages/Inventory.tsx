@@ -8,6 +8,8 @@ import { useNavigate } from 'react-router-dom';
 import { MascotEngine } from '../core/game/MascotEngine';
 import type { MascotArchetype } from '../core/game/MascotEngine';
 import { SkillTree } from '../components/SkillTree';
+import { CustomizableHero } from '../components/CustomizableHero';
+import { getPlayerHeroStage } from '../core/theme/heroProgress';
 
 const mascotEngine = new MascotEngine();
 
@@ -26,6 +28,8 @@ export default function Inventory() {
         name: profile.name,
         color: 'var(--color-blue)',
         avatar: profile.equippedAvatar || '👤',
+        hero: profile.equippedHero || undefined,
+        heroConfig: profile.heroConfig || {},
         mascot: profile.equippedMascot || '',
         streak: profile.streak || 0,
         class_id: profile.class_id || '',
@@ -93,7 +97,11 @@ export default function Inventory() {
                         className={idx === selectedPlayerIndex ? styles.activePlayer : ''}
                         onClick={() => setSelectedPlayerIndex(idx)}
                     >
-                        <span className={styles.playerAvatar}>{p.avatar || '👤'}</span>
+                        <span className={styles.playerAvatar}>
+                            {p.hero
+                                ? <CustomizableHero heroId={p.hero} stage={getPlayerHeroStage(p)} config={p.heroConfig} size={28} />
+                                : (p.avatar || '👤')}
+                        </span>
                         <span className={styles.playerName}>{p.name}</span>
                     </button>
                 ))}

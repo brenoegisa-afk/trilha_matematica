@@ -1,4 +1,5 @@
 import type { Enemy, Player } from '../types';
+import { MATH_VILLAINS } from '../theme/VillainsMap';
 
 /**
  * BattleEngine — Pure functions for battle logic.
@@ -6,12 +7,7 @@ import type { Enemy, Player } from '../types';
  */
 export const BattleEngine = {
     generateEnemy(playerLevel: number, subjectId: string = 'math'): Enemy {
-        const mathEnemies = [
-            { id: 'math_goblin', name: 'Goblin da Soma', icon: '👺', baseHp: 100 },
-            { id: 'division_dragon', name: 'Dragão da Divisão', icon: '🐲', baseHp: 250 },
-            { id: 'geometry_ghost', name: 'Fantasma dos Ângulos', icon: '👻', baseHp: 150 },
-            { id: 'algebra_alien', name: 'Alienígena X', icon: '👽', baseHp: 200 }
-        ];
+        const mathEnemies = MATH_VILLAINS;
 
         const portEnemies = [
             { id: 'grammar_giant', name: 'Gigante da Gramática', icon: '👹', baseHp: 120 },

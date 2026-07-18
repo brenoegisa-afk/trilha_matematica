@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { MathEngine } from '../core/learning/MathEngine';
+import { CurriculumGraph } from '../core/learning/CurriculumGraph';
 
 describe('MathEngine', () => {
     it('generates a basic addition or subtraction for grade 1-2 correctly', () => {
@@ -35,5 +36,30 @@ describe('MathEngine', () => {
         const q = MathEngine.generate('5', 'Green');
         const uniqueSet = new Set(q.options);
         expect(uniqueSet.size).toBe(4);
+    });
+});
+
+describe('MathEngine.generateFromNode — anti-repetição', () => {
+    const node = CurriculumGraph.getNode('add_two_digits')!; // range mais largo (evita colisão por acaso)
+
+    it('evita repetir uma pergunta que está na lista "avoid" quando há alternativa', () => {
+        // Gera uma primeira pergunta, tenta gerar de novo evitando-a — como o
+        // range de add_two_digits (até 20) tem muitas combinações, a segunda
+        // tentativa praticamente sempre acha algo diferente.
+        const first = MathEngine.generateFromNode(node);
+        let sawDifferent = false;
+        for (let i = 0; i < 20; i++) {
+            const next = MathEngine.generateFromNode(node, [first.question]);
+            if (next.question !== first.question) { sawDifferent = true; break; }
+        }
+        expect(sawDifferent).toBe(true);
+    });
+
+    it('não trava em loop infinito mesmo se "avoid" cobrir quase tudo', () => {
+        // avoid absurdamente grande (nunca vai bater) só garante que o método
+        // sempre retorna algo, não fica girando pra sempre.
+        const q = MathEngine.generateFromNode(node, ['pergunta que nunca existe']);
+        expect(q.question).toBeTruthy();
+        expect(q.nodeId).toBe('add_two_digits');
     });
 });

@@ -1,5 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useGame } from '../context/GameContext';
+import { HeroAvatar } from './HeroAvatar';
+import { getPlayerHeroStage } from '../core/theme/heroProgress';
 import styles from './Dice.module.css';
 
 // Dot patterns for each face (3x3 grid positions)
@@ -75,7 +77,9 @@ export default function Dice() {
                 <div className={styles.turnIndicator}>
                     Vez de: <strong style={{ color: currentPlayer.color }}>{currentPlayer.name}</strong>
                     <div className={styles.playerMiniInfo}>
-                        <span>{currentPlayer.avatar}</span>
+                        {currentPlayer.hero
+                            ? <HeroAvatar heroId={currentPlayer.hero} stage={getPlayerHeroStage(currentPlayer)} size={24} />
+                            : <span>{currentPlayer.avatar || '🐰'}</span>}
                         <span>Lv.{currentPlayer.level}</span>
                     </div>
                 </div>

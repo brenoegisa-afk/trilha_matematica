@@ -377,10 +377,23 @@ export class MathEngine {
     /**
      * Gera uma questão baseada no nó curricular ativo do aluno.
      * Esta é a nova API principal — usa o grafo de progressão.
+     *
+     * `avoid` traz o texto das últimas perguntas que ESSE jogador acabou de
+     * ver (ver `SubjectService.getQuestion`) — tenta sortear de novo até sair
+     * algo diferente, pra não repetir "3 + 4" duas vezes seguidas. Nós com
+     * range de números pequeno (ex.: soma até 10 no 1º ano) têm poucas
+     * combinações possíveis, então paramos depois de algumas tentativas em
+     * vez de girar pra sempre.
      */
-    static generateFromNode(node: CurriculumNode): Question {
+    static generateFromNode(node: CurriculumNode, avoid: string[] = []): Question {
         const generator = NODE_GENERATORS[node.id];
-        const q = generator ? generator(node) : generateFallback(node);
+        const MAX_ATTEMPTS = 6;
+        let q: Omit<Question, 'nodeId'>;
+        let attempt = 0;
+        do {
+            q = generator ? generator(node) : generateFallback(node);
+            attempt++;
+        } while (avoid.includes(q.question) && attempt < MAX_ATTEMPTS);
         // Carimba o nó de origem para que o loop de jogo saiba qual maestria atualizar.
         return { ...q, nodeId: node.id };
     }
