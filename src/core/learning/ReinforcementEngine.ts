@@ -1,5 +1,7 @@
 import type { Question, Player, TileType } from '../types';
 import { SubjectService } from '../game/SubjectService';
+import { CurriculumGraph } from './CurriculumGraph';
+import { MathEngine } from './MathEngine';
 
 /**
  * ReinforcementEngine
@@ -19,6 +21,26 @@ export class ReinforcementEngine {
 
         // For Math, we can dynamically generate an easier version
         if (subjectId === 'math') {
+            // O reforço deve continuar no conceito que gerou o erro. Buscar
+            // outra questão pelo seletor curricular podia mudar de nó.
+            const failedNode = failedQuestion.nodeId
+                ? CurriculumGraph.getNode(failedQuestion.nodeId)
+                : undefined;
+            if (failedNode) {
+                const generated = MathEngine.generateFromNode(failedNode, player.recentQuestions || []);
+                // Reduzimos apenas uma dimensão: menos alternativas. Mantemos
+                // o mesmo nó, números e tipo de problema para não mascarar o conceito.
+                const wrongOption = generated.options.find(option => option !== generated.answer);
+                const options = wrongOption
+                    ? (Math.random() < 0.5 ? [generated.answer, wrongOption] : [wrongOption, generated.answer])
+                    : generated.options;
+                return {
+                    ...generated,
+                    options,
+                    isReinforcement: true,
+                    explanation: undefined
+                };
+            }
             // Temporarily trick the MathEngine into generating an easier question by passing a mocked player with 0 streak
             const easierPlayer = { ...player, streak: 0, sessionStats: { ...player.sessionStats, correctAnswers: 0 } };
             

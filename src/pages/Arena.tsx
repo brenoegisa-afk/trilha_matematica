@@ -1,16 +1,18 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import questionsData from '../data/questions.json';
 import { triggerConfetti } from '../utils/confetti';
 import { getSavedProfiles, updateProfile } from '../utils/saveSystem';
 import type { SaveProfile } from '../utils/saveSystem';
 import { useGame } from '../context/GameContext';
+import { SubjectService } from '../core/game/SubjectService';
+import { CurriculumEngine } from '../core/learning/CurriculumEngine';
 import styles from './Arena.module.css';
 
 export default function Arena() {
     const navigate = useNavigate();
     const location = useLocation();
-    const { players: contextPlayers } = useGame();
+    const { players: contextPlayers, selectedGrade, currentSubjectId } = useGame();
+    const subjectService = useMemo(() => new SubjectService(), []);
 
     const [gameState, setGameState] = useState<'start' | 'playing' | 'end'>('start');
     const [timeLeft, setTimeLeft] = useState(60);
@@ -32,14 +34,11 @@ export default function Arena() {
 
 
     const generateQuestion = useCallback(() => {
-        const pool = (questionsData as any).subjects.math.grades['1-2'].Green.concat(
-            (questionsData as any).subjects.math.grades['3-4'].Green,
-            (questionsData as any).subjects.math.grades['5'].Green
-        );
-        const randomQ = pool[Math.floor(Math.random() * pool.length)];
-        setCurrentQ(randomQ);
+        const player = contextPlayers.find(p => p.id === selectedProfileId);
+        if (!player) return;
+        setCurrentQ(subjectService.getQuestion(currentSubjectId, selectedGrade, 'Green', player));
         setFeedback('none');
-    }, []);
+    }, [contextPlayers, currentSubjectId, selectedGrade, selectedProfileId, subjectService]);
 
     useEffect(() => {
         if (gameState === 'playing' && timeLeft > 0) {
@@ -64,6 +63,10 @@ export default function Arena() {
             alert("Selecione um jogador primeiro!");
             return;
         }
+        if (!contextPlayers.some(player => player.id === selectedProfileId)) {
+            alert('Inicie a Arena pelo Preparar Aventura para carregar o percurso de aprendizagem.');
+            return;
+        }
         setScore(0);
         setStreak(0);
         setTimeLeft(60);
@@ -72,7 +75,15 @@ export default function Arena() {
     };
 
     const handleAnswer = (answer: string) => {
-        if (answer === currentQ.answer) {
+        const player = contextPlayers.find(p => p.id === selectedProfileId);
+        if (!player || !currentQ) return;
+        const isCorrect = answer === currentQ.answer;
+        if (currentQ.nodeId) {
+            const result = CurriculumEngine.updateNodeMastery(player, currentQ.nodeId, isCorrect, isCorrect ? undefined : answer);
+            player.nodeMastery = result.nodeMastery;
+            updateProfile(player.id, { nodeMastery: result.nodeMastery });
+        }
+        if (isCorrect) {
             const newStreak = streak + 1;
             const multiplier = Math.min(3, 1 + (newStreak * 0.2));
             setScore(prev => prev + Math.floor(100 * multiplier));

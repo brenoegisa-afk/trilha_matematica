@@ -34,7 +34,16 @@ export interface NodeMastery {
     // Distratores escolhidos quando o aluno erra: { "resposta errada": vezes }.
     // Sinal diagnóstico bruto para o professor ("confunde × com +").
     misconceptions?: Record<string, number>;
+    reviewDueAt?: string;
+    reviewIntervalIndex?: number;
+    successfulReviews?: number;
+    /** Pré-requisito liberado por evidência do diagnóstico; não equivale a domínio. */
+    placementPassed?: boolean;
+    placementDiagnosedAt?: string;
+    diagnosticVersion?: string;
 }
+
+export type LearningState = 'discovering' | 'practicing' | 'consolidating' | 'mastered' | 'reviewing';
 
 // Fluência da tabuada: um registro por fato (ex.: "7x8").
 export interface TabuadaFact {
@@ -55,6 +64,8 @@ export interface Player {
     heroConfig?: Record<string, string>; // customização livre (companheiro, aura) — ver customization.ts
     unlockedCosmetics?: string[]; // "slotId:optionId" desbloqueados jogando (ver customization.ts)
     recentQuestions?: string[]; // texto das últimas perguntas vistas (evita repetição, ver SubjectService)
+    recentNodeIds?: string[]; // nós da sessão, usados para variar a prática entre eixos
+    recentSkillIds?: string[];
     mascot?: string;
     currentPosition: number;
     inventoryProtectionCount: number;
@@ -124,6 +135,8 @@ export interface StructuredExplanation {
 
 export interface Question {
     id?: string;
+    /** Identificador da ocorrência pedagógica. Diferencia itens gerados do mesmo nó. */
+    questionRef?: string;
     question: string;
     answer: string;
     options: string[];

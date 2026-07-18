@@ -18,10 +18,13 @@ import { MascotEngine } from '../core/game/MascotEngine';
 import { SessionService } from '../core/game/SessionService';
 import { ReinforcementEngine } from '../core/learning/ReinforcementEngine';
 import { CurriculumEngine } from '../core/learning/CurriculumEngine';
+import { CurriculumGraph } from '../core/learning/CurriculumGraph';
 import { BnccMap } from '../core/learning/BnccMap';
+import { normalizeGrade, type Grade, type GradeSelection } from '../core/learning/Grade';
+import { LearningAttemptService } from '../core/services/LearningAttemptService';
 import { pickRandomLockedOption, cosmeticKey } from '../core/theme/customization';
 
-import type { Player, Tile, TileType, GameStatus, Question, Enemy, Subject, GameState, Mascot } from '../core/types';
+import type { Player, Tile, TileType, GameStatus, Question, Enemy, Subject, GameState, Mascot, NodeMastery } from '../core/types';
 
 // Stateful engines that still need instances (contain data catalogs, not game state)
 const skillEngine = new SkillEngine();
@@ -33,6 +36,7 @@ const mascotEngine = new MascotEngine();
 
 const SELECTED_HERO_KEY = '@TrilhaCampeoes:SelectedHero';
 const HERO_CONFIG_KEY = '@TrilhaCampeoes:HeroConfig';
+let learningSessionId = crypto.randomUUID();
 
 function readSelectedHero(): string | null {
     try {
@@ -74,7 +78,7 @@ interface GameStoreState {
     // --- Application State ---
     players: Player[];
     currentUser: User | null;
-    selectedGrade: string;
+    selectedGrade: Grade;
     currentSubjectId: string;
     availableSubjects: Subject[];
     selectedHeroId: string | null; // herói escolhido na tela de identidade (HeroesMap)
@@ -104,12 +108,13 @@ interface GameStoreState {
     cosmeticUnlockData: { playerName: string, slotLabel: string, optionLabel: string, emoji: string } | null;
 
     // --- Actions ---
-    setGrade: (grade: string) => void;
+    setGrade: (grade: GradeSelection) => void;
     setSubject: (id: string) => void;
     selectHero: (heroId: string) => void;
     setHeroConfig: (config: Record<string, string>) => void;
     setCurrentUser: (user: User | null) => void;
     refreshPlayers: () => void;
+    applyDiagnosticPlacement: (studentId: string, nodeMastery: Record<string, NodeMastery>) => Promise<void>;
     addPlayer: (name: string, color: string, code?: string, classId?: string) => SaveProfile;
     startGame: () => void;
     rollDice: () => number;
@@ -455,6 +460,36 @@ export const useGameStore = create<GameStoreState>((set, get) => {
             const gs = get().gameState;
             if (!gs.activeQuestion) return;
             const isCorrect = answer === gs.activeQuestion.answer;
+            const player = gs.players[gs.currentPlayerIndex];
+            const question = gs.activeQuestion;
+            const previousAttempts = question.nodeId
+                ? (player.nodeMastery?.[question.nodeId]?.attempts || 0)
+                : 0;
+
+            // Melhor esforço: falha de rede não interrompe a aprendizagem. A
+            // próxima entrega adicionará a fila offline durável sobre este contrato.
+            void LearningAttemptService.record({
+                attemptId: crypto.randomUUID(),
+                sessionId: learningSessionId,
+                studentId: player.id,
+                classId: player.class_id,
+                gameMode: gs.status === 'battle' ? 'battle' : 'trilha',
+                nodeId: question.nodeId,
+                skillId: question.skillId,
+                questionRef: question.questionRef || question.id || question.nodeId || question.skillId,
+                generatorVersion: question.nodeId ? 'curriculum-v1' : 'legacy-v1',
+                itemFormat: 'multiple_choice',
+                selectedResponse: answer,
+                isCorrect,
+                responseLatencyMs: Date.now() - questionShownAt,
+                attemptNumber: previousAttempts + 1,
+                hintCount: 0,
+                supportLevel: 'none',
+                occurredAt: new Date().toISOString()
+            }).then(({ error }) => {
+                if (error) console.warn('Tentativa de aprendizagem será reenviada quando a fila offline existir.', error);
+            });
+
             // Guarda o que foi escolhido para o registro de distrator no advanceTurn.
             lastSelectedOption = isCorrect ? null : answer;
             // Acerto rápido demais para ter lido → baixa confiança (anti-chute).
@@ -523,18 +558,53 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                 
                 const customQ: Question = {
                     id: picked.id,
+                    questionRef: picked.id,
                     question: picked.question,
                     answer: picked.answer,
                     options: parsedOptions.filter((o: string) => o), // remove vazias
                     skillId: picked.skill_id,
                     difficulty: 'medium'
                 };
-                if (customQ.skillId) {
-                    const bncc = BnccMap.getCode(customQ.skillId, get().selectedGrade);
-                    if (bncc) customQ.bnccCode = bncc;
+
+                // Questões de matemática só entram na Trilha se puderem ser
+                // atribuídas a um nó do currículo. Isso impede registros sem
+                // habilidade e garante que a batalha interna use a mesma regra
+                // de anti-repetição da pergunta normal.
+                if (get().currentSubjectId === 'math') {
+                    const explicitNode = picked.node_id ? CurriculumGraph.getNode(picked.node_id) : undefined;
+                    const mappedNode = explicitNode || (customQ.skillId
+                        ? CurriculumEngine.pickNode(player, 'math', customQ.skillId, get().selectedGrade)
+                        : undefined);
+
+                    if (!mappedNode || mappedNode.subjectId !== 'math' || mappedNode.skillId !== customQ.skillId) {
+                        console.warn('Questão personalizada ignorada: informe uma habilidade curricular válida.', picked.id);
+                    } else if ((player.recentQuestions || []).includes(customQ.question)) {
+                        console.warn('Questão personalizada recente ignorada para evitar repetição.', picked.id);
+                    } else {
+                        customQ.nodeId = mappedNode.id;
+                        player.recentQuestions = [...(player.recentQuestions || []), customQ.question].slice(-6);
+                        if (customQ.skillId) {
+                            const bncc = BnccMap.getCode(customQ.skillId, get().selectedGrade);
+                            if (bncc) customQ.bnccCode = bncc;
+                        }
+                        updateGame(GameEngine.setQuestion(gs, customQ));
+                        return;
+                    }
+                } else {
+                    if ((player.recentQuestions || []).includes(customQ.question)) {
+                        console.warn('Questão personalizada recente ignorada para evitar repetição.', picked.id);
+                    } else {
+                        player.recentQuestions = [...(player.recentQuestions || []), customQ.question].slice(-6);
+                        if (customQ.skillId) {
+                            const bncc = BnccMap.getCode(customQ.skillId, get().selectedGrade);
+                            if (bncc) customQ.bnccCode = bncc;
+                        }
+                        updateGame(GameEngine.setQuestion(gs, customQ));
+                        return;
+                    }
                 }
-                updateGame(GameEngine.setQuestion(gs, customQ));
-                return;
+                // Sem nó compatível ou se foi recente, segue para a questão
+                // curricular padrão abaixo, que respeita o histórico do aluno.
             }
             
             // 2. Verificar foco ativo da turma
@@ -572,6 +642,7 @@ export const useGameStore = create<GameStoreState>((set, get) => {
             updateGame(GameEngine.setQuestion(gs, nextQ));
         },
         start: (pls?: Player[]) => {
+            learningSessionId = crypto.randomUUID();
             const newState = GameEngine.createInitialState(pls || get().players);
             updateGame(newState);
         }
@@ -581,7 +652,7 @@ export const useGameStore = create<GameStoreState>((set, get) => {
         // Init State
         players: [],
         currentUser: null,
-        selectedGrade: '1-2',
+        selectedGrade: '1',
         currentSubjectId: 'math',
         availableSubjects: AVAILABLE_SUBJECTS,
         selectedHeroId: readSelectedHero(),
@@ -603,9 +674,29 @@ export const useGameStore = create<GameStoreState>((set, get) => {
         isSavingSessions: false,
 
         // Setters
-        setGrade: (grade) => set({ selectedGrade: grade }),
+        setGrade: (grade) => set({ selectedGrade: normalizeGrade(grade) }),
         setSubject: (id) => set({ currentSubjectId: id }),
         setCurrentUser: (user) => set({ currentUser: user }),
+        applyDiagnosticPlacement: async (studentId, nodeMastery) => {
+            const updatedPlayers = get().players.map(player =>
+                player.id === studentId ? { ...player, nodeMastery } : player
+            );
+            const updatedGameState = {
+                ...get().gameState,
+                players: get().gameState.players.map(player =>
+                    player.id === studentId ? { ...player, nodeMastery } : player
+                )
+            };
+            updateProfile(studentId, { nodeMastery });
+            set({ ...flattenGameState(updatedGameState), players: updatedPlayers });
+
+            const { error } = await supabase.from('profiles')
+                .update({ node_mastery: nodeMastery })
+                .eq('id', studentId);
+            if (error) {
+                console.warn('Posicionamento enfileirado; a gravação imediata falhou.', error);
+            }
+        },
 
         // Escolha do herói (camada de identidade). Persiste localmente e, se já há
         // jogadores na fila, grava no perfil de cada um (equippedHero) + no Player.
@@ -740,6 +831,7 @@ export const useGameStore = create<GameStoreState>((set, get) => {
         },
 
         startGame: async () => {
+            learningSessionId = crypto.randomUUID();
             const ranking = await getGlobalRanking();
             const { players } = get();
             const sortedPlayers = players.map(p => {

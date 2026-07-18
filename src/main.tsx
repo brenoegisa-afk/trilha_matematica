@@ -15,6 +15,7 @@ import CharacterCustomizer from './pages/CharacterCustomizer'
 import Arena from './pages/Arena'
 import Tabuada from './pages/Tabuada'
 import Battle from './pages/Battle'
+import Diagnostic from './pages/Diagnostic'
 import ParentDashboard from './pages/ParentDashboard'
 import Inventory from './pages/Inventory'
 import { BatchImporter } from './pages/BatchImporter'
@@ -49,6 +50,7 @@ const router = createBrowserRouter([
       { path: '/arena', element: <Arena /> },
       { path: '/tabuada', element: <Tabuada /> },
       { path: '/setup', element: <Setup /> },
+      { path: '/diagnostic', element: <Diagnostic /> },
       { path: '/game', element: <Game /> },
       { path: '/shop', element: <Shop /> },
       { path: '/ranking', element: <Ranking /> },

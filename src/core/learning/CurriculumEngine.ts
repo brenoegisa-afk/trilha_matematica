@@ -8,10 +8,20 @@
  *   3. Se ele está errando muito, verifica o pré-requisito
  */
 
-import type { Player, NodeMastery } from '../types';
+import type { Player, NodeMastery, LearningState } from '../types';
 import { CurriculumGraph, type CurriculumNode } from './CurriculumGraph';
+import { matchesGradeSelection } from './Grade';
+import { scheduleReview } from './ReviewSchedule';
 
 export class CurriculumEngine {
+    static getLearningState(nodeMastery: NodeMastery | undefined): LearningState {
+        if (!nodeMastery || nodeMastery.attempts === 0) return 'discovering';
+        if (nodeMastery.reviewDueAt && new Date(nodeMastery.reviewDueAt) <= new Date()) return 'reviewing';
+        if (nodeMastery.mastered) return 'mastered';
+        const accuracy = nodeMastery.successes / nodeMastery.attempts;
+        if (nodeMastery.attempts >= 3 && accuracy >= 0.8) return 'consolidating';
+        return 'practicing';
+    }
     /**
      * Extrai os pontos de maestria por nó a partir do player.
      * Usa o campo nodeMastery do sessionStats ou inicializa vazio.
@@ -29,7 +39,10 @@ export class CurriculumEngine {
 
         for (const [nodeId, data] of Object.entries(nodeMastery)) {
             const node = CurriculumGraph.getNode(nodeId);
-            if (node && data.points >= node.masteryThreshold) {
+            // placementPassed é uma evidência de posicionamento, não uma
+            // promoção de domínio. Ele apenas permite iniciar no ponto que o
+            // diagnóstico já verificou, sem liberar o aluno por série/XP.
+            if (node && (data.points >= node.masteryThreshold || data.placementPassed)) {
                 mastered.add(nodeId);
             }
         }
@@ -47,25 +60,35 @@ export class CurriculumEngine {
      * 4. Prioriza nós com mais tentativas sem maestria (onde ele está "travado")
      * 5. Se não há fronteira, retorna nós raiz
      */
-    static pickNode(player: Player, subjectId: string, forcedSkillId?: string, grade?: string): CurriculumNode {
+    static pickNode(
+        player: Player,
+        subjectId: string,
+        forcedSkillId?: string,
+        grade?: string,
+        sessionHistory?: {
+            recentNodeIds?: string[];
+            recentSkillIds?: string[];
+            skillAttempts?: Record<string, number>;
+        }
+    ): CurriculumNode {
         const mastered = this.getMasteredNodes(player);
         const nodeMastery = this.getNodeMasteryMap(player);
 
         let frontier = CurriculumGraph.getFrontierNodes(mastered, subjectId);
+        const placementDepth = Math.max(0, ...Object.values(nodeMastery)
+            .filter(item => item.placementPassed)
+            .map(item => CurriculumGraph.getNode(item.nodeId)?.depth || 0));
 
-        // Ciência da SÉRIE: sem isto, todo aluno novo começa na raiz do grafo
-        // ("Soma até 10"), mesmo um 5º ano. Restringimos a fronteira à série
-        // escolhida; se a fronteira (respeitando pré-requisitos) ainda não tem
-        // nada da série, entramos direto pelos nós daquela série (por profundidade).
+        // Ciência da SÉRIE: dá preferência a nós da série escolhida, mas a série
+        // nunca autoriza pular pré-requisitos. Se ainda não existir um nó elegível
+        // nessa série, preservamos a fronteira do grafo em vez de entrar direto em
+        // qualquer nó daquela série.
         if (grade) {
-            const inGrade = frontier.filter(n => n.grade === grade);
+            const inGrade = frontier.filter(n =>
+                matchesGradeSelection(CurriculumGraph.getNodeGrade(n), grade)
+            );
             if (inGrade.length > 0) {
                 frontier = inGrade;
-            } else {
-                const gradeNodes = CurriculumGraph.getNodesBySubject(subjectId)
-                    .filter(n => n.grade === grade && !mastered.has(n.id))
-                    .sort((a, b) => a.depth - b.depth);
-                if (gradeNodes.length > 0) frontier = gradeNodes;
             }
         }
 
@@ -77,6 +100,14 @@ export class CurriculumEngine {
             }
         }
 
+        // Após o diagnóstico, o aluno já comprovou uma base. Mantemos a prática
+        // na fronteira desse patamar (ou acima), sem deixá-lo cair em outro ramo
+        // elementar apenas porque a cor da casa pediu "operações básicas".
+        if (placementDepth > 0) {
+            const atPlacementLevel = frontier.filter(node => node.depth >= placementDepth);
+            if (atPlacementLevel.length > 0) frontier = atPlacementLevel;
+        }
+
         // Se a fronteira tem nós, escolhe com inteligência
         if (frontier.length > 0) {
             // Priorizar nós que o aluno já tentou mas ainda não dominou (está "praticando")
@@ -86,8 +117,16 @@ export class CurriculumEngine {
             });
 
             if (inProgress.length > 0) {
+                // Um nó mais profundo já iniciado não deve sequestrar toda a
+                // sessão quando ainda existem opções no patamar em que o
+                // diagnóstico posicionou a criança.
+                const sessionDepth = Math.min(...frontier.map(node => node.depth));
+                const inProgressAtSessionDepth = inProgress.filter(node => node.depth === sessionDepth);
+                const practiceCandidates = inProgressAtSessionDepth.length > 0
+                    ? inProgressAtSessionDepth
+                    : inProgress;
                 // Verifica se está errando muito — pode precisar de revisão do pré-requisito
-                const struggling = inProgress.find(n => {
+                const struggling = practiceCandidates.find(n => {
                     const nm = nodeMastery[n.id];
                     return nm && nm.attempts >= 5 && (nm.successes / nm.attempts) < 0.4;
                 });
@@ -104,18 +143,72 @@ export class CurriculumEngine {
                     }
                 }
 
-                // Senão, continua praticando o nó em progresso (aleatório entre eles)
-                return inProgress[Math.floor(Math.random() * inProgress.length)];
+                const recentSkills = sessionHistory?.recentSkillIds?.slice(-2) || [];
+                if (recentSkills.length === 2 && recentSkills[0] === recentSkills[1]) {
+                    const alternativeAxis = frontier.filter(node => node.skillId !== recentSkills[1]);
+                    if (alternativeAxis.length > 0) {
+                        return this.pickBalancedNode(alternativeAxis, nodeMastery, sessionHistory);
+                    }
+                }
+
+                // Senão, continua praticando, mas sem repetir o mesmo nó/eixo
+                // indefinidamente dentro de uma única partida.
+                return this.pickBalancedNode(practiceCandidates, nodeMastery, sessionHistory);
             }
 
-            // Nenhum em progresso — pega um nó novo da fronteira (menor depth primeiro)
-            frontier.sort((a, b) => a.depth - b.depth);
-            return frontier[0];
+            // Sem prática em andamento, quem veio do diagnóstico começa no
+            // ponto mais avançado comprovado; alunos novos continuam pela base.
+            // Posicionamento não é autorização para pular direto ao ponto
+            // mais profundo que por acaso esteja desbloqueado. Começamos no
+            // patamar comprovado (ou no próximo disponível), preservando a
+            // progressão e evitando concentrar uma sessão inteira em Frações.
+            const targetDepth = Math.min(...frontier.map(node => node.depth));
+            return this.pickBalancedNode(
+                frontier.filter(node => node.depth === targetDepth),
+                nodeMastery,
+                sessionHistory
+            );
         }
 
         // Fallback absoluto: retorna o primeiro nó raiz do assunto
         const roots = CurriculumGraph.getRootNodes(subjectId);
         return roots[0] || CurriculumGraph.getAllNodes()[0];
+    }
+
+    private static pickBalancedNode(
+        nodes: CurriculumNode[],
+        nodeMastery: Record<string, NodeMastery>,
+        sessionHistory?: {
+            recentNodeIds?: string[];
+            recentSkillIds?: string[];
+            skillAttempts?: Record<string, number>;
+        }
+    ): CurriculumNode {
+        const recentNodes = sessionHistory?.recentNodeIds?.slice(-2) || [];
+        const recentSkills = sessionHistory?.recentSkillIds?.slice(-2) || [];
+        let candidates = nodes.filter(node => !recentNodes.includes(node.id));
+        if (candidates.length === 0) candidates = nodes;
+
+        // Depois de duas questões no mesmo eixo, troca de eixo quando a
+        // fronteira oferecer alternativa. Isso controla blocos de frações,
+        // operações ou lógica sem impedir uma revisão necessária.
+        if (recentSkills.length === 2 && recentSkills[0] === recentSkills[1]) {
+            const anotherSkill = candidates.filter(node => node.skillId !== recentSkills[1]);
+            if (anotherSkill.length > 0) candidates = anotherSkill;
+        }
+
+        // Quando há mais de um eixo possível, a sessão favorece o que recebeu
+        // menos tentativas. O histórico recente evita repetições adjacentes;
+        // esta contagem evita que um eixo volte a dominar a partida inteira.
+        const skillAttempts = sessionHistory?.skillAttempts || {};
+        if (new Set(candidates.map(node => node.skillId)).size > 1) {
+            const leastAttempts = Math.min(...candidates.map(node => skillAttempts[node.skillId] || 0));
+            candidates = candidates.filter(node => (skillAttempts[node.skillId] || 0) === leastAttempts);
+        }
+
+        const fewestAttempts = Math.min(...candidates.map(node => nodeMastery[node.id]?.attempts || 0));
+        const leastPracticed = candidates.filter(node => (nodeMastery[node.id]?.attempts || 0) === fewestAttempts);
+        return leastPracticed[Math.floor(Math.random() * leastPracticed.length)];
     }
 
     /**
@@ -128,7 +221,7 @@ export class CurriculumEngine {
     private static readonly POINTS_CORRECT_LOW_CONFIDENCE = 20;
     private static readonly POINTS_WRONG = 25;
     // Nunca considerar dominado com pouquíssima evidência, mesmo se o threshold for baixo.
-    private static readonly MIN_ATTEMPTS_TO_MASTER = 3;
+    private static readonly MIN_ATTEMPTS_TO_MASTER = 6;
 
     static updateNodeMastery(
         player: Player,
@@ -145,6 +238,7 @@ export class CurriculumEngine {
         }
 
         const nm = nodeMasteryMap[nodeId];
+        const wasDueForReview = !!nm.reviewDueAt && new Date(nm.reviewDueAt) <= new Date();
         nm.attempts += 1;
 
         if (isCorrect) {
@@ -159,13 +253,22 @@ export class CurriculumEngine {
                 nm.misconceptions[selectedOption] = (nm.misconceptions[selectedOption] || 0) + 1;
             }
         }
+        if (wasDueForReview && isCorrect) nm.successfulReviews = (nm.successfulReviews || 0) + 1;
+
+        const review = scheduleReview(new Date(),
+            nm.reviewDueAt ? { intervalIndex: nm.reviewIntervalIndex ?? 0, reviewDueAt: nm.reviewDueAt } : undefined,
+            isCorrect
+        );
+        nm.reviewDueAt = review.reviewDueAt;
+        nm.reviewIntervalIndex = review.intervalIndex;
 
         // Verificar promoção
         let promoted = false;
         let masteredNode: CurriculumNode | undefined;
         let newNode: CurriculumNode | undefined;
 
-        if (node && nm.points >= node.masteryThreshold && nm.attempts >= this.MIN_ATTEMPTS_TO_MASTER && !nm.mastered) {
+        const accuracy = nm.successes / nm.attempts;
+        if (node && nm.points >= node.masteryThreshold && nm.attempts >= this.MIN_ATTEMPTS_TO_MASTER && accuracy >= 0.8 && (nm.successfulReviews || 0) >= 1 && !nm.mastered) {
             nm.mastered = true;
             promoted = true;
             masteredNode = node;

@@ -3,11 +3,33 @@ import questionsData from '../../data/questions.json';
 import { ExplanationEngine } from './ExplanationEngine';
 import { MathEngine } from '../learning/MathEngine';
 import { CurriculumEngine } from '../learning/CurriculumEngine';
+import { CurriculumGraph } from '../learning/CurriculumGraph';
+import { getLegacyContentGrade } from '../learning/Grade';
 
 // Quantas perguntas recentes lembramos por jogador para evitar repetição
 // (ver MathEngine.generateFromNode). Não precisa ser grande: o objetivo é só
 // não repetir a MESMA pergunta duas ou três vezes seguidas.
 const RECENT_QUESTIONS_WINDOW = 6;
+const RECENT_SESSION_WINDOW = 3;
+
+function rememberMathQuestion(player: Player, question: Question) {
+    player.recentQuestions = [...(player.recentQuestions || []), question.question].slice(-RECENT_QUESTIONS_WINDOW);
+    if (question.nodeId) player.recentNodeIds = [...(player.recentNodeIds || []), question.nodeId].slice(-RECENT_SESSION_WINDOW);
+    if (question.skillId) player.recentSkillIds = [...(player.recentSkillIds || []), question.skillId].slice(-RECENT_SESSION_WINDOW);
+}
+
+export function getDueReviewNode(player: Player | undefined, subjectId: string) {
+    if (!player?.nodeMastery) return null;
+    const now = Date.now();
+    const due = Object.values(player.nodeMastery)
+        .filter(item => item.reviewDueAt && new Date(item.reviewDueAt).getTime() <= now)
+        .map(item => ({ item, node: CurriculumGraph.getNode(item.nodeId) }))
+        .filter((entry): entry is { item: NonNullable<typeof entry.item>; node: NonNullable<typeof entry.node> } =>
+            !!entry.node && entry.node.subjectId === subjectId
+        )
+        .sort((a, b) => new Date(a.item.reviewDueAt!).getTime() - new Date(b.item.reviewDueAt!).getTime());
+    return due[0]?.node || null;
+}
 
 // Extension of the current data structure to support subjects and skills
 // In a real scenario, this would come from an API
@@ -43,6 +65,13 @@ export class SubjectService {
     public getQuestion(subjectId: string, grade: string, tileType: string, player?: Player, forcedSkillId?: string): Question {
         // Intercept math subject for dynamic procedural generation
         if (subjectId === 'math') {
+            const dueNode = getDueReviewNode(player, subjectId);
+            if (dueNode) {
+                const q = MathEngine.generateFromNode(dueNode, player?.recentQuestions || []);
+                q.isReview = true;
+                if (player) rememberMathQuestion(player, q);
+                return q;
+            }
             let potentialSkillId = forcedSkillId;
             if (!forcedSkillId) {
                 if (tileType === 'Yellow') potentialSkillId = 'math_logic';
@@ -51,11 +80,16 @@ export class SubjectService {
             }
 
             if (player) {
-                const node = CurriculumEngine.pickNode(player, subjectId, potentialSkillId, grade);
+                const node = CurriculumEngine.pickNode(player, subjectId, potentialSkillId, grade, {
+                    recentNodeIds: player.recentNodeIds,
+                    recentSkillIds: player.recentSkillIds,
+                    skillAttempts: Object.fromEntries(Object.entries(player.sessionStats.skillsPracticed || {})
+                        .map(([skillId, stats]) => [skillId, stats.attempts]))
+                });
                 const q = MathEngine.generateFromNode(node, player.recentQuestions || []);
                 // Guarda as últimas perguntas DESSE jogador pra não repetir de novo
                 // logo em seguida (ver MathEngine.generateFromNode).
-                player.recentQuestions = [...(player.recentQuestions || []), q.question].slice(-RECENT_QUESTIONS_WINDOW);
+                rememberMathQuestion(player, q);
                 return q;
             } else {
                 return MathEngine.generate(grade, tileType, player, potentialSkillId);
@@ -64,9 +98,10 @@ export class SubjectService {
 
         // Navigate the static structure for other subjects (Portuguese/Science)
         const subjectPool = (questionsData.subjects as any)[subjectId];
+        const legacyGrade = getLegacyContentGrade(grade);
         
-        if (subjectPool && subjectPool.grades && subjectPool.grades[grade]) {
-            const tilePool = subjectPool.grades[grade][tileType];
+        if (subjectPool && subjectPool.grades && subjectPool.grades[legacyGrade]) {
+            const tilePool = subjectPool.grades[legacyGrade][tileType];
             
             if (tilePool && tilePool.length > 0) {
                 const q = tilePool[Math.floor(Math.random() * tilePool.length)];

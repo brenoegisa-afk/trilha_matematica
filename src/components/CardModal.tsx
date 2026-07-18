@@ -90,6 +90,13 @@ export default function CardModal() {
     };
 
     const cardStyle = getCardStyle(activeCardType);
+    const skillTitle: Record<string, string> = {
+        math_basic: 'Operações Básicas',
+        math_expressions: 'Expressões Numéricas',
+        math_logic: 'Raciocínio Lógico',
+        math_fractions: 'Frações'
+    };
+    const title = activeQuestion.skillId ? (skillTitle[activeQuestion.skillId] || cardStyle.title) : cardStyle.title;
     const feedbackClass = answerFeedback === 'correct' ? styles.correctFeedback : answerFeedback === 'wrong' ? styles.wrongFeedback : '';
 
     return (
@@ -106,7 +113,7 @@ export default function CardModal() {
                 </div>
                 
                 <h2 className={styles.title} style={{ color: cardStyle.border }}>
-                    {cardStyle.title}
+                    {title}
                 </h2>
                 
                 <div className={styles.playerInfo}>

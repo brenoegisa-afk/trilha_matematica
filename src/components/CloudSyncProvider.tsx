@@ -4,9 +4,10 @@ import { supabase } from '../utils/supabaseClient';
 import { useSyncStore } from '../store/useSyncStore';
 import { isValidUuid } from '../utils/saveSystem';
 import type { SaveProfile } from '../utils/saveSystem';
+import { LearningAttemptService } from '../core/services/LearningAttemptService';
 
 export function CloudSyncProvider() {
-    const { syncQueue, removeFromQueue } = useSyncStore();
+    const { syncQueue, removeFromQueue, attemptQueue, removeAttempt } = useSyncStore();
 
     const { mutate, isPending } = useMutation({
         mutationFn: async (profile: SaveProfile) => {
@@ -80,6 +81,26 @@ export function CloudSyncProvider() {
             mutate(profileToSync);
         }
     }, [syncQueue, mutate, isPending]);
+
+    useEffect(() => {
+        if (attemptQueue.length === 0 || !navigator.onLine) return;
+        const attempt = attemptQueue[0];
+        void LearningAttemptService.record(attempt).then(({ error }) => {
+            if (!error) removeAttempt(attempt.attemptId);
+        });
+    }, [attemptQueue, removeAttempt]);
+
+    useEffect(() => {
+        const retryWhenOnline = () => {
+            const attempt = useSyncStore.getState().attemptQueue[0];
+            if (!attempt) return;
+            void LearningAttemptService.record(attempt).then(({ error }) => {
+                if (!error) useSyncStore.getState().removeAttempt(attempt.attemptId);
+            });
+        };
+        window.addEventListener('online', retryWhenOnline);
+        return () => window.removeEventListener('online', retryWhenOnline);
+    }, []);
 
     return null; // Invisible background manager component
 }

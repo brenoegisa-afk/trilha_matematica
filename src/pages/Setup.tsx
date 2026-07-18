@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
+import { DiagnosticProgressService } from '../core/services/DiagnosticProgressService';
+import { DIAGNOSTIC_VERSION } from '../core/learning/DiagnosticEngine';
 import { supabase } from '../utils/supabaseClient';
 import { updateProfile } from '../utils/saveSystem';
 import { CustomizableHero } from '../components/CustomizableHero';
@@ -175,6 +177,12 @@ export default function Setup() {
             setClassConfig(classActiveFocus, customQuestions);
         }
 
+        const diagnosticStoredLocally = !!players[0]?.nodeMastery
+            && Object.values(players[0].nodeMastery).some(item => item.diagnosticVersion === DIAGNOSTIC_VERSION);
+        const needsDiagnostic = currentSubjectId === 'math'
+            && !!players[0]
+            && (!diagnosticStoredLocally || !await DiagnosticProgressService.hasCompleted(players[0].id, currentSubjectId));
+
         startGame();
 
         if (gameMode === 'arena') {
@@ -184,7 +192,7 @@ export default function Setup() {
         } else if (gameMode === 'battle') {
             navigate('/battle');
         } else {
-            navigate('/game');
+            navigate(needsDiagnostic ? '/diagnostic' : '/game');
         }
     };
 
@@ -193,21 +201,27 @@ export default function Setup() {
         let grades = [];
         if (currentSubjectId === 'math') {
             grades = [
-                { id: '1-2', label: '1º e 2º Ano', sub: 'Adição/Subtração', icon: '🍎' },
-                { id: '3-4', label: '3º e 4º Ano', sub: 'Multiplicação', icon: '🧠' },
-                { id: '5', label: '5º Ano', sub: 'Lógica/Expressões', icon: '🚀' }
+                { id: '1', label: '1º Ano', sub: 'Números iniciais', icon: '🍎' },
+                { id: '2', label: '2º Ano', sub: 'Operações iniciais', icon: '➕' },
+                { id: '3', label: '3º Ano', sub: 'Multiplicação', icon: '🧠' },
+                { id: '4', label: '4º Ano', sub: 'Consolidação', icon: '📐' },
+                { id: '5', label: '5º Ano', sub: 'Lógica e expressões', icon: '🚀' }
             ];
         } else if (currentSubjectId === 'portuguese') {
             grades = [
-                { id: '1-2', label: '1º e 2º Ano', sub: 'Alfabetização', icon: '🖍️' },
-                { id: '3-4', label: '3º e 4º Ano', sub: 'Gramática', icon: '📖' },
+                { id: '1', label: '1º Ano', sub: 'Alfabetização', icon: '🖍️' },
+                { id: '2', label: '2º Ano', sub: 'Leitura inicial', icon: '🔤' },
+                { id: '3', label: '3º Ano', sub: 'Gramática', icon: '📖' },
+                { id: '4', label: '4º Ano', sub: 'Textos e gêneros', icon: '📰' },
                 { id: '5', label: '5º Ano', sub: 'Interpretação', icon: '🎭' }
             ];
         } else {
             grades = [
-                { id: '1-2', label: '1º e 2º Ano', sub: 'Seres Vivos', icon: '🌱' },
-                { id: '3-4', label: '3º e 4º Ano', sub: 'Ciclo da Água', icon: '💧' },
-                { id: '5', label: '5º Ano', sub: 'Corpo e Espaço', icon: '🪐' }
+                { id: '1', label: '1º Ano', sub: 'Seres vivos', icon: '🌱' },
+                { id: '2', label: '2º Ano', sub: 'Corpo e natureza', icon: '🐾' },
+                { id: '3', label: '3º Ano', sub: 'Hábitos e ambiente', icon: '💧' },
+                { id: '4', label: '4º Ano', sub: 'Ecossistemas', icon: '🌍' },
+                { id: '5', label: '5º Ano', sub: 'Corpo e espaço', icon: '🪐' }
             ];
         }
 
@@ -217,7 +231,7 @@ export default function Setup() {
                     <div 
                         key={g.id}
                         className={`${styles.islandCard} ${selectedGrade === g.id ? styles.activeGrade : ''}`}
-                        onClick={() => setGrade(g.id)}
+                        onClick={() => setGrade(g.id as import('../core/learning/Grade').GradeSelection)}
                     >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
                             <span style={{ fontSize: '2rem' }}>{g.icon}</span>
