@@ -107,6 +107,27 @@ export default function Inventory() {
                 ))}
             </div>
 
+            <section style={{
+                width: 'min(100%, 760px)', margin: '0 auto 20px', padding: '16px',
+                border: '3px solid var(--color-ink)', borderRadius: '16px', background: 'white',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px',
+                flexWrap: 'wrap'
+            }}>
+                <div>
+                    <strong style={{ fontSize: '1.05rem' }}>✨ Brilho do herói</strong>
+                    <p style={{ margin: '4px 0 0', fontSize: '0.9rem' }}>
+                        Escolha a aura e o companheiro que deixam seu herói com a sua cara.
+                    </p>
+                </div>
+                <button
+                    className="btn-primary"
+                    style={{ padding: '10px 16px', whiteSpace: 'nowrap' }}
+                    onClick={() => navigate('/customizar')}
+                >
+                    Personalizar ✨
+                </button>
+            </section>
+
             <div className={styles.tabs}>
                 <button 
                     className={`${styles.tabBtn} ${activeTab === 'mascots' ? styles.activeTab : ''}`}

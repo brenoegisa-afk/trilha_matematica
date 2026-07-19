@@ -26,7 +26,7 @@ export default function Hub() {
         {
             id: 'battle',
             title: 'Batalha de Mascotes',
-            description: 'Treine seus mascotes com o poder da matemática.',
+            description: 'Encontre Guardiões na Trilha e use matemática para vencer.',
             icon: '🐾',
             active: true,
             color: 'var(--color-red)'

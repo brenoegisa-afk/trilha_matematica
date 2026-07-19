@@ -115,13 +115,14 @@ interface GameStoreState {
     setCurrentUser: (user: User | null) => void;
     refreshPlayers: () => void;
     applyDiagnosticPlacement: (studentId: string, nodeMastery: Record<string, NodeMastery>) => Promise<void>;
-    addPlayer: (name: string, color: string, code?: string, classId?: string) => SaveProfile;
+    addPlayer: (name: string, color: string, code?: string, classId?: string, remoteProfile?: Partial<SaveProfile>) => SaveProfile;
     startGame: () => void;
     rollDice: () => number;
     submitAnswer: (answer: string) => void;
     acknowledgeFeedback: () => void;
     acknowledgeVictory: () => void;
     startBattle: () => void;
+    startMascotBattle: () => void;
     clearLevelUp: () => void;
     clearXpNotification: () => void;
     clearNodeUnlock: () => void;
@@ -134,6 +135,7 @@ interface GameStoreState {
         acknowledgeFeedback: () => void;
         acknowledgeVictory: () => void;
         startBattle: () => void;
+        startMascotBattle: () => void;
         startReinforcement: () => void;
         generateQuestion: (type: TileType) => void;
         start: (players?: Player[]) => void;
@@ -240,6 +242,7 @@ export const useGameStore = create<GameStoreState>((set, get) => {
         const gs = get().gameState;
         const player = gs.players[gs.currentPlayerIndex];
         const activeTileType = gs.activeCardType || 'Normal';
+        const supportLevel = gs.activeQuestion?.isReinforcement ? 'worked_example' as const : 'none' as const;
         
         player.streak = streakEngine.calculateNewStreak(isCorrect, player.streak);
         applyXP(player, activeTileType, isCorrect, player.streak);
@@ -305,7 +308,12 @@ export const useGameStore = create<GameStoreState>((set, get) => {
         const activeNodeId = gs.activeQuestion?.nodeId;
         if (activeNodeId) {
             const result = CurriculumEngine.updateNodeMastery(
-                player, activeNodeId, isCorrect, lastSelectedOption ?? undefined, lastAnswerTooFast
+                player,
+                activeNodeId,
+                isCorrect,
+                lastSelectedOption ?? undefined,
+                lastAnswerTooFast || supportLevel !== 'none',
+                supportLevel
             );
             player.nodeMastery = result.nodeMastery;
 
@@ -353,7 +361,15 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                         return; // Wait for victory modal
                     } else {
                         let cleared = GameEngine.clearQuestion(gs);
-                        const nextQ = subjectService.getQuestion(get().currentSubjectId, get().selectedGrade, activeTileType as TileType, player);
+                        const forcedSkillId = get().classConfig?.activeFocusSkill || undefined;
+                        const nextQ = subjectService.getQuestion(
+                            get().currentSubjectId,
+                            get().selectedGrade,
+                            activeTileType as TileType,
+                            player,
+                            forcedSkillId,
+                            { balanceAcrossSkills: !forcedSkillId }
+                        );
                         cleared = GameEngine.setQuestion(cleared, nextQ);
                         updateGame(cleared);
                         questionShownAt = Date.now();
@@ -369,7 +385,15 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                         updateGame(GameEngine.endTurn(gs));
                     } else {
                         let cleared = GameEngine.clearQuestion(gs);
-                        const nextQ = subjectService.getQuestion(get().currentSubjectId, get().selectedGrade, activeTileType as TileType, player);
+                        const forcedSkillId = get().classConfig?.activeFocusSkill || undefined;
+                        const nextQ = subjectService.getQuestion(
+                            get().currentSubjectId,
+                            get().selectedGrade,
+                            activeTileType as TileType,
+                            player,
+                            forcedSkillId,
+                            { balanceAcrossSkills: !forcedSkillId }
+                        );
                         cleared = GameEngine.setQuestion(cleared, nextQ);
                         updateGame(cleared);
                         questionShownAt = Date.now();
@@ -462,6 +486,7 @@ export const useGameStore = create<GameStoreState>((set, get) => {
             const isCorrect = answer === gs.activeQuestion.answer;
             const player = gs.players[gs.currentPlayerIndex];
             const question = gs.activeQuestion;
+            const supportLevel = question.isReinforcement ? 'worked_example' as const : 'none' as const;
             const previousAttempts = question.nodeId
                 ? (player.nodeMastery?.[question.nodeId]?.attempts || 0)
                 : 0;
@@ -483,8 +508,8 @@ export const useGameStore = create<GameStoreState>((set, get) => {
                 isCorrect,
                 responseLatencyMs: Date.now() - questionShownAt,
                 attemptNumber: previousAttempts + 1,
-                hintCount: 0,
-                supportLevel: 'none',
+                hintCount: supportLevel === 'none' ? 0 : 1,
+                supportLevel,
                 occurredAt: new Date().toISOString()
             }).then(({ error }) => {
                 if (error) console.warn('Tentativa de aprendizagem será reenviada quando a fila offline existir.', error);
@@ -521,6 +546,13 @@ export const useGameStore = create<GameStoreState>((set, get) => {
             const enemy = BattleEngine.generateEnemy(player.level, get().currentSubjectId);
             set({ currentEnemy: enemy });
             updateGame(GameEngine.updateStatus(gs, 'battle'));
+        },
+        startMascotBattle: () => {
+            // Modo próprio, motor único: abre um Guardião imediatamente, mas
+            // usa exatamente as mesmas regras de currículo, domínio, revisão
+            // e telemetria das batalhas encontradas na Trilha.
+            actionsAPI.startBattle();
+            actionsAPI.generateQuestion('Red');
         },
         startReinforcement: () => {
             const gs = get().gameState;
@@ -628,7 +660,14 @@ export const useGameStore = create<GameStoreState>((set, get) => {
             }
             
             // 4. Gerar questão padrão (automática)
-            const nextQ = subjectService.getQuestion(get().currentSubjectId, get().selectedGrade, type, player, forcedSkillId);
+            const nextQ = subjectService.getQuestion(
+                get().currentSubjectId,
+                get().selectedGrade,
+                type,
+                player,
+                forcedSkillId,
+                { balanceAcrossSkills: gs.status === 'battle' && !forcedSkillId }
+            );
             
             if (isReview) {
                 nextQ.isReview = true;
@@ -775,7 +814,8 @@ export const useGameStore = create<GameStoreState>((set, get) => {
             
             set((state) => ({
                 players: state.players.map((p: Player) => {
-                    const profile = getOrCreateProfile(p.name, p.id ? undefined : '0000');
+                    const savedProfile = getSavedProfiles().find(profile => profile.id === p.id);
+                    const profile = savedProfile || getOrCreateProfile(p.name, p.id ? undefined : '0000');
                     return {
                         ...p,
                         avatar: profile.equippedAvatar,
@@ -795,8 +835,12 @@ export const useGameStore = create<GameStoreState>((set, get) => {
             }));
         },
 
-        addPlayer: (name, color, code = '0000', classId = '') => {
-            const profile = getOrCreateProfile(name, code);
+        addPlayer: (name, color, code = '0000', classId = '', remoteProfile) => {
+            let profile = getOrCreateProfile(name, code);
+            if (remoteProfile?.id) {
+                profile = updateProfile(profile.id, { ...remoteProfile, id: remoteProfile.id })
+                    || { ...profile, ...remoteProfile, id: remoteProfile.id };
+            }
             const { players, currentUser } = get();
             
             if (currentUser && !profile.user_id) {
@@ -854,6 +898,7 @@ export const useGameStore = create<GameStoreState>((set, get) => {
         acknowledgeFeedback: actionsAPI.acknowledgeFeedback,
         acknowledgeVictory: actionsAPI.acknowledgeVictory,
         startBattle: actionsAPI.startBattle,
+        startMascotBattle: actionsAPI.startMascotBattle,
         startReinforcement: actionsAPI.startReinforcement,
         setClassConfig: actionsAPI.setClassConfig,
         actions: actionsAPI

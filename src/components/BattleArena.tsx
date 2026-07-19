@@ -51,8 +51,14 @@ export default function BattleArena() {
     const playerHpPercent = (currentHp / playerMaxHp) * 100;
 
     return (
-        <div className={styles.overlay}>
+        <div className={styles.overlay} role="dialog" aria-modal="true" aria-label="Arena dos Guardiões">
+            <div className={styles.stars} aria-hidden="true" />
+            <div className={styles.horizon} aria-hidden="true" />
             <div className={`${styles.arenaContainer} ${hitAnimation === 'player' ? styles.playerHit : ''}`}>
+                <div className={styles.modeBadge}>
+                    <span>⚔️ Arena dos Guardiões</span>
+                    <span className={styles.modeHint}>Missão adaptativa</span>
+                </div>
                 <div className={styles.battleHeader}>
                     <h2>Desafio do Guardião!</h2>
                     <p>Vença o {currentEnemy.name} para seguir em frente e ganhar um Mascote!</p>
@@ -80,7 +86,7 @@ export default function BattleArena() {
                     <div className={styles.entity}>
                         <div className={styles.playerIcon}>
                             {player.hero
-                                ? <CustomizableHero heroId={player.hero} stage={getPlayerHeroStage(player)} config={player.heroConfig} size={120} />
+                                ? <CustomizableHero heroId={player.hero} stage={getPlayerHeroStage(player)} config={player.heroConfig} size={120} accentColor={player.color} />
                                 : player.avatar}
                         </div>
                         <div className={styles.hpBarContainer}>
@@ -199,6 +205,7 @@ export default function BattleArena() {
                         )}
                     </div>
                 </div>
+                <p className={styles.arenaMessage}>Cada estratégia bem usada fortalece sua jornada.</p>
             </div>
         </div>
     );

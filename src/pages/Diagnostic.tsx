@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
 import { DiagnosticEngine, DIAGNOSTIC_MIN_CHALLENGES, type DiagnosticEvidence } from '../core/learning/DiagnosticEngine';
 import { MathEngine } from '../core/learning/MathEngine';
@@ -7,20 +7,27 @@ import { DiagnosticProgressService } from '../core/services/DiagnosticProgressSe
 
 export default function Diagnostic() {
     const navigate = useNavigate();
-    const { players, selectedGrade, currentSubjectId, applyDiagnosticPlacement } = useGame();
+    const { players, selectedGrade, currentSubjectId, applyDiagnosticPlacement, startMascotBattle } = useGame();
+    const location = useLocation();
     const [evidence, setEvidence] = useState<DiagnosticEvidence[]>([]);
     const [feedback, setFeedback] = useState<string | null>(null);
     const [isFinalizing, setIsFinalizing] = useState(false);
     const first = useMemo(() => DiagnosticEngine.getStartingNodes(currentSubjectId, selectedGrade)[0], [currentSubjectId, selectedGrade]);
     const node = evidence.length === 0 ? first : DiagnosticEngine.getNextNode(currentSubjectId, selectedGrade, evidence);
     const question = useMemo(() => node ? MathEngine.generateFromNode(node) : null, [node?.id, evidence.length]);
+    const startNextMode = () => {
+        if (location.state?.continueMode === 'battle') {
+            startMascotBattle();
+        }
+        navigate('/game');
+    };
 
     if (!players.length || currentSubjectId !== 'math') {
         navigate('/game');
         return null;
     }
     if (!node || !question) {
-        return <main style={wrap}><h1>✨ Pronto para a aventura!</h1><p>{isFinalizing ? 'Guardando seu ponto de partida…' : 'Agora vamos jogar.'}</p><button style={button} disabled={isFinalizing} onClick={() => navigate('/game')}>{isFinalizing ? 'Preparando…' : 'Começar missão'}</button></main>;
+        return <main style={wrap}><h1>✨ Pronto para a aventura!</h1><p>{isFinalizing ? 'Guardando seu ponto de partida…' : 'Agora vamos jogar.'}</p><button style={button} disabled={isFinalizing} onClick={startNextMode}>{isFinalizing ? 'Preparando…' : 'Começar missão'}</button></main>;
     }
 
     const answer = (option: string) => {
@@ -61,7 +68,7 @@ export default function Diagnostic() {
                 {question.options.map(option => <button key={option} style={button} onClick={() => answer(option)}>{option}</button>)}
             </div>}
         </section>
-        <button style={{ ...button, background: '#eee', color: '#222' }} onClick={() => navigate('/game')}>Pular aquecimento</button>
+        <button style={{ ...button, background: '#eee', color: '#222' }} onClick={startNextMode}>Pular aquecimento</button>
     </main>;
 }
 

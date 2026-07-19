@@ -158,6 +158,21 @@
     width: 100%;
 }
 
+.reinforcementHint {
+    width: 100%;
+    box-sizing: border-box;
+    margin: -4px 0 16px;
+    padding: 10px 14px;
+    border: 2px dashed var(--color-yellow-dark);
+    border-radius: 14px;
+    background: #fff8d9;
+    color: #5a4700;
+    font-size: 0.98rem;
+    font-weight: 700;
+    line-height: 1.35;
+    text-align: center;
+}
+
 .optionButton {
     background-color: white;
     border: 3px solid #e5e5e5;

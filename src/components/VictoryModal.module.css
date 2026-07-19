@@ -3,7 +3,10 @@
     top: 0;
     left: 0;
     width: 100vw;
-    height: 100vh;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 16px;
+    overflow-y: auto;
     background: rgba(0, 0, 0, 0.45);
     display: flex;
     align-items: center;
@@ -24,7 +27,8 @@
     max-width: 500px;
     background: white;
     border-radius: 40px;
-    padding: 60px 40px;
+    max-height: calc(100dvh - 32px);
+    padding: clamp(28px, 7vw, 60px) clamp(20px, 5vw, 40px);
     text-align: center;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     overflow: hidden;
@@ -162,4 +166,14 @@
     width: 100%;
     height: 100%;
     pointer-events: none;
+}
+
+@media (max-width: 600px) {
+    .victoryOverlay { align-items: flex-start; }
+    .victoryContainer { width: 100%; border-radius: 28px; overflow-y: auto; }
+    .mascotCircle { width: 120px; height: 120px; margin-bottom: 18px; font-size: 68px; }
+    .title { font-size: 2rem; }
+    .subtitle { margin-bottom: 22px; font-size: 1.1rem; }
+    .mascotName { font-size: 1.35rem; }
+    .buffBox { margin-bottom: 20px; }
 }

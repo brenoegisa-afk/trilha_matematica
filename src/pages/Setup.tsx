@@ -4,17 +4,25 @@ import { useGame } from '../context/GameContext';
 import { DiagnosticProgressService } from '../core/services/DiagnosticProgressService';
 import { DIAGNOSTIC_VERSION } from '../core/learning/DiagnosticEngine';
 import { supabase } from '../utils/supabaseClient';
-import { updateProfile } from '../utils/saveSystem';
 import { CustomizableHero } from '../components/CustomizableHero';
 import { getPlayerHeroStage } from '../core/theme/heroProgress';
 import styles from './Setup.module.css';
 
 const AVAILABLE_COLORS = [
-    { id: 'red', label: 'Vermelha', hex: 'var(--color-red)' },
-    { id: 'blue', label: 'Azul', hex: 'var(--color-blue)' },
-    { id: 'green', label: 'Verde', hex: 'var(--color-green)' },
-    { id: 'yellow', label: 'Amarela', hex: 'var(--color-yellow)' }
+    'var(--color-red)',
+    'var(--color-blue)',
+    'var(--color-green)',
+    'var(--color-yellow)'
 ];
+
+/** A identidade visual não deve ser uma decisão obrigatória antes de jogar.
+ *  O resultado é estável para cada aluno e só muda se a cor já estiver em uso
+ *  pela equipe presente na mesma partida. */
+function getAutomaticHeroColor(studentId: string, players: { color: string }[]): string {
+    const hash = [...studentId].reduce((total, char) => ((total * 31) + char.charCodeAt(0)) >>> 0, 0);
+    const ordered = AVAILABLE_COLORS.map((_, index) => AVAILABLE_COLORS[(hash + index) % AVAILABLE_COLORS.length]);
+    return ordered.find(color => !players.some(player => player.color === color)) || ordered[0];
+}
 
 // O roster devolvido pela RPC get_class_roster contém APENAS id + name.
 // Nenhum dado sensível (secret_code, notas) trafega para a tela de login.
@@ -25,14 +33,13 @@ interface ClassStudent {
 
 export default function Setup() {
     const navigate = useNavigate();
-    const { players, addPlayer, startGame, selectedGrade, setGrade, refreshPlayers, availableSubjects, currentSubjectId, setSubject, setClassConfig } = useGame();
+    const { players, addPlayer, startGame, startMascotBattle, selectedGrade, setGrade, refreshPlayers, availableSubjects, currentSubjectId, setSubject, setClassConfig } = useGame();
     
     // Class flow state
     const [classCode, setClassCode] = useState('');
     const [classStudents, setClassStudents] = useState<ClassStudent[] | null>(null);
     const [selectedStudentId, setSelectedStudentId] = useState('');
     const [secretCode, setSecretCode] = useState('');
-    const [selectedColor, setSelectedColor] = useState('red');
     const [classLoading, setClassLoading] = useState(false);
     const [consentChecked, setConsentChecked] = useState(false);
     const [classActiveFocus, setClassActiveFocus] = useState<string | null>(null);
@@ -81,12 +88,6 @@ export default function Setup() {
             return;
         }
 
-        const colorHex = AVAILABLE_COLORS.find(c => c.id === selectedColor)?.hex || 'black';
-        if (players.some(p => p.color === colorHex)) {
-            alert('Essa cor já foi escolhida!');
-            return;
-        }
-
         if (secretCode.length < 4) {
             alert('O PIN deve ter 4 números!');
             return;
@@ -122,12 +123,18 @@ export default function Setup() {
                 return;
             }
 
-            // Add player to game context (returns a new local profile or updates existing)
-            const profile = addPlayer(student.name, colorHex, '', student.class_id);
+            // Perfis que já possuírem uma cor remota a preservam. Para os
+            // demais, a trilha atribui um brilho automaticamente, sem criar
+            // uma barreira de escolha antes da partida.
+            const colorHex = typeof student.color === 'string' && student.color
+                ? student.color
+                : getAutomaticHeroColor(student.id, players);
 
-            // Sincroniza o perfil local com o estado do banco (sobrevive à troca de tablet)
-            updateProfile(profile.id, {
-                id: student.id, // Override local UUID com o UUID do banco para manter o vínculo
+            // O perfil remoto precisa ser aplicado antes de entrar na fila.
+            // Assim o diagnóstico e os pré-requisitos não são substituídos por
+            // um perfil vazio do navegador ao iniciar a partida.
+            addPlayer(student.name, colorHex, '', student.class_id, {
+                id: student.id,
                 user_id: student.user_id,
                 totalScore: student.total_score || 0,
                 stars: student.stars || 0,
@@ -183,14 +190,19 @@ export default function Setup() {
             && !!players[0]
             && (!diagnosticStoredLocally || !await DiagnosticProgressService.hasCompleted(players[0].id, currentSubjectId));
 
-        startGame();
+        await startGame();
 
         if (gameMode === 'arena') {
             navigate('/arena', { state: { fromSetup: true } });
         } else if (gameMode === 'tabuada') {
             navigate('/tabuada', { state: { fromSetup: true } });
         } else if (gameMode === 'battle') {
-            navigate('/battle');
+            if (needsDiagnostic) {
+                navigate('/diagnostic', { state: { continueMode: 'battle' } });
+            } else {
+                startMascotBattle();
+                navigate('/game');
+            }
         } else {
             navigate(needsDiagnostic ? '/diagnostic' : '/game');
         }
@@ -331,45 +343,22 @@ export default function Setup() {
                             placeholder="PIN (4 números)"
                         />
 
-                        <label className={styles.label} style={{ fontSize: '0.9rem', textAlign: 'center' }}>Cor da Tampinha:</label>
-                        <div className={styles.colorPicker} style={{ marginBottom: '20px' }}>
-                            {AVAILABLE_COLORS.map(c => {
-                                const isTaken = players.some(p => p.color === c.hex);
-                                return (
-                                    <div
-                                        key={c.id}
-                                        className={styles.colorDot}
-                                        onClick={() => !isTaken && setSelectedColor(c.id)}
-                                        style={{
-                                            backgroundColor: c.hex,
-                                            opacity: isTaken ? 0.2 : 1,
-                                            boxShadow: selectedColor === c.id ? `0 0 0 4px var(--color-ink)` : 'none',
-                                            cursor: isTaken ? 'not-allowed' : 'pointer'
-                                        }}
-                                    />
-                                );
-                            })}
-                        </div>
+                        <p style={{
+                            margin: '0 0 16px', textAlign: 'center', color: 'var(--color-ink)',
+                            fontSize: '0.85rem', fontWeight: 700, lineHeight: 1.4
+                        }}>
+                            ✨ O brilho do seu herói será preparado automaticamente para a aventura.
+                        </p>
 
-                        <label
-                            style={{
-                                display: 'flex',
-                                alignItems: 'flex-start',
-                                gap: '8px',
-                                color: 'var(--color-ink)',
-                                fontSize: '0.8rem',
-                                marginBottom: '12px',
-                                cursor: 'pointer',
-                                lineHeight: 1.4
-                            }}
-                        >
+                        <label className={styles.consentLabel}>
                             <input
+                                className={styles.consentCheckbox}
                                 type="checkbox"
                                 checked={consentChecked}
                                 onChange={e => setConsentChecked(e.target.checked)}
-                                style={{ marginTop: '3px', accentColor: 'var(--color-green)' }}
                             />
-                            Concordo que os dados inseridos sejam usados exclusivamente para fins pedagógicos nesta plataforma.
+                            <span className={styles.consentIndicator} aria-hidden="true">✓</span>
+                            <span>Concordo que os dados inseridos sejam usados exclusivamente para fins pedagógicos nesta plataforma.</span>
                         </label>
 
                         <button 

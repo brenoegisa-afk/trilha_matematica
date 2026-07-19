@@ -47,6 +47,23 @@ describe('CurriculumEngine.pickNode', () => {
         expect(['add_two_digits', 'mult_intro', 'sub_simple', 'seq_simple']).toContain(node.id);
     });
 
+    it('não libera pré-requisito apenas por pontos altos sem evidência de domínio', () => {
+        const prerequisite = CurriculumGraph.getNode('add_simple')!;
+        const player = makePlayer({
+            add_simple: {
+                nodeId: 'add_simple',
+                points: prerequisite.masteryThreshold + 500,
+                attempts: 2,
+                successes: 2,
+                mastered: false
+            }
+        });
+
+        expect(CurriculumEngine.getMasteredNodes(player).has('add_simple')).toBe(false);
+        const node = CurriculumEngine.pickNode(player, 'math', 'math_expressions');
+        expect(node.prerequisites).toEqual([]);
+    });
+
     it('prioriza nó "em progresso" (tentado, não dominado) sobre nó novo', () => {
         const player = makePlayer({
             add_simple: { nodeId: 'add_simple', points: 100, attempts: 2, successes: 2, mastered: false }
@@ -152,6 +169,29 @@ describe('CurriculumEngine.updateNodeMastery', () => {
         const player = makePlayer();
         const result = CurriculumEngine.updateNodeMastery(player, 'add_simple', true, undefined, true);
         expect(result.nodeMastery.add_simple.points).toBe(20);
+    });
+
+    it('acerto com exemplo guiado é registrado, mas não vira evidência independente nem avança revisão', () => {
+        const player = makePlayer({
+            add_simple: {
+                nodeId: 'add_simple', points: 240, attempts: 5, successes: 5,
+                mastered: false, reviewDueAt: '2020-01-01T00:00:00.000Z'
+            }
+        });
+
+        const result = CurriculumEngine.updateNodeMastery(
+            player, 'add_simple', true, undefined, true, 'worked_example'
+        );
+
+        expect(result.nodeMastery.add_simple).toMatchObject({
+            attempts: 6,
+            successes: 6,
+            independentAttempts: 5,
+            independentSuccesses: 5,
+            mastered: false
+        });
+        expect(result.nodeMastery.add_simple).not.toHaveProperty('successfulReviews');
+        expect(result.nodeMastery.add_simple.reviewIntervalIndex).toBe(0);
     });
 
     it('erro registra o distrator escolhido (sinal diagnóstico)', () => {

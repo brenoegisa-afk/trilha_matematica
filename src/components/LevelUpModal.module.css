@@ -8,7 +8,10 @@
     top: 0;
     left: 0;
     width: 100vw;
-    height: 100vh;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 16px;
+    overflow-y: auto;
     background: rgba(0, 0, 0, 0.8);
     display: flex;
     justify-content: center;
@@ -87,6 +90,8 @@
     animation: slamIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     max-width: 400px;
     width: 90%;
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
 }
 
 @keyframes slamIn {
@@ -216,4 +221,13 @@
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
+}
+
+@media (max-width: 600px) {
+    .overlay { align-items: flex-start; }
+    .sunburst { width: 360px; height: 360px; }
+    .card { width: 100%; padding: 26px 20px; border-radius: 28px; }
+    .medalIcon { font-size: 4.5rem; }
+    .title { font-size: 1.8rem; }
+    .newLevel { font-size: 2.8rem; }
 }

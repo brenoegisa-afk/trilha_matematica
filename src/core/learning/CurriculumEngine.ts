@@ -39,10 +39,12 @@ export class CurriculumEngine {
 
         for (const [nodeId, data] of Object.entries(nodeMastery)) {
             const node = CurriculumGraph.getNode(nodeId);
-            // placementPassed é uma evidência de posicionamento, não uma
-            // promoção de domínio. Ele apenas permite iniciar no ponto que o
-            // diagnóstico já verificou, sem liberar o aluno por série/XP.
-            if (node && (data.points >= node.masteryThreshold || data.placementPassed)) {
+            // Pontos são somente uma medida de progresso: não podem liberar
+            // pré-requisitos sem as evidências que `updateNodeMastery` exige.
+            // placementPassed é a exceção deliberada: ele representa a base
+            // comprovada pelo diagnóstico e permite posicionar o aluno sem
+            // transformar XP/score em domínio.
+            if (node && (data.mastered || data.placementPassed)) {
                 mastered.add(nodeId);
             }
         }
@@ -228,7 +230,8 @@ export class CurriculumEngine {
         nodeId: string,
         isCorrect: boolean,
         selectedOption?: string,
-        lowConfidence: boolean = false
+        lowConfidence: boolean = false,
+        supportLevel: 'none' | 'hint' | 'visual' | 'worked_example' = 'none'
     ): { nodeMastery: Record<string, NodeMastery>; promoted: boolean; masteredNode?: CurriculumNode; newNode?: CurriculumNode } {
         const nodeMasteryMap = { ...this.getNodeMasteryMap(player) };
         const node = CurriculumGraph.getNode(nodeId);
@@ -238,8 +241,23 @@ export class CurriculumEngine {
         }
 
         const nm = nodeMasteryMap[nodeId];
+        // Compatibilidade: em perfis anteriores a esta regra, as tentativas
+        // já registradas são consideradas independentes. A partir de agora,
+        // pistas e exemplos são guardados sem virar evidência de domínio.
+        const independentAttemptsBefore = nm.independentAttempts ?? nm.attempts;
+        const independentSuccessesBefore = nm.independentSuccesses ?? nm.successes;
+        const isIndependent = supportLevel === 'none';
         const wasDueForReview = !!nm.reviewDueAt && new Date(nm.reviewDueAt) <= new Date();
         nm.attempts += 1;
+
+        if (isIndependent) {
+            nm.independentAttempts = independentAttemptsBefore + 1;
+            if (isCorrect) nm.independentSuccesses = independentSuccessesBefore + 1;
+            else nm.independentSuccesses = independentSuccessesBefore;
+        } else {
+            nm.independentAttempts = independentAttemptsBefore;
+            nm.independentSuccesses = independentSuccessesBefore;
+        }
 
         if (isCorrect) {
             nm.successes += 1;
@@ -253,11 +271,12 @@ export class CurriculumEngine {
                 nm.misconceptions[selectedOption] = (nm.misconceptions[selectedOption] || 0) + 1;
             }
         }
-        if (wasDueForReview && isCorrect) nm.successfulReviews = (nm.successfulReviews || 0) + 1;
+        if (wasDueForReview && isCorrect && isIndependent) nm.successfulReviews = (nm.successfulReviews || 0) + 1;
 
         const review = scheduleReview(new Date(),
             nm.reviewDueAt ? { intervalIndex: nm.reviewIntervalIndex ?? 0, reviewDueAt: nm.reviewDueAt } : undefined,
-            isCorrect
+            isCorrect,
+            supportLevel
         );
         nm.reviewDueAt = review.reviewDueAt;
         nm.reviewIntervalIndex = review.intervalIndex;
@@ -267,8 +286,10 @@ export class CurriculumEngine {
         let masteredNode: CurriculumNode | undefined;
         let newNode: CurriculumNode | undefined;
 
-        const accuracy = nm.successes / nm.attempts;
-        if (node && nm.points >= node.masteryThreshold && nm.attempts >= this.MIN_ATTEMPTS_TO_MASTER && accuracy >= 0.8 && (nm.successfulReviews || 0) >= 1 && !nm.mastered) {
+        const independentAttempts = nm.independentAttempts || 0;
+        const independentSuccesses = nm.independentSuccesses || 0;
+        const accuracy = independentAttempts > 0 ? independentSuccesses / independentAttempts : 0;
+        if (node && nm.points >= node.masteryThreshold && independentAttempts >= this.MIN_ATTEMPTS_TO_MASTER && accuracy >= 0.8 && (nm.successfulReviews || 0) >= 1 && !nm.mastered) {
             nm.mastered = true;
             promoted = true;
             masteredNode = node;

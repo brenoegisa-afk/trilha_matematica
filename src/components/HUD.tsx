@@ -25,7 +25,7 @@ export default function HUD() {
                             style={player.hero ? { background: 'transparent' } : { backgroundColor: player.color }}
                         >
                             {player.hero
-                                ? <CustomizableHero heroId={player.hero} stage={getPlayerHeroStage(player)} config={player.heroConfig} size={40} />
+                                ? <CustomizableHero heroId={player.hero} stage={getPlayerHeroStage(player)} config={player.heroConfig} size={40} accentColor={player.color} />
                                 : (player.avatar || '🐰')}
                         </div>
 

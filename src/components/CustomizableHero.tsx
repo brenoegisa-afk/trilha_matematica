@@ -11,14 +11,30 @@ interface CustomizableHeroProps {
     stage?: number;
     config?: CharacterConfig;
     size?: number;             // altura do herói em px
+    accentColor?: string;
 }
 
-export function CustomizableHero({ heroId, stage = 5, config = {}, size = 200 }: CustomizableHeroProps) {
+export function CustomizableHero({ heroId, stage = 5, config = {}, size = 200, accentColor }: CustomizableHeroProps) {
     const companion = getOption('companion', config.companion);
     const aura = getOption('aura', config.aura);
 
     return (
         <div style={{ position: 'relative', display: 'inline-block', lineHeight: 0 }}>
+            {accentColor && (
+                <span
+                    aria-hidden="true"
+                    style={{
+                        position: 'absolute',
+                        inset: size * 0.12,
+                        borderRadius: '50%',
+                        background: accentColor,
+                        opacity: 0.42,
+                        filter: `blur(${Math.max(6, size * 0.09)}px)`,
+                        zIndex: -1,
+                        pointerEvents: 'none'
+                    }}
+                />
+            )}
             {/* Aura — atrás/acima da cabeça */}
             {aura?.emoji && (
                 <span
