@@ -196,7 +196,7 @@ export default function Board() {
                                 style={hasHero ? { background: 'transparent', border: 'none', boxShadow: 'none' } : undefined}
                             >
                                 {hasHero
-                                    ? <CustomizableHero heroId={p.hero!} stage={getPlayerHeroStage(p)} config={p.heroConfig} size={92} />
+                                    ? <CustomizableHero heroId={p.hero!} stage={getPlayerHeroStage(p)} config={p.heroConfig} size={92} accentColor={p.color} />
                                     : (p.avatar || '🐰')}
                                 <div className={styles.playerNameTag}>{p.name}</div>
                             </div>

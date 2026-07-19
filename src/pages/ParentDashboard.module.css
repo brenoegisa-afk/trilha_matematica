@@ -94,7 +94,7 @@
 
 .childrenGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(350px, 100%), 1fr));
     gap: 30px;
 }
 
@@ -276,4 +276,20 @@
 .emptyText {
     color: #94a3b8;
     font-style: italic;
+}
+
+@media (max-width: 600px) {
+    .container { padding: 24px 14px; }
+    .header { align-items: flex-start; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+    .headerTitle h1 { font-size: 2rem; }
+    .headerTitle p { font-size: 1rem; }
+    .backBtn, .primaryBtn { width: 100%; }
+    .childrenGrid { gap: 18px; }
+    .cardHeader, .skillsContainer { padding: 18px; }
+    .statsContainer { gap: 8px; padding: 14px; }
+    .statBox { min-width: 0; padding: 10px 6px; }
+    .statValue { font-size: 1.4rem; }
+    .statLabel { font-size: 0.68rem; text-align: center; }
+    .insightsContainer { padding: 0 18px 18px; }
+    .premiumOverlayBtn { margin: auto 18px 18px; }
 }

@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { triggerConfetti } from '../utils/confetti';
 import { getSavedProfiles, updateProfile } from '../utils/saveSystem';
-import type { SaveProfile } from '../utils/saveSystem';
 import { useGame } from '../context/GameContext';
 import { SubjectService } from '../core/game/SubjectService';
 import { CurriculumEngine } from '../core/learning/CurriculumEngine';
+import { LearningAttemptService } from '../core/services/LearningAttemptService';
 import styles from './Arena.module.css';
 
 export default function Arena() {
@@ -20,23 +20,34 @@ export default function Arena() {
     const [streak, setStreak] = useState(0);
     const [currentQ, setCurrentQ] = useState<any>(null);
     const [feedback, setFeedback] = useState<'none' | 'correct' | 'wrong'>('none');
-    const [profiles, setProfiles] = useState<SaveProfile[]>([]);
     const [selectedProfileId, setSelectedProfileId] = useState<string>('');
+    const questionShownAt = useRef(Date.now());
+    const learningSessionId = useRef(crypto.randomUUID());
 
     useEffect(() => {
-        setProfiles(getSavedProfiles());
-
-        // If coming from setup, pick the first player automatically
-        if (location.state?.fromSetup && contextPlayers.length > 0) {
+        // A Arena trabalha apenas com os jogadores autenticados na aventura
+        // atual. Perfis soltos do localStorage podem ser de outra turma/ano e
+        // não podem determinar a dificuldade desta sessão.
+        if (contextPlayers.length > 0 && (!selectedProfileId || !contextPlayers.some(p => p.id === selectedProfileId))) {
             setSelectedProfileId(contextPlayers[0].id);
         }
-    }, [location.state, contextPlayers]);
+    }, [contextPlayers, selectedProfileId, location.state]);
 
 
     const generateQuestion = useCallback(() => {
         const player = contextPlayers.find(p => p.id === selectedProfileId);
         if (!player) return;
-        setCurrentQ(subjectService.getQuestion(currentSubjectId, selectedGrade, 'Green', player));
+        // Verde é apenas a estética da Arena; não deve prender a criança em
+        // operações básicas. O motor escolhe um nó elegível e alterna eixos.
+        setCurrentQ(subjectService.getQuestion(
+            currentSubjectId,
+            selectedGrade,
+            'Green',
+            player,
+            undefined,
+            { balanceAcrossSkills: true }
+        ));
+        questionShownAt.current = Date.now();
         setFeedback('none');
     }, [contextPlayers, currentSubjectId, selectedGrade, selectedProfileId, subjectService]);
 
@@ -48,23 +59,20 @@ export default function Arena() {
             setGameState('end');
             // Save Progress
             if (selectedProfileId && score > 0) {
+                const savedProfile = getSavedProfiles().find(profile => profile.id === selectedProfileId);
                 const starsToAdd = Math.floor(score / 100); // 1 star per 100 points in Arena
                 updateProfile(selectedProfileId, {
-                    totalScore: (profiles.find(p => p.id === selectedProfileId)?.totalScore || 0) + score,
-                    stars: (profiles.find(p => p.id === selectedProfileId)?.stars || 0) + starsToAdd,
-                    gamesPlayed: (profiles.find(p => p.id === selectedProfileId)?.gamesPlayed || 0) + 1
+                    totalScore: (savedProfile?.totalScore || 0) + score,
+                    stars: (savedProfile?.stars || 0) + starsToAdd,
+                    gamesPlayed: (savedProfile?.gamesPlayed || 0) + 1
                 });
             }
         }
-    }, [gameState, timeLeft, selectedProfileId, score, profiles]);
+    }, [gameState, timeLeft, selectedProfileId, score, contextPlayers]);
 
     const startGame = () => {
         if (!selectedProfileId) {
             alert("Selecione um jogador primeiro!");
-            return;
-        }
-        if (!contextPlayers.some(player => player.id === selectedProfileId)) {
-            alert('Inicie a Arena pelo Preparar Aventura para carregar o percurso de aprendizagem.');
             return;
         }
         setScore(0);
@@ -78,6 +86,28 @@ export default function Arena() {
         const player = contextPlayers.find(p => p.id === selectedProfileId);
         if (!player || !currentQ) return;
         const isCorrect = answer === currentQ.answer;
+        const previousAttempts = currentQ.nodeId
+            ? (player.nodeMastery?.[currentQ.nodeId]?.attempts || 0)
+            : 0;
+        void LearningAttemptService.record({
+            attemptId: crypto.randomUUID(),
+            sessionId: learningSessionId.current,
+            studentId: player.id,
+            classId: player.class_id,
+            gameMode: 'arena',
+            nodeId: currentQ.nodeId,
+            skillId: currentQ.skillId,
+            questionRef: currentQ.questionRef || currentQ.id || currentQ.nodeId || currentQ.skillId,
+            generatorVersion: currentQ.nodeId ? 'curriculum-v1' : 'legacy-v1',
+            itemFormat: 'multiple_choice',
+            selectedResponse: answer,
+            isCorrect,
+            responseLatencyMs: Date.now() - questionShownAt.current,
+            attemptNumber: previousAttempts + 1,
+            hintCount: 0,
+            supportLevel: 'none',
+            occurredAt: new Date().toISOString()
+        });
         if (currentQ.nodeId) {
             const result = CurriculumEngine.updateNodeMastery(player, currentQ.nodeId, isCorrect, isCorrect ? undefined : answer);
             player.nodeMastery = result.nodeMastery;
@@ -113,8 +143,8 @@ export default function Arena() {
                             className={styles.select}
                         >
                             <option value="">Selecione...</option>
-                            {profiles.map(p => (
-                                <option key={p.id} value={p.id}>{p.name} (⭐ {p.stars})</option>
+                            {contextPlayers.map(p => (
+                                <option key={p.id} value={p.id}>{p.name} (⭐ {p.score})</option>
                             ))}
                         </select>
                     </div>
@@ -133,7 +163,7 @@ export default function Arena() {
     }
 
     if (gameState === 'end') {
-        const playerName = profiles.find(p => p.id === selectedProfileId)?.name || 'Campeão';
+        const playerName = contextPlayers.find(p => p.id === selectedProfileId)?.name || 'Campeão';
         return (
             <div className={styles.arenaContainer}>
                 <div className={styles.endCard}>

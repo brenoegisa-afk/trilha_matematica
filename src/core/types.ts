@@ -31,6 +31,9 @@ export interface NodeMastery {
     attempts: number;
     successes: number;
     mastered: boolean;
+    /** Evidências respondidas sem pista/exemplo. Perfis legados usam attempts/successes como base inicial. */
+    independentAttempts?: number;
+    independentSuccesses?: number;
     // Distratores escolhidos quando o aluno erra: { "resposta errada": vezes }.
     // Sinal diagnóstico bruto para o professor ("confunde × com +").
     misconceptions?: Record<string, number>;

@@ -24,6 +24,7 @@ export default function Game() {
         clearLevelUp, 
         clearXpNotification 
     } = useGame();
+    const isBattleActive = gameStatus === 'battle';
 
     // Redirect to setup if NO players exist
     useEffect(() => {
@@ -33,14 +34,16 @@ export default function Game() {
     }, [players.length, gameStatus, navigate]);
 
     return (
-        <div className="app-container" style={{ justifyContent: 'flex-start', paddingTop: '10px', position: 'relative' }}>
-            <header style={{ width: '100%', maxWidth: '850px', display: 'flex', justifyContent: 'flex-end', padding: '0 15px', marginBottom: '5px' }}>
-                <button className="btn-danger" onClick={() => navigate('/')} style={{ padding: '4px 10px', fontSize: '0.85rem' }}>Sair</button>
-            </header>
+        <div className="app-container" style={{ justifyContent: 'flex-start', paddingTop: isBattleActive ? 0 : '10px', position: 'relative' }}>
+            {!isBattleActive && (
+                <header style={{ width: '100%', maxWidth: '850px', display: 'flex', justifyContent: 'flex-end', padding: '0 15px', marginBottom: '5px' }}>
+                    <button className="btn-danger" onClick={() => navigate('/')} style={{ padding: '4px 10px', fontSize: '0.85rem' }}>Sair</button>
+                </header>
+            )}
 
             <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-                <HUD />
-                <Board />
+                {!isBattleActive && <HUD />}
+                {!isBattleActive && <Board />}
             </main>
 
             <BattleArena />

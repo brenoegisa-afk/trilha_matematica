@@ -57,7 +57,7 @@ function PlayerStatsCard({ player }: { player: Player }) {
                     style={player.hero ? { background: 'transparent' } : { backgroundColor: player.color }}
                 >
                     {player.hero
-                        ? <CustomizableHero heroId={player.hero} stage={getPlayerHeroStage(player)} config={player.heroConfig} size={48} />
+                        ? <CustomizableHero heroId={player.hero} stage={getPlayerHeroStage(player)} config={player.heroConfig} size={48} accentColor={player.color} />
                         : (player.avatar || '👤')}
                 </div>
                 <div className={styles.nameArea}>

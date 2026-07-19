@@ -12,6 +12,15 @@ import { getLegacyContentGrade } from '../learning/Grade';
 const RECENT_QUESTIONS_WINDOW = 6;
 const RECENT_SESSION_WINDOW = 3;
 
+export interface QuestionSelectionOptions {
+    /**
+     * Nos desafios do guardião a cor da casa define o encontro, não a matéria.
+     * Sem este sinal, amarelo/vermelho forçavam lógica/expressões durante toda
+     * a batalha e transformavam o combate em uma sequência do mesmo conteúdo.
+     */
+    balanceAcrossSkills?: boolean;
+}
+
 function rememberMathQuestion(player: Player, question: Question) {
     player.recentQuestions = [...(player.recentQuestions || []), question.question].slice(-RECENT_QUESTIONS_WINDOW);
     if (question.nodeId) player.recentNodeIds = [...(player.recentNodeIds || []), question.nodeId].slice(-RECENT_SESSION_WINDOW);
@@ -62,7 +71,14 @@ export class SubjectService {
      * Adaptative question fetching
      * Bridges the old 'TileType' system with the new 'Skill' system
      */
-    public getQuestion(subjectId: string, grade: string, tileType: string, player?: Player, forcedSkillId?: string): Question {
+    public getQuestion(
+        subjectId: string,
+        grade: string,
+        tileType: string,
+        player?: Player,
+        forcedSkillId?: string,
+        options: QuestionSelectionOptions = {}
+    ): Question {
         // Intercept math subject for dynamic procedural generation
         if (subjectId === 'math') {
             const dueNode = getDueReviewNode(player, subjectId);
@@ -73,7 +89,7 @@ export class SubjectService {
                 return q;
             }
             let potentialSkillId = forcedSkillId;
-            if (!forcedSkillId) {
+            if (!forcedSkillId && !options.balanceAcrossSkills) {
                 if (tileType === 'Yellow') potentialSkillId = 'math_logic';
                 else if (tileType === 'Red') potentialSkillId = 'math_expressions';
                 else potentialSkillId = 'math_basic';

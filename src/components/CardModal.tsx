@@ -137,6 +137,12 @@ export default function CardModal() {
                             <button className={styles.ttsButton} onClick={() => playAudio(activeQuestion.question)} title="Ouvir Pergunta">🔊</button>
                         </div>
 
+                        {activeQuestion.isReinforcement && !waitingFeedback && (
+                            <p className={styles.reinforcementHint}>
+                                💡 Pista: é a mesma ideia. Agora escolha entre duas respostas e pense com calma.
+                            </p>
+                        )}
+
                         {waitingFeedback ? (
                             <div className={styles.educationalFeedback}>
                                 {answerFeedback === 'correct' ? (
@@ -152,7 +158,7 @@ export default function CardModal() {
                                         <div className={styles.feedbackIcon}>{reaction.icon}</div>
                                         <h3 className={styles.feedbackTitleError}>{reaction.title}</h3>
                                         <p className={styles.feedbackMessage}>
-                                            A resposta correta era: <span className={styles.correctAnswerHighlight}>{activeQuestion.answer}</span>
+                                            Errar faz parte de aprender. Vamos conferir juntos: <span className={styles.correctAnswerHighlight}>{activeQuestion.answer}</span>
                                         </p>
 
                                         {/* Structured Explanation Render */}
@@ -188,7 +194,7 @@ export default function CardModal() {
                                         onClick={() => actions.startReinforcement?.()}
                                         style={{ backgroundColor: 'var(--color-yellow)', color: '#333' }}
                                     >
-                                        Exercício de Reforço 🔄
+                                        Tentar de novo com uma pista 🔄
                                     </button>
                                 ) : (
                                     <button 
